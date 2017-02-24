@@ -349,13 +349,12 @@ int inireftrias_3d(pMesh mesh, pSol sol){
   for(k=1; k<=mesh->ne;k++){
     pt = &mesh->tetra[k];
 	  for(j=0;j<4;j++){
-      np0 = pt->v[j];
+        np0 = pt->v[j];
 	    p0 = &mesh->point[np0];
       
-      if( p0->flag == 1 ) continue;
+        if( p0->flag == 1 ) continue;
 	    p0->flag = 1;
-      sol->val[np0] = sqrt(sol->val[np0]);
-      
+        sol->val[np0] = sqrt(sol->val[np0]);
   	}
   }
   

@@ -203,7 +203,8 @@ int inidist_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   for (k=1; k<=sol1->nt; k++)
     sol1->ref[k] = -1;
 
-  /* set tag=2 if elt intersected, 1 if connected to elt intersected, 0 else */
+  /* Set tag=2 if elt intersected, 1 if connected to elt intersected, 0 else 
+    (information to be used in function signdist_2d) */
   nc  = 0;
   npp = 0;
   for (k=1; k<=mesh2->na; k++){
@@ -622,15 +623,15 @@ int inireftrias_2d(pMesh mesh, pSol sol){
   return(1);
 }
 
-/* Initialize a signed distance function to a domain already existing in mesh,
-    defined by pt->ref = REFINT */
+/* Initialize a signed distance function to some entities existing in mesh */
 int iniencdomain_2d(pMesh mesh, pSol sol){
-  int ier,*actiedg,nb,k,i0,i1,ia, *adja,iel,jel;
-  int ilist, *list, base,cur,nc,j,iadr,i,ib,tag; 
-  pTria pt,pt1;
-  pEdge pe;
-  pPoint pa,pb,p1,p2;
-  double d;
+  pTria    pt,pt1;
+  pEdge    ped;
+  pPoint   pa,pb,p0,p1,p2;
+  double   d;
+  int      ied,ier,*actiedg,nb,k,l,ip0,ip1,ip2,ia,*adja,iel,jel;
+  int      ilist,*list,base,cur,nc,iadr,ib,tag;
+  char     i,i0,i1,i2;
   
   /* Hash edges of the mesh */
   ier = hashEdge_2d(mesh);
@@ -639,154 +640,178 @@ int iniencdomain_2d(pMesh mesh, pSol sol){
   nb = 0;
   actiedg = (int*)calloc(mesh->na+1,sizeof(int));
 
+  /* Count active edges coming from interior subdomain */
   for(k=1;k<=mesh->nt;k++){
     pt = &mesh->tria[k];
 
-    if ( pt->ref != REFINT ) continue;
-    for(j=0; j<3; j++){
-      i0 = inxt2[j];
+    if ( !isIntDom(pt->ref) ) continue;
+    for(i=0; i<3; i++){
+      i0 = inxt2[i];
       i1 = inxt2[i0];
       iadr = 3*(k-1) + 1;
       adja = &mesh->adja[iadr];
-      iel = adja[j]/3; //note iel can be 0, if pt is near an external boundary... Such edges must be accepted
+      iel = adja[i]/3;
+      pt1 = &mesh->tria[iel];
       
-      if( /*!iel || ((mesh->tria[iel]).ref != REFINT )*/ iel && ((mesh->tria[iel]).ref != REFINT)){
-        ia = getEdge(mesh, pt->v[i0], pt->v[i1]);
-        assert(ia); 
-    
-        if(((mesh->edge[ia]).ref == REFDIR)|| ((mesh->edge[ia]).ref == REFDIRSWP) || ((mesh->edge[ia]).ref == REFSYM)) continue; //MODIF for moving boundary conditions
+      if( iel && !isIntDom(pt1->ref) ) {
+        ied = getEdge(mesh,pt->v[i0],pt->v[i1]);
+        assert(ied);
+        ped = &mesh->edge[ied];
         
         nb++;
-        actiedg[nb] = ia;
-        (mesh->edge[ia]).flag = k; // starting triangle
+        actiedg[nb] = ied;
+        
+        /* Store starting triangle */
+        ped->flag = k;
+      }
+    }
+  }
+  
+  /* Count active edges coming from the startEdge field */
+  if ( info.nsa ) {
+    for (k=1; k<=mesh->na; k++) {
+      ped = &mesh->edge[k];
+      if ( !ped->flag && isStartEdg(ped->ref) ) {
+        nb++;
+        actiedg[nb] = k;
+      }
+    }
+    /* Assign a starting triangle to those edges */
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      for (i=0; i<3; i++) {
+        i0 = inxt2[i];
+        i1 = inxt2[i0];
+        ied = getEdge(mesh,pt->v[i0],pt->v[i1]);
+        if ( ied ) {
+          ped = &mesh->edge[ied];
+          if ( !ped->flag ) ped->flag = k;
+        }
       }
     }
   }
   
   printf("Number of active edges : %d \n", nb);
   
+  /* Initialize distance */
   for (k=1; k<=sol->np; k++) 
     sol->val[k] = INIVAL_2d;
   
-  sol->nt = mesh->nt; 	
-  /* memory alloc */
+  sol->nt = mesh->nt;
+  
+  /* Memory allocation */
   list = (int*)calloc(mesh->nt+1,sizeof(int));
   assert(list);
     
-  /* travel the list of boundary edges */	
+  /* Travel the list of boundary edges */
   for (k=1; k<=nb; k++) {
-    pe  = &mesh->edge[actiedg[k]];
-	  p1 = &mesh->point[pe->v[0]];
-	  p2 = &mesh->point[pe->v[1]];
-    iel = pe->flag; 
+    ped  = &mesh->edge[actiedg[k]];
+    pa   = &mesh->point[ped->v[0]];
+    pb   = &mesh->point[ped->v[1]];
+    iel  = ped->flag;
     assert(iel);
-	
+    
     ilist       = 1;
     list[ilist] = iel;
     base = ++mesh->flag;
     pt   = &mesh->tria[iel];
     pt->flag = base;
-    pt->tag  = 2;
     cur      = 1;
     do {
       iel  = list[cur];
       pt   = &mesh->tria[iel];
-	  
       iadr = 3*(iel-1) + 1;
       adja = &mesh->adja[iadr];
       
       for (i=0; i<3; i++) {
-        ia = inxt2[i];
-        ib = inxt2[ia];
-        pa = &mesh->point[pt->v[ia]];      
-        pb = &mesh->point[pt->v[ib]];       
-        ier = intersec_2d(p1,p2,pa,pb);
+        i1 = inxt2[i];
+        i2 = inxt2[i1];
+        p1 = &mesh->point[pt->v[i1]];
+        p2 = &mesh->point[pt->v[i2]];
+        ier = intersec_2d(pa,pb,p1,p2);
         jel = adja[i] / 3;
-        pt1 = &mesh->tria[jel];
-        if ( ier ) {
-          pt1->tag = 2;
-          if ( jel && pt1->flag < base ) {
+        if ( ier && jel ) {
+          pt1 = &mesh->tria[jel];
+          if ( pt1->flag < base ) {
             ilist++;
             list[ilist] = jel;
             pt1->flag   = base;
           }
         }
-        else if ( !pt1->tag )  pt1->tag = 1;
       }
       cur++;
     }
     while ( cur <= ilist );
-	
-    /* list analysis */
-    for (i=1; i<=ilist; i++) {
-      iel = list[i];
+    
+    /* Travel elements in the list and calculate distance to the considered edge at points of elements;
+       at the end, the tag of points is 1 if the distance is realized as a orthogonal projection, 2 otherwise */
+    for (l=1; l<=ilist; l++) {
+      iel = list[l];
       pt  = &mesh->tria[iel];
-      for (j=0; j<3; j++) {
-        ia = pt->v[j];
-        pa = &mesh->point[ia];
-        d  = distpt_2d(p1,p2,pa,&tag);
-        if ( d < sol->val[ia] ) {
-          sol->val[ia] = d;
-          pa->tag = tag;
+      for (i=0; i<3; i++) {
+        ip0 = pt->v[i];
+        p0 = &mesh->point[ip0];
+        d  = distpt_2d(pa,pb,p0,&tag);
+        if ( d < sol->val[ip0] ) {
+          sol->val[ip0] = d;
+          p0->tag = tag;
         }
       }
     }
   }
   fprintf(stdout,"     distance\n");
   
-  /* Set all points on the boundary to exactly 0 */
+  /* Set distance of all points on active edges to exactly 0 */
   for (k=1; k<=nb; k++) {
-    pe  = &mesh->edge[actiedg[k]];
-	  i0 = pe->v[0];
-	  i1 = pe->v[1];
-	  sol->val[i0] = 0.0;
-	  sol->val[i1] = 0.0;
+    ped = &mesh->edge[actiedg[k]];
+    ip0 = ped->v[0];
+    ip1 = ped->v[1];
+    sol->val[ip0] = 0.0;
+    sol->val[ip1] = 0.0;
   }	  
   
-  /* correction */
+  /* Correction procedure for vertices where distance is not initialized as an orthogonal projection */
   nc = 0;
   for (k=1; k<=mesh->np; k++) {
-    pa = &mesh->point[k];
-    if ( pa->tag < 2 )  continue;
+    p0 = &mesh->point[k];
+    
+    /* Uninitialized distance, or initialized and realized as a projection */
+    if ( p0->tag < 2 )  continue;
 	
     /* possible optimization here */
-    for (i=1; i<=nb; i++) {
-      pe = &mesh->edge[actiedg[i]];
-      p1 = &mesh->point[pe->v[0]];      
-      p2 = &mesh->point[pe->v[1]];       
-      d  = distpt_2d(p1,p2,pa,&tag);
+    for (l=1; l<=nb; l++) {
+      ped = &mesh->edge[actiedg[l]];
+      pa = &mesh->point[ped->v[0]];
+      pb = &mesh->point[ped->v[1]];
+      d  = distpt_2d(pa,pb,p0,&tag);
       if ( tag == 1 && d < sol->val[k] ) {
         sol->val[k] = d;
         break;
       }
     }
-    pa->tag = 1;
+    p0->tag = 1;
     nc++;
   }
   if ( nc )   fprintf(stdout,"     %d correction(s)\n",nc);
   
   /* Put sign in the function, and take sqrt */ 
-  for(k=1; k<=mesh->nt;k++){
+  for (k=1; k<=mesh->nt;k++) {
     pt = &mesh->tria[k];
-	  for(j=0;j<3;j++){
-	    ia = pt->v[j];
-	    pa = &mesh->point[ia];
-	    if(pa->flag ==1) continue;
-	    pa->flag =1;
-	    if(pt->ref == REFINT){
-	      sol->val[ia] = -sqrt(sol->val[ia]);
-      }
-	    else{
-        sol->val[ia] = sqrt(sol->val[ia]);
-	    } 
+    for (i=0; i<3; i++) {
+      ip0 = pt->v[i];
+      p0 = &mesh->point[ip0];
+      if ( p0->flag == 1 ) continue;
+      p0->flag = 1;
+      if ( isIntDom(pt->ref) )
+        sol->val[ip0] = -sqrt(sol->val[ip0]);
+      else
+        sol->val[ip0] = sqrt(sol->val[ip0]);
   	}
   }
   
-  /* reset flags */
-  for(k =1;k<=mesh->np;k++){
-    pa = &mesh->point[k];
-	  pa->flag = 0;
-  }
+  /* Reset point flags */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
   
   free(actiedg);
   return(1);

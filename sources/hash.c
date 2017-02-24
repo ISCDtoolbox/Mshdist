@@ -16,6 +16,52 @@ unsigned char idir[5]     = {0,1,2,0,1};
 unsigned char idirt[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
 hash hTab;
 
+/* Identify whether ref corresponds to a reference of an interior subdomain */
+inline int isIntDom(int ref) {
+  int k;
+  
+  for (k=0; k<info.nintel; k++)
+    if ( info.intel[k] == ref ) return(1);
+  
+  return(0);
+}
+
+/* Identify whether ref corresponds to a starting triangle */
+inline int isStartTri(int ref) {
+  int k;
+  
+  if ( info.nst ) {
+    for (k=0; k<info.nst; k++)
+      if ( info.st[k] == ref ) return(1);
+  }
+  
+  return(0);
+}
+
+/* Identify whether ref corresponds to a starting edges */
+inline int isStartEdg(int ref) {
+  int k;
+  
+  if ( info.nsa ) {
+    for (k=0; k<info.nsa; k++)
+      if ( info.sa[k] == ref ) return(1);
+  }
+  
+  return(0);
+}
+
+/* Identify whether ref corresponds to a starting vertex */
+inline int isStartVer(int ref) {
+  int k;
+  
+  if ( info.nsp ) {
+    for (k=0; k<info.nsp; k++)
+      if ( info.sp[k] == ref ) return(1);
+  }
+  
+  return(0);
+}
+
 int hashelt_3d(pMesh mesh) {
   pTetra    pt,pt1;
   int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;

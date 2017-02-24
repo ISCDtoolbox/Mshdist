@@ -42,8 +42,9 @@ int intersec_2d(pPoint p1,pPoint p2,pPoint pa,pPoint pb) {
   return( det3*det4 <= 0.0 );
 }
 
-/* return distance from point pa to segment (p1,p2);
- pa->tag set to 2 if distance is realized by p1 or p2 */
+/* Return (squared) distance from point pa to segment (p1,p2);
+   proj = 2 if distance is realized by p1 or p2,
+          1 if it is realized by the orthogonal projection of pa on (p1p2) */
 double distpt_2d(pPoint p1,pPoint p2,pPoint pa,int *proj) {
   double   a,b,c,d,dd,ux,uy,vx,vy,wx,wy,xp,yp,lambda;
   

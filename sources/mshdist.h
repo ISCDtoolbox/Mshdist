@@ -71,6 +71,7 @@ typedef struct {
   double   dt,ray,res;
   int      ncpu,libpid,typ[2];          /* for // purposes */
   int      maxit,ref,nsref,*sref;
+  int      nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
   char     imprim,ddebug,option,bbbc,hausdorff,specdist,startref,noscale; 
   mytime   ctim[TIMEMAX];
 } Info;
@@ -177,6 +178,10 @@ int     getTria(pMesh,int,int,int);
 double  volume(double *,double *,double *,double *);
 void    delhash(pMesh);
 int     corrGrad_3d(pMesh,pSol);
+int     isIntDom(int );
+int     isStartTri(int );
+int     isStartEdg(int );
+int     isStartVer(int );
 
 /* Analytical distance functions */
 int     genHolesPCB_2d(pMesh mesh,pSol sol);

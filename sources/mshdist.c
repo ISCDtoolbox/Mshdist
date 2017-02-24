@@ -39,6 +39,31 @@ static void usage(char *prog) {
   exit(1);
 }
 
+/* Release memort contained in Info, if need be */
+static int freeInfo() {
+  if ( info.nintel && info.intel ) {
+    info.nintel = 0;
+    info.intel = NULL;
+  }
+  
+  if ( info.nst && info.st ) {
+    info.nst = 0;
+    info.st = NULL;
+  }
+  
+  if ( info.nsa && info.sa ) {
+    info.nsa = 0;
+    info.sa = NULL;
+  }
+  
+  if ( info.nsp && info.sp ) {
+    info.nsp = 0;
+    info.sp = NULL;
+  }
+  
+  return(1);
+}
+
 /* Parse arguments on the command line */
 static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
   int      i,ier;
@@ -229,7 +254,53 @@ static int parsop(pMesh mesh) {
     if ( !ret || feof(in) )  break;
     for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
     
+    /* in mode -dom: read interior triangles; if none, default reference is REFINT */
+    if ( !strcmp(data,"interiordomains") ) {
+      fscanf(in,"%d",&info.nintel);
+      info.intel = (int*)calloc(info.nintel,sizeof(int));
+      assert ( info.nintel );
+      for (k=0; k<info.nintel; k++)
+        fscanf(in,"%d",&info.intel[k]);
+    }
+    
+    /* in mode -dom: read starting triangles (useful in 3d only) */
+    if ( !strcmp(data,"starttrias") ) {
+      fscanf(in,"%d",&info.nst);
+      info.st = (int*)calloc(info.nst,sizeof(int));
+      assert ( info.nst );
+      for (k=0; k<info.nst; k++)
+        fscanf(in,"%d",&info.st[k]);
+    }
+    
+    /* in mode -dom: read starting vertices */
+    if ( !strcmp(data,"startver") ) {
+      fscanf(in,"%d",&info.nsp);
+      info.sp = (int*)calloc(info.nsp,sizeof(int));
+      assert ( info.nsp );
+      for (k=0; k<info.nsp; k++)
+        fscanf(in,"%d",&info.sp[k]);
+    }
+    
+    /* in mode -dom: read starting edges */
+    if ( !strcmp(data,"startedges") ) {
+      fscanf(in,"%d",&info.nsa);
+      info.sa = (int*)calloc(info.nsa,sizeof(int));
+      assert ( info.nsa );
+      for (k=0; k<info.nsa; k++)
+        fscanf(in,"%d",&info.sa[k]);
+    }
+    
+    /* in mode -dom: read starting vertices */
+    if ( !strcmp(data,"startver") ) {
+      fscanf(in,"%d",&info.nsp);
+      info.sp = (int*)calloc(info.nsp,sizeof(int));
+      assert ( info.nsp );
+      for (k=0; k<info.nsp; k++)
+        fscanf(in,"%d",&info.sp[k]);
+    }
+    
     /* Read references to initialize distance function (used with option startref) */
+    /* Only available in 3D -> to update to match the 2d version */
     if ( !strcmp(data,"startref") ) {
       fscanf(in,"%d",&info.nsref);
       info.sref = (int*)calloc(info.nsref+1,sizeof(double));
@@ -362,6 +433,8 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
     return(1);
   }
 
+  /* Distance initialization ,depending on the option */
+  /* Signed distance generation from the contour of mesh2 */
   if ( info.option == 1 ) {
 	  /* bucket sort */
 	  bucket = newBucket(mesh1,BUCKSIZ);
@@ -374,6 +447,7 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
     ier = sgndist(mesh1,mesh2,sol1,bucket);
   }
 
+  /* Signed distance generation from entities enclosed in mesh1 */
   else if ( info.option == 3){
     if( info.startref ) {
       if ( info.imprim )  fprintf(stdout,"  ** Generation of signed distance function from surface edg/tria with prescribed refs\n");
@@ -387,11 +461,19 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
 	  assert(ier);
   }
   
+  /* Redistancing */
   else {
 	  if ( info.imprim )  fprintf(stdout,"  ** Redistancing\n");
 	  ier = iniredist(mesh1,sol1);
   }
+  
+  /* Free fields contained in the Info structure, if need be */
+  if ( !freeInfo() ) {
+    fprintf(stdout,"  ## Error in releasing memory contained in Info. Abort.\n");
+    return(0);
+  }
 
+  /* Signed distance propagation */
   if ( ier > 0 ) {
     chrono(ON,&info.ctim[4]);
     if ( info.imprim )  fprintf(stdout,"  ** Propagation [%d cpu]\n",info.ncpu);
@@ -443,8 +525,18 @@ int main(int argc,char **argv) {
 
   /* Parse command line arguments */
   if ( !parsar(argc,argv,&mesh1,&sol1,&mesh2) )  return(1);
-  if( info.startref && !parsop(&mesh1) ) return(1);
   
+  /* Read file DEFAULT.mshdist, if any */
+  parsop(&mesh1);
+  
+  /* Default value for the interior domain, if none supplied (used in -dom option only) */
+  if ( !info.nintel ) {
+    info.nintel = 1;
+    info.intel = (int*)calloc(1,sizeof(int));
+    info.intel[0] = REFINT;
+  }
+  
+  /* Te be deleted, ultimately */
   if(info.startref && info.nsref < 1 ) {
     printf("    *** No starting ref for triangles found.\n ");
     exit(0);
