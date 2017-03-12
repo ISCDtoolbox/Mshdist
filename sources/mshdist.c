@@ -241,6 +241,7 @@ static int parsop(pMesh mesh) {
   if ( ptr )  *ptr = '\0';
   strcat(data,".mshdist");
   in = fopen(data,"r");
+  
   if ( !in ) {
     sprintf(data,"%s","DEFAULT.mshdist");
     in = fopen(data,"r");
@@ -401,10 +402,10 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
 
   if(info.specdist){
     printf("GENERATING HOLES \n");
-    genHolesPCB_2d(mesh1,sol1);
+    //genHolesPCB_2d(mesh1,sol1);
     //genHolesRadia_2d(mesh1,sol1);
     //anafuncbuddha(mesh1,sol1);
-    //gen2Holes_2d(mesh1,sol1);
+    gen2Holes_2d(mesh1,sol1);
     //holeCl_3d(mesh1,sol1);
     //anafunchelix(mesh1,sol1);
     //holeClCrane(mesh1,sol1);
