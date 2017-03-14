@@ -655,6 +655,9 @@ int iniencdomain_2d(pMesh mesh, pSol sol){
       
       if( iel && !isIntDom(pt1->ref) ) {
         ied = getEdge(mesh,pt->v[i0],pt->v[i1]);
+        if ( !ied ) {
+          printf("Triangles %d %d \n",k,iel);
+        }
         assert(ied);
         ped = &mesh->edge[ied];
         
