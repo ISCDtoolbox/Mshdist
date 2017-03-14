@@ -6,6 +6,7 @@ mshdist is a simple algorithm to generate the signed distance function to given 
 
 #### Usage
 
+* A short documentation is supplied (see the ./documentation folder).
 
 #### Quickstart
 
