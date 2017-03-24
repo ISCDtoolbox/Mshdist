@@ -12,7 +12,7 @@
 
 #include "chrono.h"
 #include "libmesh5.h"
-#include "lplib2.h"
+#include "lplib3.h"
 #include "memory.h"
 
 #define D_VER   "1.1b"
@@ -51,7 +51,7 @@ typedef struct {
 	int     v[2],flag,ref;
 } Edge;
 typedef Edge * pEdge;
-	
+
 typedef struct {
   int            v[3],mark,flag,ref;
   double         h;
@@ -72,7 +72,7 @@ typedef struct {
   int      ncpu,libpid,typ[2];          /* for // purposes */
   int      maxit,ref,nsref,*sref;
   int      nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
-  char     imprim,ddebug,option,bbbc,hausdorff,specdist,startref,noscale; 
+  char     imprim,ddebug,option,bbbc,hausdorff,specdist,startref,noscale;
   mytime   ctim[TIMEMAX];
 } Info;
 
@@ -93,7 +93,7 @@ typedef struct {
   int         type[2],size,typtab[2][GmfMaxTyp];
   double     *val;
   float       time;
-  int        *ref;  
+  int        *ref;
   char       *name;
 } Sol;
 typedef Sol * pSol;
@@ -103,7 +103,7 @@ typedef struct {
 	pSol     sol;
 	double  *grad,*dtmp,*res,dt,dtfin;
 } Param;
-		
+
 typedef struct {
   int     size;
   int    *head;
@@ -119,7 +119,7 @@ typedef struct {
   hTria         *ttab;
   int           thsiz,thmax;
 } hash;
-	
+
 /* prototypes */
 int  loadMesh(pMesh mesh1,pMesh mesh2);
 int  loadSol(pSol );
@@ -190,7 +190,7 @@ int     genHolesRadia_2d(pMesh ,pSol );
 int     holeClMast_3d(pMesh mesh, pSol sol);
 int     genHolesMast_3d(pMesh mesh, pSol sol);
 int     holeClBridge_3d(pMesh mesh, pSol sol);
-int     holeClBridge2_3d(pMesh mesh, pSol sol); 
+int     holeClBridge2_3d(pMesh mesh, pSol sol);
 int     genHolesBridge_3d(pMesh,pSol);
 int     genHolesCantia_3d(pMesh mesh,pSol sol);
 int     holeClStarfish_3d(pMesh mesh, pSol sol);
