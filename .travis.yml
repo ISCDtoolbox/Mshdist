@@ -20,6 +20,5 @@ script:
   - make
   - make install
   - cd -
-  - nstokes demos/2d/cavity
 notifications:
   email: false
