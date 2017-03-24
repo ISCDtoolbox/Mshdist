@@ -1,0 +1,25 @@
+language: c++
+compiler:
+  - gcc
+  - clang
+os:
+  - linux
+  - osx
+before_script:
+  - git clone https://github.com/ISCDtoolbox/Commons.git
+  - mkdir Commons/build
+  - cd Commons/build
+  - cmake ..
+  - make 
+  - make install
+  - cd -
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - make install
+  - cd -
+  - nstokes demos/2d/cavity
+notifications:
+  email: false
