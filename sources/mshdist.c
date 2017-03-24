@@ -26,7 +26,7 @@ static void excfun(int sigid) {
 /* Manual */
 static void usage(char *prog) {
   fprintf(stdout,"usage: %s [-v[n]] [-h] file1[.mesh] [file2[.mesh]] options\n",prog);
-  
+
   fprintf(stdout,"\n** Generic options :\n");
   fprintf(stdout,"-d      Turn on debug mode\n");
   fprintf(stdout,"-h      Print this message\n");
@@ -45,22 +45,22 @@ static int freeInfo() {
     info.nintel = 0;
     info.intel = NULL;
   }
-  
+
   if ( info.nst && info.st ) {
     info.nst = 0;
     info.st = NULL;
   }
-  
+
   if ( info.nsa && info.sa ) {
     info.nsa = 0;
     info.sa = NULL;
   }
-  
+
   if ( info.nsp && info.sp ) {
     info.nsp = 0;
     info.sp = NULL;
   }
-  
+
   return(1);
 }
 
@@ -91,48 +91,48 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
           if ( i < argc && isdigit(argv[i][0]) )
             info.dt = atof(argv[i]);
           else
-            --i; 
+            --i;
         }
 		else if ( !strcmp(argv[i],"-dom") ) {
-		  info.option = 3; 
+		  info.option = 3;
 		  ++i;
 		  if ( i < argc && isdigit(argv[i][0]) )
 			info.ref = atoi(argv[i]);
 		  else{
 			--i;
-		  } 
+		  }
 		}
 		else if ( !strcmp(argv[i],"-d") )
           info.ddebug = 1;
-		  		  
-		break;   
+
+		break;
       case 'n':
         if ( !strcmp(argv[i],"-ncpu") ) {
           ++i;
           if ( i < argc && isdigit(argv[i][0]) )
             info.ncpu = atoi(argv[i]);
           else
-            --i; 
+            --i;
         }
-        else if ( !strcmp(argv[i],"-noscale") ) 
+        else if ( !strcmp(argv[i],"-noscale") )
           info.noscale = 1;
-        
+
       break;
-	  
+
       /* Calculate Hausdorff distance */
 	  case 'h':
 		if ( !strcmp(argv[i],"-hausdorff") ) {
 		  info.hausdorff = 1;
 		}
 		break;
- 
+
       case 'i':
         if ( ++i < argc ) {
           if ( isdigit(argv[i][0]) ) {
             info.maxit = atoi(argv[i]);
             info.maxit = D_MAX(10,info.maxit);
           }
-          else 
+          else
             i--;
         }
         else {
@@ -145,7 +145,7 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
         if ( ++i < argc ) {
           if ( isdigit(argv[i][0]) )
             info.res = atof(argv[i]);
-          else 
+          else
             i--;
         }
         else {
@@ -153,7 +153,7 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
           usage(argv[0]);
         }
         break;
-      
+
       /* Generate a particular, analytical implicit function */
       case 's':
         if ( !strcmp(argv[i],"-specdist") ) {
@@ -165,12 +165,12 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
             info.option = 3;
         }
         break;
-        
+
       case 'v':
         if ( ++i < argc ) {
           if ( argv[i][0] == '-' || isdigit(argv[i][0]) )
             info.imprim = atoi(argv[i]);
-          else 
+          else
             i--;
         }
         else {
@@ -185,12 +185,12 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
         break;
       }
     }
-    
+
     else {
       if ( mesh1->name == NULL ) {
         mesh1->name = argv[i];
         if ( info.imprim == -99 )  info.imprim = 5;
-      } 
+      }
       else if ( mesh2->name == NULL )
         mesh2->name = argv[i];
       else {
@@ -213,16 +213,16 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
     mesh1->name = (char *)calloc(128,sizeof(char));
     assert(mesh1->name);
     fprintf(stdout,"  -- MESH1 BASENAME ?\n");
-    fflush(stdin); 
+    fflush(stdin);
     ier = fscanf(stdin,"%s",mesh1->name);
   }
-  
+
   sol1->name = (char *)calloc(128,sizeof(char));
   assert(sol1->name);
   strcpy(sol1->name,mesh1->name);
   ptr = strstr(sol1->name,".mesh");
   if ( ptr ) *ptr = '\0';
-  
+
   /* Option 3 prevails */
   if (( mesh2->name == NULL ) && (info.option != 3))
 	  info.option = 2;
@@ -235,26 +235,26 @@ static int parsop(pMesh mesh) {
   int        ret,i,k;
   char       *ptr,data[256];
   FILE       *in;
-  
+
   strcpy(data,mesh->name);
   ptr = strstr(data,".mesh");
   if ( ptr )  *ptr = '\0';
   strcat(data,".mshdist");
   in = fopen(data,"r");
-  
+
   if ( !in ) {
     sprintf(data,"%s","DEFAULT.mshdist");
     in = fopen(data,"r");
     if ( !in )  return(1);
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
-  
+
   /* Read parameters */
   while ( !feof(in) ) {
     ret = fscanf(in,"%s",data);
     if ( !ret || feof(in) )  break;
     for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
-    
+
     /* in mode -dom: read interior triangles; if none, default reference is REFINT */
     if ( !strcmp(data,"interiordomains") ) {
       fscanf(in,"%d",&info.nintel);
@@ -263,7 +263,7 @@ static int parsop(pMesh mesh) {
       for (k=0; k<info.nintel; k++)
         fscanf(in,"%d",&info.intel[k]);
     }
-    
+
     /* in mode -dom: read starting triangles (useful in 3d only) */
     if ( !strcmp(data,"starttrias") ) {
       fscanf(in,"%d",&info.nst);
@@ -272,7 +272,7 @@ static int parsop(pMesh mesh) {
       for (k=0; k<info.nst; k++)
         fscanf(in,"%d",&info.st[k]);
     }
-    
+
     /* in mode -dom: read starting vertices */
     if ( !strcmp(data,"startver") ) {
       fscanf(in,"%d",&info.nsp);
@@ -281,7 +281,7 @@ static int parsop(pMesh mesh) {
       for (k=0; k<info.nsp; k++)
         fscanf(in,"%d",&info.sp[k]);
     }
-    
+
     /* in mode -dom: read starting edges */
     if ( !strcmp(data,"startedges") ) {
       fscanf(in,"%d",&info.nsa);
@@ -290,7 +290,7 @@ static int parsop(pMesh mesh) {
       for (k=0; k<info.nsa; k++)
         fscanf(in,"%d",&info.sa[k]);
     }
-    
+
     /* in mode -dom: read starting vertices */
     if ( !strcmp(data,"startver") ) {
       fscanf(in,"%d",&info.nsp);
@@ -299,21 +299,21 @@ static int parsop(pMesh mesh) {
       for (k=0; k<info.nsp; k++)
         fscanf(in,"%d",&info.sp[k]);
     }
-    
+
     /* Read references to initialize distance function (used with option startref) */
     /* Only available in 3D -> to update to match the 2d version */
     if ( !strcmp(data,"startref") ) {
       fscanf(in,"%d",&info.nsref);
       info.sref = (int*)calloc(info.nsref+1,sizeof(double));
       assert(info.sref);
-      
+
       for(k=1; k<=info.nsref; k++) {
         fscanf(in,"%d ",&info.sref[k]);
       }
     }
   }
   fclose(in);
-  
+
   return(1);
 }
 
@@ -330,7 +330,7 @@ static void stats(pMesh mesh1,pMesh mesh2) {
 static void endcod() {
 
   chrono(OFF,&info.ctim[0]);
-  fprintf(stdout,"\n   ELAPSED TIME  %s\n",printim(info.ctim[0].gdif));
+  fprintf(stdout,"\n   ELAPSED TIME  %s\n",getim(info.ctim[0].gdif));
 }
 
 
@@ -342,7 +342,7 @@ int setfunc(int dim) {
     locelt  = locelt_2d;
     nxtelt  = nxtelt_2d;
     hashelt = hashelt_2d;
-	  
+
     if ( info.option == 1 ) {
       inidist = inidist_2d;
       sgndist = sgndist_2d;
@@ -354,7 +354,7 @@ int setfunc(int dim) {
 	  else {
 	    iniredist = iniredist_2d;
 	  }
-  
+
     ppgdist = ppgdist_2d;
   }
   else {
@@ -363,7 +363,7 @@ int setfunc(int dim) {
     locelt  = locelt_3d;
     nxtelt  = nxtelt_3d;
     hashelt = hashelt_3d;
-	
+
     if ( info.option == 1 ) {
 	    inidist = inidist_3d;
       sgndist = sgndist_3d;
@@ -375,7 +375,7 @@ int setfunc(int dim) {
 	  else {
 		  iniredist = iniredist_3d;
 	  }
-	  
+
     ppgdist = ppgdist_3d;
   }
 
@@ -440,7 +440,7 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
 	  /* bucket sort */
 	  bucket = newBucket(mesh1,BUCKSIZ);
 	  if ( !bucket )  return(0);
-    
+
 	  if ( info.imprim )  fprintf(stdout,"  ** Initialization\n");
     ier = inidist(mesh1,mesh2,sol1,bucket);
 
@@ -452,8 +452,8 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
   else if ( info.option == 3){
     if( info.startref ) {
       if ( info.imprim )  fprintf(stdout,"  ** Generation of signed distance function from surface edg/tria with prescribed refs\n");
-      ier = inireftrias(mesh1,sol1);  
-    
+      ier = inireftrias(mesh1,sol1);
+
     }
   	else {
       if ( info.imprim )  fprintf(stdout,"  ** Generation of signed distance function from tria/tets with ref 3\n");
@@ -461,13 +461,13 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
     }
 	  assert(ier);
   }
-  
+
   /* Redistancing */
   else {
 	  if ( info.imprim )  fprintf(stdout,"  ** Redistancing\n");
 	  ier = iniredist(mesh1,sol1);
   }
-  
+
   /* Free fields contained in the Info structure, if need be */
   if ( !freeInfo() ) {
     fprintf(stdout,"  ## Error in releasing memory contained in Info. Abort.\n");
@@ -480,12 +480,12 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
     if ( info.imprim )  fprintf(stdout,"  ** Propagation [%d cpu]\n",info.ncpu);
     ier = ppgdist(mesh1,sol1);
     chrono(OFF,&info.ctim[4]);
-	
+
 	//assert(errdist(mesh1,mesh2,sol1));
   }
   else if ( ier < 0 )
     fprintf(stdout,"  ## Problem in sign function\n");
-  
+
   if ( info.option == 1 )  freeBucket(bucket);
 
   return(ier);
@@ -526,36 +526,36 @@ int main(int argc,char **argv) {
 
   /* Parse command line arguments */
   if ( !parsar(argc,argv,&mesh1,&sol1,&mesh2) )  return(1);
-  
+
   /* Read file DEFAULT.mshdist, if any */
   parsop(&mesh1);
-  
+
   /* Default value for the interior domain, if none supplied (used in -dom option only) */
   if ( !info.nintel ) {
     info.nintel = 1;
     info.intel = (int*)calloc(1,sizeof(int));
     info.intel[0] = REFINT;
   }
-  
+
   /* Te be deleted, ultimately */
   if(info.startref && info.nsref < 1 ) {
     printf("    *** No starting ref for triangles found.\n ");
     exit(0);
   }
-  
+
   /* Load data */
   if ( info.imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
   if ( !loadMesh(&mesh1,&mesh2) )  return(1);
   if (info.option == 2 )
-	  if (!loadSol(&sol1) )  return(1); 
-  
+	  if (!loadSol(&sol1) )  return(1);
+
   if ( !setfunc(mesh1.dim) )  return(1);
-  
+
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )  stats(&mesh1,&mesh2);
-  
-  fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",printim(info.ctim[1].gdif));
+
+  fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",getim(info.ctim[1].gdif));
 
   /* Analysis */
   fprintf(stdout,"\n  %s\n   MODULE MSHDIST-LJLL : %s (%s)\n  %s\n",D_STR,D_VER,D_REL,D_STR);
@@ -567,17 +567,17 @@ int main(int argc,char **argv) {
   if ( !hashelt(&mesh1) )  return(1);
   chrono(OFF,&info.ctim[2]);
   if ( info.imprim )
-    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",printim(info.ctim[2].gdif));
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",getim(info.ctim[2].gdif));
 
   /* Distance calculation */
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 2 : DISTANCING\n");
   chrono(ON,&info.ctim[3]);
 
   if ( !mshdis1(&mesh1,&mesh2,&sol1) )  return(1);
-	
+
   chrono(OFF,&info.ctim[3]);
   if ( info.imprim )
-    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",printim(info.ctim[3].gdif));
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",getim(info.ctim[3].gdif));
 
   fprintf(stdout,"\n  %s\n   END OF MODULE MSHDIST \n  %s\n",D_STR,D_STR);
 
@@ -586,7 +586,7 @@ int main(int argc,char **argv) {
   chrono(ON,&info.ctim[1]);
   if ( !info.noscale || !info.specdist )
     if ( !unscaleSol(&sol1) )  return(1);
-  
+
   if ( !saveSol(&sol1) )     return(1);
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
@@ -606,4 +606,3 @@ int main(int argc,char **argv) {
 
   return(0);
 }
-

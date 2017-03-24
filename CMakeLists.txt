@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_BUILD_TYPE  "Release")
+INCLUDE_DIRECTORIES(  "$ENV{HOME}/include")
+LINK_DIRECTORIES( "$ENV{HOME}/lib")
 SET(CMAKE_CXX_FLAGS   "-w -O3")
 SET(CMAKE_C_FLAGS   "-w -O3")
 set(CMAKE_MACOSX_RPATH 1)
@@ -9,9 +11,12 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 project(MshDist)
 file(                  GLOB_RECURSE source_files sources/*)
 file(                  GLOB_RECURSE header_files sources/*.h)
+
 FIND_LIBRARY(          M_LIB m)
+find_library(          Commons NAMES Commons HINTS "$ENV{HOME}/lib")
+
 ADD_LIBRARY(           MshDist SHARED ${source_files})
-target_link_libraries( MshDist ${M_LIB} "-lpthread")
+target_link_libraries( MshDist ${Commons})
 INSTALL(               TARGETS MshDist LIBRARY  DESTINATION "$ENV{HOME}/lib")
 INSTALL(               FILES ${header_files} DESTINATION "$ENV{HOME}/include")
 
