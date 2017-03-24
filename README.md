@@ -3,8 +3,8 @@ mshdist is a simple algorithm to generate the signed distance function to given 
 
 #### Installation
 
-1. you will need to install the [ICS Commons Library](https://github.com/ICStoolbox/Commons) on your system.
-Please refer to the instructions provided on the ICS Commons Library page in order to install this library.
+1. you will need to install the [ISCD Commons Library](https://github.com/ISCDtoolbox/Commons) on your system.
+Please refer to the instructions provided on the ISCD Commons Library page in order to install this library.
 
 2. download the zip archive of NavierStokes or clone this repository:
 
@@ -25,7 +25,7 @@ Please refer to the instructions provided on the ICS Commons Library page in ord
 
 #### Usage
 
-* A short documentation is supplied (see the ./documentation folder).
+* A short documentation is supplied (see the [documentation](documentation) folder).
 
 #### Quickstart
 
