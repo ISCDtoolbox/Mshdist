@@ -1,4 +1,4 @@
-# mshdist
+# mshdist ![](https://travis-ci.org/ISCDtoolbox/Mshdist.svg?branch=master)
 mshdist is a simple algorithm to generate the signed distance function to given objects in two and three space dimensions.
 
 #### Installation
