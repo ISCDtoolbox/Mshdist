@@ -328,9 +328,11 @@ static void stats(pMesh mesh1,pMesh mesh2) {
 
 
 static void endcod() {
+  char    stim[32];
 
   chrono(OFF,&info.ctim[0]);
-  fprintf(stdout,"\n   ELAPSED TIME  %s\n",getim(info.ctim[0].gdif));
+  printim(info.ctim[0].gdif,stim);
+  fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
 }
 
 
@@ -495,6 +497,7 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
 int main(int argc,char **argv) {
   Mesh       mesh1,mesh2;
   Sol        sol1;
+  char       stim[32];
 
   fprintf(stdout,"  -- MSHDIST, Release %s (%s) \n",D_VER,D_REL);
   fprintf(stdout,"     %s\n",D_CPY);
@@ -553,9 +556,11 @@ int main(int argc,char **argv) {
   if ( !setfunc(mesh1.dim) )  return(1);
 
   chrono(OFF,&info.ctim[1]);
-  if ( info.imprim )  stats(&mesh1,&mesh2);
+  if ( info.imprim )
+    stats(&mesh1,&mesh2);
 
-  fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",getim(info.ctim[1].gdif));
+  printim(info.ctim[1].gdif,stim);
+  fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
   /* Analysis */
   fprintf(stdout,"\n  %s\n   MODULE MSHDIST-LJLL : %s (%s)\n  %s\n",D_STR,D_VER,D_REL,D_STR);
@@ -566,9 +571,11 @@ int main(int argc,char **argv) {
 
   if ( !hashelt(&mesh1) )  return(1);
   chrono(OFF,&info.ctim[2]);
-  if ( info.imprim )
-    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",getim(info.ctim[2].gdif));
-
+  if ( info.imprim ) {
+    printim(info.ctim[2].gdif,stim);
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+  }
+  
   /* Distance calculation */
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 2 : DISTANCING\n");
   chrono(ON,&info.ctim[3]);
@@ -576,9 +583,11 @@ int main(int argc,char **argv) {
   if ( !mshdis1(&mesh1,&mesh2,&sol1) )  return(1);
 
   chrono(OFF,&info.ctim[3]);
-  if ( info.imprim )
-    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",getim(info.ctim[3].gdif));
-
+  if ( info.imprim ) {
+    printim(info.ctim[3].gdif,stim);
+    printf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+  }
+  
   fprintf(stdout,"\n  %s\n   END OF MODULE MSHDIST \n  %s\n",D_STR,D_STR);
 
   /* Save file */
