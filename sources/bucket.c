@@ -146,13 +146,12 @@ int buckin_3d(pMesh mesh,pBucket bucket,double *c) {
   return(0);
 }
 
-
 int buckin_2d(pMesh mesh,pBucket bucket,double *c) {
   pPoint    pp1;
   double    dm,dd,d2,ux,uy;
   int       i,j,ii,jj,d,ic,ip,ip1,siz;
   int       imin,imax,jmin,jmax;
-
+  
   siz = bucket->size;
   dd  = siz / (double)PRECI;
 

@@ -215,7 +215,7 @@ int     holeCl_Chair(pMesh,pSol);
 int     holeChairIni(pMesh,pSol);
 int     gen1Hole_2d(pMesh mesh,pSol sol);
 
-/* function pointers */
+/* Function pointers */
 pBucket (*newBucket)(pMesh ,int );
 int     (*buckin)(pMesh ,pBucket ,double *);
 int     (*locelt)(pMesh ,int ,double *,double *);

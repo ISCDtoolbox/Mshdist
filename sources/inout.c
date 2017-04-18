@@ -2,7 +2,6 @@
 
 extern Info info;
 
-
 /* Read mesh data */
 int loadMesh(pMesh mesh1,pMesh mesh2) {
   pPoint       ppt;
@@ -173,10 +172,10 @@ int loadMesh(pMesh mesh1,pMesh mesh2) {
   }
   GmfCloseMesh(inm);
 
-  if (( info.option == 2 )||( info.option == 3 ))  return(1);  
+  if ( ( info.option == 2 ) || ( info.option == 3 ) )  return(1);
 	
   /* load mesh 2 */
-	name = mesh2->name;
+  name = mesh2->name;
   strcpy(data,name);
   ptr = strstr(data,".mesh");
   mesh2->bin = 0;

@@ -224,9 +224,9 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
   if ( ptr ) *ptr = '\0';
 
   /* Option 3 prevails */
-  if (( mesh2->name == NULL ) && (info.option != 3))
+  if ( ( mesh2->name == NULL ) && (info.option != 3) )
 	  info.option = 2;
-
+  
   return(1);
 }
 
@@ -348,7 +348,7 @@ int setfunc(int dim) {
     if ( info.option == 1 ) {
       inidist = inidist_2d;
       sgndist = sgndist_2d;
-	  }
+    }
     else if(info.option == 3){
       inireftrias = inireftrias_2d;
       iniencdomain = iniencdomain_2d;
@@ -439,11 +439,11 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
   /* Distance initialization ,depending on the option */
   /* Signed distance generation from the contour of mesh2 */
   if ( info.option == 1 ) {
-	  /* bucket sort */
-	  bucket = newBucket(mesh1,BUCKSIZ);
-	  if ( !bucket )  return(0);
-
-	  if ( info.imprim )  fprintf(stdout,"  ** Initialization\n");
+    /* bucket sort */
+    bucket = newBucket(mesh1,BUCKSIZ);
+    if ( !bucket )  return(0);
+    
+    if ( info.imprim )  fprintf(stdout,"  ** Initialization\n");
     ier = inidist(mesh1,mesh2,sol1,bucket);
 
     if ( info.imprim )  fprintf(stdout,"  ** Sign identification\n");
@@ -541,7 +541,7 @@ int main(int argc,char **argv) {
   }
 
   /* Te be deleted, ultimately */
-  if(info.startref && info.nsref < 1 ) {
+  if ( info.startref && info.nsref < 1 ) {
     printf("    *** No starting ref for triangles found.\n ");
     exit(0);
   }
@@ -549,8 +549,9 @@ int main(int argc,char **argv) {
   /* Load data */
   if ( info.imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
+  
   if ( !loadMesh(&mesh1,&mesh2) )  return(1);
-  if (info.option == 2 )
+  if ( info.option == 2 )
 	  if (!loadSol(&sol1) )  return(1);
 
   if ( !setfunc(mesh1.dim) )  return(1);

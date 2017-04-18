@@ -191,7 +191,8 @@ int inidist_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
 
   for (k=1; k<=sol1->np; k++)
     sol1->val[k] = INIVAL_2d;
-  sol1->nt = mesh1->nt; 	
+  
+  sol1->nt = mesh1->nt;
   
   /* Memory allocation */
   list = (int*)calloc(mesh1->nt+1,sizeof(int));
@@ -207,17 +208,19 @@ int inidist_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
     (information to be used in function signdist_2d) */
   nc  = 0;
   npp = 0;
+  
   for (k=1; k<=mesh2->na; k++){
     pe  = &mesh2->edge[k];
-	  p1  = &mesh2->point[pe->v[0]];
+    p1  = &mesh2->point[pe->v[0]];
     p2  = &mesh2->point[pe->v[1]];
+    
     iel = buckin(mesh1,bucket,p1->c);
     iel = locelt(mesh1,iel,p1->c,cb);
-	  
-	  if(!iel){
-	    iel = buckin(mesh1,bucket,p2->c);
-		  iel = locelt(mesh1,iel,p2->c,cb);
-	  }
+    
+    if ( !iel ) {
+      iel = buckin(mesh1,bucket,p2->c);
+      iel = locelt(mesh1,iel,p2->c,cb);
+    }
 	  
     ilist       = 1;
     list[ilist] = iel;
@@ -283,7 +286,7 @@ int inidist_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
     }
   }
   fprintf(stdout,"     distance\n");
-	
+  
   /* correction */
   nc = 0;
   for (k=1; k<=mesh1->np; k++){

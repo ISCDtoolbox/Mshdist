@@ -22,6 +22,7 @@ int scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1) {
 			if ( ppt->c[i] < info.min1[i] )  info.min1[i] = ppt->c[i];
 		}
 	}
+  
 	delta = 0.0;
 	for (i=0; i<mesh1->dim; i++) {
 		dd = fabs(info.max1[i]-info.min1[i]);
@@ -52,12 +53,11 @@ int scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1) {
     return(1);
   }
   
-  if (info.option == 3){
+  if ( info.option == 3 )
     return(1);
-  }
   
-  /* 2nd mesh is quarter sized in mesh 1 */
-  //store in info.max/min the max/min coordinate of all the points of mesh2
+  /* 2nd mesh is put to scale SIZE with respect to mesh 1 */
+  /* store in info.max/min the max/min coordinate of all the points of mesh2 */
   for (k=1; k<=mesh2->np; k++) {
     ppt = &mesh2->point[k];
     for (i=0; i<mesh2->dim; i++) {
@@ -96,22 +96,20 @@ int scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1) {
 		if ( dd > deltb )  deltb = dd;
   }*/
   
-  //info.ddebug = 1;
-  if ( info.ddebug ) {
-	  printf("min %f %f %f  max %f %f %f\n",info.min1[0],info.min1[1],info.min1[2],info.max1[0],info.max1[1],info.max1[2]);
+
+    /*printf("min %f %f %f  max %f %f %f\n",info.min1[0],info.min1[1],info.min1[2],info.max1[0],info.max1[1],info.max1[2]);
   	printf("min %f %f %f  max %f %f %f\n",info.min2[0],info.min2[1],info.min2[2],info.max2[0],info.max2[1],info.max2[2]);
     printf("delta1 %f %f %f \n",info.delta1[0],info.delta1[1],info.delta1[2]);
     printf("delta2 %f %f %f \n",info.delta2[0],info.delta2[1],info.delta2[2]);
-	  printf("deltb = %f\n",deltb);
-  }
+    printf("deltb = %f\n",deltb);*/
   
-  /* Dimension mesh2 to be SIZE*mesh1, and locate it at the centre of mesh1 */
+  /* Resize mesh2 to SIZE*mesh1, and locate it at the centre of mesh1 */
   dd = SIZE / deltb;
   for (k=1; k<=mesh2->np; k++) {
     ppt = &mesh2->point[k];
     for (i=0; i<mesh2->dim; i++) {
       ppt->c[i]  = dd * (ppt->c[i]-info.min2[i]);
-      ppt->c[i] += 0.5*(1.0-SIZE);
+      ppt->c[i] += 0.5*(1.0-dd*info.delta2[i]);
       //ppt->c[i] -= dd * 0.5*info.delta2[i];
       //ppt->c[i] +=      0.5*info.delta1[i];
     }
