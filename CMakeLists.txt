@@ -15,9 +15,9 @@ file(                  GLOB_RECURSE header_files sources/*.h)
 FIND_LIBRARY(          M_LIB m)
 find_library(          Commons NAMES Commons HINTS "$ENV{HOME}/lib")
 
-ADD_LIBRARY(           MshDistance SHARED ${source_files})
+ADD_LIBRARY(           MshDistance STATIC ${source_files})
 target_link_libraries( MshDistance ${Commons})
-INSTALL(               TARGETS MshDistance LIBRARY  DESTINATION "$ENV{HOME}/lib")
+#INSTALL(               TARGETS MshDistance LIBRARY  DESTINATION "$ENV{HOME}/lib")
 INSTALL(               FILES ${header_files} DESTINATION "$ENV{HOME}/include")
 
 #Executable
