@@ -72,7 +72,7 @@ typedef struct {
   int      ncpu,libpid,typ[2];          /* for // purposes */
   int      maxit,ref,nsref,*sref;
   int      nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
-  char     imprim,ddebug,option,bbbc,hausdorff,specdist,startref,noscale;
+  char     imprim,ddebug,option,bbbc,hausdorff,pcloud,specdist,startref,noscale;
   mytime   ctim[TIMEMAX];
 } Info;
 
@@ -129,7 +129,8 @@ int  scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1);
 int  unscaleSol(pSol sol);
 int  locateTetra(pMesh mesh,int nsdep,int base,double *p,double *cb);
 int  locateTria(pMesh mesh,int nsdep,int base,double *p,double *cb);
-int boulep (pMesh mesh, int start, int ip, int * list);
+int  boulep_2d(pMesh mesh,int ,int* );
+int  boulet_3d(pMesh mesh, int start, int ip, int * list);
 void freeBucket(pBucket );
 
 int intersec_2d(pPoint,pPoint,pPoint,pPoint);
@@ -158,7 +159,9 @@ int     closept_3d(pMesh ,double *);
 int     hashelt_3d(pMesh );
 int     hashelt_2d(pMesh );
 int     inidist_2d(pMesh ,pMesh ,pSol ,pBucket );
+int     inidistpcloud_2d(pMesh ,pMesh ,pSol ,pBucket );
 int     inidist_3d(pMesh ,pMesh ,pSol ,pBucket );
+int     inidistpcloud_3d(pMesh ,pMesh ,pSol ,pBucket );
 int     iniredist_2d(pMesh ,pSol );
 int     iniredist_3d(pMesh ,pSol );
 int     sgndist_2d(pMesh ,pMesh ,pSol ,pBucket );
@@ -223,6 +226,7 @@ int     (*nxtelt)(pMesh ,int ,double *,double *);
 int     (*closept)(pMesh ,double *);
 int     (*hashelt)(pMesh );
 int     (*inidist)(pMesh ,pMesh ,pSol ,pBucket );
+int     (*inidistpcloud)(pMesh ,pMesh ,pSol ,pBucket );
 int     (*iniredist)(pMesh ,pSol );
 int     (*iniencdomain)(pMesh ,pSol );
 int     (*inireftrias)(pMesh, pSol);

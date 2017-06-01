@@ -247,7 +247,7 @@ int inireftrias_3d(pMesh mesh, pSol sol){
     for(j=0; j<3; j++) {
       ip = idirt[iface][j];
 
-      lball = boulep(mesh,iel,ip,ball);
+      lball = boulet_3d(mesh,iel,ip,ball);
       assert(lball);
 
       for(l=0; l<lball; l++) {
@@ -466,7 +466,7 @@ int iniencdomain_3d(pMesh mesh, pSol sol){
     for(j=0; j<3; j++){
       ip =idirt[iface][j];
 
-      lball = boulep(mesh,iel,ip,ball);
+      lball = boulet_3d(mesh,iel,ip,ball);
       assert(lball);
 
       for(l=0; l<lball; l++){
@@ -723,6 +723,11 @@ int inidist_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   free(circum);
   return(1);
 
+}
+
+/* Initialize unsigned distance function to the point cloud contained in mesh2 */
+int inidistpcloud_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
+  return(1);
 }
 
 

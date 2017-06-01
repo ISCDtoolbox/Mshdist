@@ -342,6 +342,65 @@ int inidist_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   return(1);
 }
 
+/* Initialize unsigned distance function to the point cloud contained in mesh2 */
+int inidistpcloud_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
+  pTria      pt;
+  pPoint     ppt,p1;
+  double     bc[3],dd;
+  int        k,l,iel,base,ip0,ip1,ilist,*list;
+  char       i;
+  
+  for (k=1; k<=mesh1->np; k++)
+    mesh1->point[k].flag = 0;
+  
+  /* Large initial value */
+  for (k=1; k<=sol1->np; k++)
+    sol1->val[k] = INIVAL_2d;
+  
+  sol1->nt = mesh1->nt;
+  
+  /* Memory allocation */
+  list = (int*)calloc(LONMAX,sizeof(int));
+  assert(list);
+  
+  /* Travel points in mesh2 an initialize the exact distance function at the near points */
+  for (k=1; k<=mesh2->np; k++) {
+    ppt = &mesh2->point[k];
+    base = ++mesh1->flag;
+    
+    /* Find triangle in mesh1 where ppt falls in */
+    iel = buckin(mesh1,bucket,ppt->c);
+    iel = locelt(mesh1,iel,ppt->c,bc);
+    
+    if ( !iel ) continue;
+    pt = &mesh1->tria[iel];
+    
+    /* Calculate the exact distance function to p0 at all points in the balls of the three vertices of pt */
+    for (i=0; i<3; i++) {
+      ip0 = pt->v[i];
+      ilist = boulep_2d(mesh1,ip1,list);
+      
+      for (l=0; l<ilist; l++) {
+        ip1 = list[l];
+        p1 = &mesh1->point[ip1];
+        if ( p1->flag < base ) {
+          dd = (p1->c[0]-ppt->c[0])*(p1->c[0]-ppt->c[0]) + (p1->c[1]-ppt->c[1])*(p1->c[1]-ppt->c[1]);
+          sol1->val[ip1] = D_MIN(sol1->val[ip1],dd);
+          p1->flag = base;
+        }
+      }
+      
+    }
+  }
+  
+  /* Take square root */
+  for (k=1; k<=sol1->np; k++)
+    sol1->val[k] = sqrt(sol1->val[k]);
+  
+  free(list);
+  return(1);
+}
+
 /* Initialize the sign of the implicit function in each connected component */
 int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   pEdge    pe;

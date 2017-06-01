@@ -74,7 +74,7 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
   while ( i < argc ) {
     if ( *argv[i] == '-' ) {
       switch(argv[i][1]) {
-      //case 'h':
+
       case '?':
         usage(argv[0]);
         break;
@@ -106,18 +106,6 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
           info.ddebug = 1;
 
 		break;
-      case 'n':
-        if ( !strcmp(argv[i],"-ncpu") ) {
-          ++i;
-          if ( i < argc && isdigit(argv[i][0]) )
-            info.ncpu = atoi(argv[i]);
-          else
-            --i;
-        }
-        else if ( !strcmp(argv[i],"-noscale") )
-          info.noscale = 1;
-
-      break;
 
       /* Calculate Hausdorff distance */
 	  case 'h':
@@ -139,6 +127,26 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
           usage(argv[0]);
         }
+        break;
+          
+      case 'n':
+        if ( !strcmp(argv[i],"-ncpu") ) {
+          ++i;
+          if ( i < argc && isdigit(argv[i][0]) )
+            info.ncpu = atoi(argv[i]);
+          else
+            --i;
+        }
+        else if ( !strcmp(argv[i],"-noscale") )
+          info.noscale = 1;
+          
+        break;
+          
+      /* Generate unsigned distance with respect to a point cloud */
+      case 'p':
+        if ( !strcmp(argv[i],"-pcloud") )
+          info.pcloud = 1;
+          
         break;
 
       case 'r':
@@ -347,18 +355,19 @@ int setfunc(int dim) {
 
     if ( info.option == 1 ) {
       inidist = inidist_2d;
+      inidistpcloud = inidistpcloud_2d;
       sgndist = sgndist_2d;
     }
     else if(info.option == 3){
       inireftrias = inireftrias_2d;
       iniencdomain = iniencdomain_2d;
     }
-	  else {
-	    iniredist = iniredist_2d;
-	  }
+    else
+      iniredist = iniredist_2d;
 
     ppgdist = ppgdist_2d;
   }
+  
   else {
     newBucket = newBucket_3d;
     buckin  = buckin_3d;
@@ -367,16 +376,16 @@ int setfunc(int dim) {
     hashelt = hashelt_3d;
 
     if ( info.option == 1 ) {
-	    inidist = inidist_3d;
+      inidist = inidist_3d;
+      inidistpcloud = inidistpcloud_3d;
       sgndist = sgndist_3d;
     }
     else if(info.option == 3){
       inireftrias = inireftrias_3d;
       iniencdomain = iniencdomain_3d;
     }
-	  else {
-		  iniredist = iniredist_3d;
-	  }
+    else
+      iniredist = iniredist_3d;
 
     ppgdist = ppgdist_3d;
   }
@@ -436,7 +445,7 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
     return(1);
   }
 
-  /* Distance initialization ,depending on the option */
+  /* Distance initialization, depending on the option */
   /* Signed distance generation from the contour of mesh2 */
   if ( info.option == 1 ) {
     /* bucket sort */
@@ -444,10 +453,16 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
     if ( !bucket )  return(0);
     
     if ( info.imprim )  fprintf(stdout,"  ** Initialization\n");
-    ier = inidist(mesh1,mesh2,sol1,bucket);
+    if ( info.pcloud )
+      ier = inidistpcloud(mesh1,mesh2,sol1,bucket);
+    else
+      ier = inidist(mesh1,mesh2,sol1,bucket);
 
     if ( info.imprim )  fprintf(stdout,"  ** Sign identification\n");
-    ier = sgndist(mesh1,mesh2,sol1,bucket);
+    
+    /* Put a sign to the initial distance field */
+    if ( !info.pcloud )
+      ier = sgndist(mesh1,mesh2,sol1,bucket);
   }
 
   /* Signed distance generation from entities enclosed in mesh1 */

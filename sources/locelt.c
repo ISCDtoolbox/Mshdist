@@ -354,7 +354,7 @@ int inTria(pMesh mesh,int nsdep,double *p,double *cb) {
   return(1);
 }
 
-
+/* Find triangle containing Point p, starting nsdep; return the barycentric coordinates of the point in this triangle in cb */
 int locelt_2d(pMesh mesh,int nsdep,double *p,double *cb) {
   pTria     pt;
   pPoint    p0,p1,p2;

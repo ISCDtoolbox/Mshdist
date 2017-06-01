@@ -1,0 +1,29 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 73ef0c9..a32aa92 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,9 +1,7 @@
+ cmake_minimum_required(VERSION 2.8)
+-set(CMAKE_BUILD_TYPE  "Release")
++
+ INCLUDE_DIRECTORIES(  "$ENV{HOME}/include")
+ LINK_DIRECTORIES( "$ENV{HOME}/lib")
+-SET(CMAKE_CXX_FLAGS   "-w -O3")
+-SET(CMAKE_C_FLAGS   "-w -O3")
+ set(CMAKE_MACOSX_RPATH 1)
+ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+ 
+@@ -15,9 +13,11 @@ file(                  GLOB_RECURSE header_files sources/*.h)
+ FIND_LIBRARY(          M_LIB m)
+ find_library(          Commons NAMES Commons HINTS "$ENV{HOME}/lib")
+ 
+-ADD_LIBRARY(           MshDistance SHARED ${source_files})
++ADD_LIBRARY(           MshDistance STATIC ${source_files})
+ target_link_libraries( MshDistance ${Commons})
+-INSTALL(               TARGETS MshDistance LIBRARY  DESTINATION "$ENV{HOME}/lib")
++INSTALL(               TARGETS MshDistance
++  ARCHIVE  DESTINATION "$ENV{HOME}/lib"
++  LIBRARY  DESTINATION "$ENV{HOME}/lib")
+ INSTALL(               FILES ${header_files} DESTINATION "$ENV{HOME}/include")
+ 
+ #Executable

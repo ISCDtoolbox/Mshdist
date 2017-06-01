@@ -162,8 +162,11 @@ int loadMesh(pMesh mesh1,pMesh mesh2) {
     GmfGotoKwd(inm,GmfTriangles);
     for (k=1; k<=mesh1->nt; k++) {
       pt1 = &mesh1->tria[k];
-      if(info.option ==3) GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);//add : 21/01/2011
-      else GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&ref);
+      if ( info.option == 3 )
+        GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
+      else
+        GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&ref);
+      
 	  for (i=0; i<3; i++) {    
         ppt = &mesh1->point[pt1->v[i]];
         if ( !ppt->s )  ppt->s = k;
@@ -206,14 +209,15 @@ int loadMesh(pMesh mesh1,pMesh mesh2) {
 		return(0);
 	}
 	
-	if ( mesh2->dim == 3 ) {
+  if ( mesh2->dim == 3 ) {
     mesh2->np = GmfStatKwd(inm,GmfVertices);
     mesh2->nt = GmfStatKwd(inm,GmfTriangles);
-	}
-	else {
+  }
+  else {
     mesh2->np = GmfStatKwd(inm,GmfVertices);
     mesh2->na = GmfStatKwd(inm,GmfEdges);
-	}
+  }
+  
   if ( !mesh2->np || (mesh2->nt+mesh2->na == 0) ) {
     fprintf(stdout,"  ** MISSING DATA (expecting elements)\n");
     return(0);
@@ -255,7 +259,7 @@ int loadMesh(pMesh mesh1,pMesh mesh2) {
         ppt->c[1] = fp2;
       }
       else {
-				GmfGetLin(inm,GmfVertices,&ppt->c[0],&ppt->c[1],&ref);
+        GmfGetLin(inm,GmfVertices,&ppt->c[0],&ppt->c[1],&ref);
       }
     }
   }

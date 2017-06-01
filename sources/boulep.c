@@ -1,11 +1,62 @@
 #include "mshdist.h"
 
+extern unsigned char inxt2[5];
 extern unsigned char inxt3[7];
+
+/* Store in list the points in the ball of ip; return length of the ball */
+int boulep_2d(pMesh mesh,int ip,int *list) {
+  pTria     pt;
+  pPoint    p0;
+  int       start,k,ipl,ilist,*adja;
+  char      i,i1,i2;
+  
+  ilist = 0;
+  
+  p0 = &mesh->point[ip];
+  start = p0->s;
+  k = start;
+  pt = &mesh->tria[k];
+  for (i=0; i<3; i++)
+    if ( pt->v[i] == ip ) break;
+  
+  assert ( i < 3 );
+  i1 = inxt2[i];
+  ipl = pt->v[i1];
+  
+  do {
+    pt = &mesh->tria[k];
+    i1 = inxt2[i];
+    i2 = inxt2[i1];
+    ilist++;
+    
+    if ( ilist >= LONMAX ) {
+      printf(" **** Problem function boulep_2d; point %d, more than %d points in the ball; abort.\n",ip,LONMAX);
+    }
+    
+    list[ilist] = pt->v[i2];
+    adja = &mesh->adja[3*(k-1)+1];
+    k = adja[i1] / 3;
+    i = adja[i1] % 3;
+  }
+  while ( k && k != start );
+  
+  /* If travel of the ball ends because an external boundary has been met, add the first point in the 
+   starting triangle to the ball */
+  if ( !k ) {
+    ilist++;
+    if ( ilist >= LONMAX ) {
+      printf(" **** Problem function boulep_2d; point %d, more than %d points in the ball; abort.\n",ip,LONMAX);
+    }
+    list[ilist] = ipl;
+  }
+  
+  return(ilist);
+}
 
 /* Return volumic ball (i.e. filled with tetrahedra) of point ip in tetra start. 
 Results are stored under the form 4*kel + jel , kel = number of the tetra, jel = local 
 index of p within kel */
-int boulep (pMesh mesh, int start, int ip, int * list){
+int boulet_3d (pMesh mesh, int start, int ip, int * list){
   pTetra pt,pt1;
   int    nump,ilist,base,cur,k,k1, *adja;
   char   j,l,i;  
