@@ -16,7 +16,7 @@ FIND_LIBRARY(          M_LIB m)
 find_library(          Commons NAMES Commons HINTS "$ENV{HOME}/lib")
 
 ADD_LIBRARY(           MshDistance STATIC ${source_files})
-target_link_libraries( MshDistance ${Commons})
+target_link_libraries( MshDistance ${M_LIB} ${Commons})
 #INSTALL(               TARGETS MshDistance LIBRARY  DESTINATION "$ENV{HOME}/lib")
 INSTALL(               FILES ${header_files} DESTINATION "$ENV{HOME}/include")
 
