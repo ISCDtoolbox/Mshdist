@@ -16,11 +16,11 @@ FIND_LIBRARY(          M_LIB m)
 find_library(          Commons NAMES Commons HINTS "$ENV{HOME}/lib")
 
 ADD_LIBRARY(           MshDistance STATIC ${source_files})
-target_link_libraries( MshDistance ${Commons})
+target_link_libraries( MshDistance ${Commons} ${M_LIB})
 #INSTALL(               TARGETS MshDistance LIBRARY  DESTINATION "$ENV{HOME}/lib")
 INSTALL(               FILES ${header_files} DESTINATION "$ENV{HOME}/include")
 
 #Executable
 add_executable(        mshdist sources/mshdist.c)
-target_link_libraries( mshdist MshDistance)
+target_link_libraries( mshdist MshDistance ${M_LIB})
 INSTALL(               TARGETS mshdist RUNTIME DESTINATION "$ENV{HOME}/bin")
