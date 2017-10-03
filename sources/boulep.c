@@ -16,6 +16,7 @@ int boulep_2d(pMesh mesh,int ip,int *list) {
   start = p0->s;
   k = start;
   pt = &mesh->tria[k];
+  
   for (i=0; i<3; i++)
     if ( pt->v[i] == ip ) break;
   

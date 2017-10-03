@@ -218,7 +218,7 @@ int loadMesh(pMesh mesh1,pMesh mesh2) {
     mesh2->na = GmfStatKwd(inm,GmfEdges);
   }
   
-  if ( !mesh2->np || (mesh2->nt+mesh2->na == 0) ) {
+  if ( !info.pcloud && ( !mesh2->np || (mesh2->nt+mesh2->na == 0) ) || ( info.pcloud && !mesh2->np ) ) {
     fprintf(stdout,"  ** MISSING DATA (expecting elements)\n");
     return(0);
   }
@@ -226,16 +226,8 @@ int loadMesh(pMesh mesh1,pMesh mesh2) {
   /* mem alloc */
   mesh2->point = (pPoint)calloc(mesh2->np+1,sizeof(Point));
   assert(mesh2->point);
-  if ( mesh2->dim == 3 ) {
-    mesh2->tria = (pTria)calloc(mesh2->nt+1,sizeof(Tria));
-    assert(mesh2->tria);
-  }
-  else {
-    mesh2->edge  = (pEdge)calloc(mesh2->na+1,sizeof(Edge));
-    assert(mesh2->edge);
-  }
-
-  /* read mesh vertices */
+  
+  /* Read mesh vertices */
   GmfGotoKwd(inm,GmfVertices);
   if ( mesh2->dim == 3 ) {
     for (k=1; k<=mesh2->np; k++) {
@@ -264,21 +256,33 @@ int loadMesh(pMesh mesh1,pMesh mesh2) {
     }
   }
 
-  /* read mesh elements */
-  if ( mesh2->dim == 3 ) {
-    GmfGotoKwd(inm,GmfTriangles);
-    for (k=1; k<=mesh2->nt; k++) {
-      pt1 = &mesh2->tria[k];
-      GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
+  /* Allocate memory and read mesh elements */
+  if ( !info.pcloud ) {
+    if ( mesh2->dim == 3 ) {
+      mesh2->tria = (pTria)calloc(mesh2->nt+1,sizeof(Tria));
+      assert(mesh2->tria);
     }
-	}
-	else {
-    GmfGotoKwd(inm,GmfEdges);
-    for (k=1; k<=mesh2->na; k++) {
-      pe = &mesh2->edge[k];
-      GmfGetLin(inm,GmfEdges,&pe->v[0],&pe->v[1],&pe->ref);
+    else {
+      mesh2->edge  = (pEdge)calloc(mesh2->na+1,sizeof(Edge));
+      assert(mesh2->edge);
+    }
+    
+    if ( mesh2->dim == 3 ) {
+      GmfGotoKwd(inm,GmfTriangles);
+      for (k=1; k<=mesh2->nt; k++) {
+        pt1 = &mesh2->tria[k];
+        GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
+      }
+    }
+    else {
+      GmfGotoKwd(inm,GmfEdges);
+      for (k=1; k<=mesh2->na; k++) {
+        pe = &mesh2->edge[k];
+        GmfGetLin(inm,GmfEdges,&pe->v[0],&pe->v[1],&pe->ref);
+      }
     }
   }
+
   GmfCloseMesh(inm);
   return(1);
 }

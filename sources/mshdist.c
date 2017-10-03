@@ -43,22 +43,42 @@ static void usage(char *prog) {
 static int freeInfo() {
   if ( info.nintel && info.intel ) {
     info.nintel = 0;
-    info.intel = NULL;
+    if ( info.intel ) {
+      free(info.intel);
+      info.intel = NULL;
+    }
   }
 
   if ( info.nst && info.st ) {
     info.nst = 0;
-    info.st = NULL;
+    if ( info.st ) {
+      free(info.st);
+      info.st = NULL;
+    }
   }
 
   if ( info.nsa && info.sa ) {
     info.nsa = 0;
-    info.sa = NULL;
+    if ( info.sa ) {
+      free(info.sa);
+      info.sa = NULL;
+    }
   }
 
   if ( info.nsp && info.sp ) {
     info.nsp = 0;
-    info.sp = NULL;
+    if ( info.sp ) {
+      free(info.sp);
+      info.sp = NULL;
+    }
+  }
+  
+  if ( info.nexp && info.exp ) {
+    info.nexp = 0;
+    if ( info.exp ) {
+      free(info.exp);
+      info.exp = NULL;
+    }
   }
 
   return(1);
@@ -168,6 +188,13 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
           info.specdist = 1;
           info.option = 3;
         }
+        else if ( !strcmp(argv[i],"-scale") ) {
+          ++i;
+          if ( i < argc && isdigit(argv[i][0]) )
+            info.size = atof(argv[i]);
+          else
+            i--;
+        }
         else if ( !strcmp(argv[i],"-sref") ) {
             info.startref = 1;
             info.option = 3;
@@ -240,7 +267,8 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
 
 /* Read file DEFAULT.mshdist */
 static int parsop(pMesh mesh) {
-  int        ret,i,k;
+  float      fbuf;
+  int        ret,i,k,l;
   char       *ptr,data[256];
   FILE       *in;
 
@@ -306,6 +334,17 @@ static int parsop(pMesh mesh) {
       assert ( info.nsp );
       for (k=0; k<info.nsp; k++)
         fscanf(in,"%d",&info.sp[k]);
+    }
+    /* In generating distance, specify one or several exterior points for the sign */
+    if ( !strcmp(data,"exteriorpoints") ) {
+      fscanf(in,"%d",&info.nexp);
+      info.exp = (int*)calloc(mesh->dim*info.nexp,sizeof(double));
+      for (k=0; k<info.nexp; k++) {
+        for (l=0; l<mesh->dim; l++) {
+          fscanf(in,"%f",&fbuf);
+          info.exp[mesh->dim*k+l] = fbuf;
+        }
+      }
     }
 
     /* Read references to initialize distance function (used with option startref) */
@@ -466,7 +505,7 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
   }
 
   /* Signed distance generation from entities enclosed in mesh1 */
-  else if ( info.option == 3){
+  else if ( info.option == 3 ){
     if( info.startref ) {
       if ( info.imprim )  fprintf(stdout,"  ** Generation of signed distance function from surface edg/tria with prescribed refs\n");
       ier = inireftrias(mesh1,sol1);
@@ -512,6 +551,7 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
 int main(int argc,char **argv) {
   Mesh       mesh1,mesh2;
   Sol        sol1;
+  int        k;
   char       stim[32];
 
   fprintf(stdout,"  -- MSHDIST, Release %s (%s) \n",D_VER,D_REL);
@@ -539,27 +579,13 @@ int main(int argc,char **argv) {
   info.ddebug = 0;
   info.ncpu   = 1;
   info.res    = EPS;
+  info.nexp   = 0;
   info.dt     = 0.001;
   info.maxit  = 1000;
+  info.size = SIZE;
 
   /* Parse command line arguments */
   if ( !parsar(argc,argv,&mesh1,&sol1,&mesh2) )  return(1);
-
-  /* Read file DEFAULT.mshdist, if any */
-  parsop(&mesh1);
-
-  /* Default value for the interior domain, if none supplied (used in -dom option only) */
-  if ( !info.nintel ) {
-    info.nintel = 1;
-    info.intel = (int*)calloc(1,sizeof(int));
-    info.intel[0] = REFINT;
-  }
-
-  /* Te be deleted, ultimately */
-  if ( info.startref && info.nsref < 1 ) {
-    printf("    *** No starting ref for triangles found.\n ");
-    exit(0);
-  }
 
   /* Load data */
   if ( info.imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
@@ -574,6 +600,30 @@ int main(int argc,char **argv) {
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )
     stats(&mesh1,&mesh2);
+  
+  /* Read file DEFAULT.mshdist, if any */
+  parsop(&mesh1);
+  
+  /* Default value for the interior domain, if none supplied (used in -dom option only) */
+  if ( !info.nintel ) {
+    info.nintel = 1;
+    info.intel = (int*)calloc(1,sizeof(int));
+    info.intel[0] = REFINT;
+  }
+  
+  /* Default value for the starting point if none supplied (used in generating signed distance only) */
+  if ( !info.nexp ) {
+    info.nexp = -1;
+    info.exp = (double*)calloc(mesh1.dim,sizeof(double));
+    for (k=0; k<mesh1.dim; k++)
+      info.exp[k] = 0.01;
+  }
+  
+  /* Te be deleted, ultimately */
+  if ( info.startref && info.nsref < 1 ) {
+    printf("    *** No starting ref for triangles found.\n ");
+    exit(0);
+  }
 
   printim(info.ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
@@ -585,6 +635,7 @@ int main(int argc,char **argv) {
   if ( !info.noscale || !info.specdist )
     if ( !scaleMesh(&mesh1,&mesh2,&sol1) )  return(1);
 
+  info.nexp = info.nexp == -1 ? 1 : info.nexp;
   if ( !hashelt(&mesh1) )  return(1);
   chrono(OFF,&info.ctim[2]);
   if ( info.imprim ) {

@@ -53,6 +53,21 @@ int scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1) {
     return(1);
   }
   
+  /* scale starting points */
+  if ( info.nexp > 0 ) {
+    for (k=0; k<info.nexp; k++) {
+      for (i=0; i<mesh1->dim; i++) {
+        info.exp[mesh1->dim*k+i] = dd*(info.exp[mesh1->dim*k+i] - info.min1[i]);
+      }
+    }
+  }
+  /* Assign a default value */
+  else {
+    info.nexp = 1;
+    for (i=0; i<mesh1->dim; i++)
+      info.exp[i] = 0.01;
+  }
+  
   if ( info.option == 3 )
     return(1);
   
@@ -104,7 +119,7 @@ int scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1) {
     printf("deltb = %f\n",deltb);*/
   
   /* Resize mesh2 to SIZE*mesh1, and locate it at the centre of mesh1 */
-  dd = SIZE / deltb;
+  dd = info.size / deltb;
   for (k=1; k<=mesh2->np; k++) {
     ppt = &mesh2->point[k];
     for (i=0; i<mesh2->dim; i++) {

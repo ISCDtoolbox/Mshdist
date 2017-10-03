@@ -345,9 +345,9 @@ int inidist_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
 /* Initialize unsigned distance function to the point cloud contained in mesh2 */
 int inidistpcloud_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   pTria      pt;
-  pPoint     ppt,p1;
+  pPoint     ppt,p0,p2;
   double     bc[3],dd;
-  int        k,l,iel,base,ip0,ip1,ilist,*list;
+  int        k,l,ll,iel,base,ip0,ip1,ip2,ilist1,*list1,ilist2,*list2;
   char       i;
   
   for (k=1; k<=mesh1->np; k++)
@@ -360,8 +360,10 @@ int inidistpcloud_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   sol1->nt = mesh1->nt;
   
   /* Memory allocation */
-  list = (int*)calloc(LONMAX,sizeof(int));
-  assert(list);
+  list1 = (int*)calloc(LONMAX,sizeof(int));
+  assert(list1);
+  list2 = (int*)calloc(LONMAX,sizeof(int));
+  assert(list2);
   
   /* Travel points in mesh2 an initialize the exact distance function at the near points */
   for (k=1; k<=mesh2->np; k++) {
@@ -375,18 +377,23 @@ int inidistpcloud_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
     if ( !iel ) continue;
     pt = &mesh1->tria[iel];
     
-    /* Calculate the exact distance function to p0 at all points in the balls of the three vertices of pt */
+    /* Calculate the exact distance function to ppt at all points in the (doubled) balls of the three vertices of pt */
     for (i=0; i<3; i++) {
       ip0 = pt->v[i];
-      ilist = boulep_2d(mesh1,ip1,list);
+      ilist1 = boulep_2d(mesh1,ip0,list1);
       
-      for (l=0; l<ilist; l++) {
-        ip1 = list[l];
-        p1 = &mesh1->point[ip1];
-        if ( p1->flag < base ) {
-          dd = (p1->c[0]-ppt->c[0])*(p1->c[0]-ppt->c[0]) + (p1->c[1]-ppt->c[1])*(p1->c[1]-ppt->c[1]);
-          sol1->val[ip1] = D_MIN(sol1->val[ip1],dd);
-          p1->flag = base;
+      for (l=0; l<ilist1; l++) {
+        ip1 = list1[l];
+        ilist2 = boulep_2d(mesh1,ip1,list2);
+        
+        for (ll=0; ll<ilist2; ll++) {
+          ip2 = list2[ll];
+          p2 = &mesh1->point[ip2];
+          if ( p2->flag < base ) {
+            dd = (p2->c[0]-ppt->c[0])*(p2->c[0]-ppt->c[0]) + (p2->c[1]-ppt->c[1])*(p2->c[1]-ppt->c[1]);
+            sol1->val[ip2] = D_MIN(sol1->val[ip2],dd);
+            p2->flag = base;
+          }
         }
       }
       
@@ -397,7 +404,8 @@ int inidistpcloud_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   for (k=1; k<=sol1->np; k++)
     sol1->val[k] = sqrt(sol1->val[k]);
   
-  free(list);
+  free(list1);
+  free(list2);
   return(1);
 }
 
@@ -413,33 +421,30 @@ int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   /* memory alloc */
   pile = (int*)calloc(mesh->nt+1,sizeof(int));
   assert(pile);
-
-  printf("coords %E, %E ", mesh->point[1].c[0], mesh->point[1].c[1]); 
-
-  /* identify triangle close to lower corner (boundary) */
-  p[0] = 0.05;
-  p[1] = 0.05;
   
-/*  //for gripping mechanism
-  p[0] = 0.31;
-  p[1] = 0.62;
-  //p[1] = 0.02;
-*/    
-  iel = buckin(mesh,bucket,p);
-  iel = locelt(mesh,iel,p,cb);
-  assert(iel);
-  printf("ELEMENT DE DEPART POUR LE SIGNE %d \n", iel);
-
+  ipile = 0;
+  
   /* reset colors */
   for (k=1; k<=mesh->nt; k++)  mesh->tria[k].flag = 0;
   for (k=1; k<=mesh->np; k++)  mesh->point[k].flag = 0;
   mesh->flag = 0;
-
-  ipile       = 1;
-  pile[ipile] = iel;
   base = ++mesh->flag;
-  pt   = &mesh->tria[iel];
-  pt->flag = base;
+  
+  /* Travel the supplied exterior points */
+  for (k=0; k<info.nexp; k++) {
+    p[0] = info.exp[2*k];
+    p[1] = info.exp[2*k+1];
+    
+    iel = buckin(mesh,bucket,p);
+    iel = locelt(mesh,iel,p,cb);
+    assert(iel);
+    
+    ipile++;
+    pile[ipile] = iel;
+    pt   = &mesh->tria[iel];
+    pt->flag = base;
+  }
+
   start    = 1;
   while ( ipile > 0 ) {
     /* search for all elements in the current connected component */
