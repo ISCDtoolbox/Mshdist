@@ -2,6 +2,7 @@
 
 unsigned char inxt2[5] = {1,2,0,1,2};
 extern Info  info;
+extern char  ddb;
 
 /* Only used when generating a signed distance function
       from a domain explicitely discretized in current mesh */
@@ -955,7 +956,271 @@ static void gradelt_2d(int istart,int istop,int ipth,Param *par) {
   }
 }
 
-/* compute new distance at points */
+/* Calculate a (positive) active value at vertex i in triangle k based on the values in the other two vertices */
+double actival_2d(pMesh mesh,pSol sol,int k,int i) {
+  pTria         pt;
+  pPoint        p0,p1,p2;
+  double        dist,d0,d1,d2,ng0,ng1,ng2,g1g2,ps1,ps2,ll,a[3],m[2][2],im[2][2],Gr[2][3],g[2],r[2],rmin,rmax;
+  double        defval1,defval2,det,idet;
+  int           ip,ip1,ip2,nr;
+  char          i1,i2;
+  
+  i1 = inxt2[i];
+  i2 = inxt2[i1];
+  
+  pt  = &mesh->tria[k];
+  ip  = pt->v[i];
+  ip1 = pt->v[i1];
+  ip2 = pt->v[i2];
+  p0  = &mesh->point[ip];
+  p1  = &mesh->point[ip1];
+  p2  = &mesh->point[ip2];
+  
+  d0  = sol->val[ip];
+  d1  = sol->val[ip1];
+  d2  = sol->val[ip2];
+
+  dist = INIVAL_2d;
+  
+  /* If ip1 is not accepted, calculate a trial value based on ip2 */
+  if ( p1->tag != 1 ) {
+    ll = (p2->c[0]-p0->c[0])*(p2->c[0]-p0->c[0]) + (p2->c[1]-p0->c[1])*(p2->c[1]-p0->c[1]);
+    ll = sqrt(ll);
+    dist = (d0 < 0.0) ? d2 -ll : d2 + ll;
+    return( fabs(dist) );
+  }
+  /* Else if ip2 is not accepted, calculate a trial value based on ip1 */
+  else if ( p2->tag != 1 ) {
+    ll = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1]);
+    ll = sqrt(ll);
+    dist = (d0 < 0.0) ? d1 -ll : d1 + ll;
+    return( fabs(dist) );
+  }
+  
+  /* At this point, both values d1 and d2 are accepted */
+  m[0][0] = p1->c[0] - p0->c[0];     m[0][1] = p1->c[1] - p0->c[1];
+  m[1][0] = p2->c[0] - p0->c[0];     m[1][1] = p2->c[1] - p0->c[1];
+  
+  det = m[0][0]*m[1][1] - m[1][0]*m[0][1];
+  if ( det < EPS1 ) return(INIVAL_2d);
+
+  idet = 1.0 / det;
+  
+  im[0][0] = idet*m[1][1];     im[0][1] = -idet*m[0][1];
+  im[1][0] = -idet*m[1][0];    im[1][1] = idet*m[0][0];
+  
+  Gr[0][0] = -im[0][0] - im[0][1];    Gr[0][1] = im[0][0];    Gr[0][2] = im[0][1];
+  Gr[1][0] = -im[1][0] - im[1][1];    Gr[1][1] = im[1][0];    Gr[1][2] = im[1][1];
+  
+  ng0  = Gr[0][0]*Gr[0][0] + Gr[1][0]*Gr[1][0];
+  ng1  = Gr[0][1]*Gr[0][1] + Gr[1][1]*Gr[1][1];
+  ng2  = Gr[0][2]*Gr[0][2] + Gr[1][2]*Gr[1][2];
+  g1g2 = Gr[0][1]*Gr[0][2] + Gr[1][1]*Gr[1][2];
+  
+  a[2] = ng0;
+  a[1] = -2.0*(d1*ng1 + d2*ng2 + (d1+d2)*g1g2);
+  a[0] = d1*d1*ng1 + d2*d2*ng2 + 2.0*d1*d2*g1g2 - 1.0;
+  
+  nr = eqquad(a,r);
+  
+  if ( nr == 1 ) {
+    if ( (d0 >= 0.0 && r[0] >= d1 && r[0] >= d2) || (d0 <= 0.0 && r[0] <= d1 && r[0] <= d2) ) {
+      /* Check the direction of the gradient in this case */
+      g[0] = (d1-r[0])*Gr[0][1] + (d2-r[0])*Gr[0][2];
+      g[1] = (d1-r[0])*Gr[1][1] + (d2-r[0])*Gr[1][2];
+      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1];
+      ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2];
+
+      if ( ( d0 >= 0.0 && ps1 < EPS1 && ps2 < EPS1 ) || ( d0 <= 0.0 && ps1 >- EPS1 && ps2 >- EPS1 )) dist = fabs(r[0]);
+    }
+  }
+  else if ( nr == 2 ) {
+    /* Sort the roots */
+    if ( d0 >= 0.0 ) {
+      if ( r[0] < r[1] ) {
+        rmin = r[0];
+        rmax = r[1];
+      }
+      else {
+        rmin = r[1];
+        rmax = r[0];
+      }
+    }
+    else {
+      if ( r[0] < r[1] ) {
+        rmin = r[1];
+        rmax = r[0];
+      }
+      else {
+        rmin = r[1];
+        rmax = r[0];
+      }
+    }
+    
+    /* Try first rmin */
+    if ( (d0 >= 0.0 && rmin >= d1 && rmin >= d2) || (d0 <= 0.0 && rmin <= d1 && rmin <= d2) ) {
+      g[0] = (d1-rmin)*Gr[0][1] + (d2-rmin)*Gr[0][2];
+      g[1] = (d1-rmin)*Gr[1][1] + (d2-rmin)*Gr[1][2];
+      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1];
+      ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2];
+      
+      if ( ( d0 >= 0.0 && ps1 < EPS1 && ps2 < EPS1 ) || ( d0 <= 0.0 && ps1 >- EPS1 && ps2 >- EPS1 )) dist = fabs(rmin);
+      
+    }
+    else if ( (d0 >= 0.0 && rmax >= d1 && rmax >= d2) || (d0 <= 0.0 && rmax <= d1 && rmax <= d2) ) {
+      g[0] = (d1-rmax)*Gr[0][1] + (d2-rmax)*Gr[0][2];
+      g[1] = (d1-rmax)*Gr[1][1] + (d2-rmax)*Gr[1][2];
+      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1];
+      ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2];
+      
+      if ( ( d0 >= 0.0 && ps1 < EPS1 && ps2 < EPS1 ) || ( d0 <= 0.0 && ps1 >- EPS1 && ps2 >- EPS1 )) dist = fabs(rmax);
+    }
+  }
+  
+  /* If no other value has been assigned to dist, calculate a trial value based on both triangle edges */
+  if ( fabs( dist - INIVAL_2d ) < EPS2 ) {
+    ll = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1]);
+    ll = sqrt(ll);
+    defval1 = (d0 < 0.0) ? d1 -ll : d1 + ll;
+    
+    ll = (p2->c[0]-p0->c[0])*(p2->c[0]-p0->c[0]) + (p2->c[1]-p0->c[1])*(p2->c[1]-p0->c[1]);
+    ll = sqrt(ll);
+    defval2 = (d0 < 0.0) ? d2 -ll : d2 + ll;
+    
+    dist = D_MIN(fabs(defval1),fabs(defval2));
+  }
+  
+  return(dist);
+}
+
+/* Propagation of the signed distance field by the Fast Marching Method */
+int ppgdistfmm_2d(pMesh mesh,pSol sol){
+  Queue     q;
+  pQueue    pq;
+  pTria     pt,pt1;
+  pPoint    p0,p1,p2;
+  double    dist;
+  int       nacc,k,l,iel,ip,ip1,ip2,ilist,*list;
+  char      i,j,j1,j2,jj;
+  
+  pq    = &q;
+  nacc  = 0;
+  
+  /* Memory allocation */
+  list = (int*)calloc(LONMAX,sizeof(int));
+  assert(list);
+  
+  /* Memory allocation for the priority queue */
+  if ( !setQueue(mesh,pq) ) {
+    printf("Impossible to allocate memory for priority queue. Abort program.\n");
+    exit(0);
+  }
+  
+  /* Definition of the initial set of active nodes: travel accepted nodes */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    for(i=0; i<3; i++) {
+      ip = pt->v[i];
+      p0 = &mesh->point[ip];
+    
+      if ( p0->tag != 1 ) continue;
+      
+      ilist = boulet_2d(mesh,k,i,list);
+      
+      for (l=0; l<ilist; l++) {
+        iel = list[l] / 3;
+        pt1 = &mesh->tria[iel];
+
+        j   = list[l] % 3;
+        j1  = inxt2[j];
+        j2  = inxt2[j1];
+        
+        ip1 = pt1->v[j1];
+        ip2 = pt1->v[j2];
+        p1 = &mesh->point[ip1];
+        p2 = &mesh->point[ip2];
+        
+        /* Calculate value at ip1 and put it in the queue */
+        if ( p1->tag != 1 ) {
+          dist = actival_2d(mesh,sol,iel,j1);
+
+          if ( p1->tag == 0 ) {
+            insertAnod(pq,ip1,dist);
+            p1->tag = 2;
+          }
+          else
+            upAnod(pq,ip1,dist);
+        }
+        
+        /* Calculate value at ip2 and put it in the queue */
+        if ( p2->tag != 1 ) {
+          dist = actival_2d(mesh,sol,iel,j2);
+          if ( p2->tag == 0 ) {
+            insertAnod(pq,ip2,dist);
+
+            p2->tag = 2;
+          }
+          else
+            upAnod(pq,ip2,dist);
+        }
+      }
+    }
+  }
+  
+/* Main loop: pop the smallest active node; it becomes accepted and the neighboring values become active */
+  while ( pq->siz ) {
+    ip = popAnod(pq,&dist);
+    if ( !ip ) {
+      printf("Problem in popping in Fast Marching Method. Abort\n");
+      exit(0);
+    }
+    
+    p0 = &mesh->point[ip];
+    p0->tag = 1;
+    sol->val[ip] = sol->val[ip] > 0.0 ? dist : -dist;
+        
+    /* Travel the ball of p0 to update the set of active nodes */
+    k = p0->s;
+    pt = &mesh->tria[k];
+    for (i=0; i<3; i++)
+      if ( pt->v[i] == ip ) break;
+    assert ( i < 3 );
+    
+    ilist = boulet_2d(mesh,k,i,list);
+    for (l=0; l<ilist; l++) {
+      iel = list[l] / 3;
+      j   = list[l] % 3;
+      pt  = &mesh->tria[iel];
+
+      for(jj=0; jj<2; jj++) {
+        j   = inxt2[j];
+        ip1 = pt->v[j];
+        p1  = &mesh->point[ip1];
+        
+        /* Either insert or update active value if the point is not already accepted */
+        if ( p1->tag == 1 ) continue;
+        
+        dist = actival_2d(mesh,sol,iel,j);
+        if ( p1->tag == 2 )
+          upAnod(pq,ip1,dist);
+        else {
+           insertAnod(pq,ip1,dist);
+           p1->tag = 2;
+        }
+      }
+    }
+  }
+  
+  /* Release memory of the queue */
+  if ( !freeQueue(pq) ) {
+    printf("Impossible to free priority queue. Abort program.\n");
+    exit(0);
+  }
+  
+  return(1);
+}
+
+/* Compute new distance at points */
 static void tmpdist_2d(int istart,int istop,int ipth,Param *par) {
   pMesh     mesh;
   pSol      sol;
@@ -987,7 +1252,6 @@ static void tmpdist_2d(int istart,int istop,int ipth,Param *par) {
 		  pt->flag =-1;
 		  continue;
 	  }
-	  
 	  
     /* vector to track characteristic line */
     if ( dd < EPS1 )  continue;
@@ -1101,9 +1365,6 @@ int ppgdist_2d(pMesh mesh,pSol sol) {
 	int k;
 	pTria pt;
 
-  /*char numit[10];
-  char *ptr;*/
-  
   /* Memory allocation */
   par.grad = (double*)calloc(9*(mesh->nt)+1,sizeof(double));
   assert(par.grad);
@@ -1220,12 +1481,12 @@ int errdist(pMesh mesh, pMesh mesh2, pSol sol){
   for(k=1;k<=mesh->np;k++){
     p0 = &mesh->point[k];
     for(l=1;l<=mesh2->na;l++){
-	    pe  = &mesh2->edge[l];
-	    p1  = &mesh2->point[pe->v[0]];
-	    p2  = &mesh2->point[pe->v[1]];
+      pe  = &mesh2->edge[l];
+      p1  = &mesh2->point[pe->v[0]];
+      p2  = &mesh2->point[pe->v[1]];
 	  
-	    dist[k] = D_MIN(dist[k],distpt_2d(p1,p2,p0,&proj));	
-	  } 
+      dist[k] = D_MIN(dist[k],distpt_2d(p1,p2,p0,&proj));
+    }
   }
 
   for(k=1;k<=mesh->np;k++){

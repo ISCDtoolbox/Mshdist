@@ -157,8 +157,8 @@ int loadMesh(pMesh mesh1,pMesh mesh2) {
         }
       }
     }    
-	}
-	else {
+  }
+  else {
     GmfGotoKwd(inm,GmfTriangles);
     for (k=1; k<=mesh1->nt; k++) {
       pt1 = &mesh1->tria[k];

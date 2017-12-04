@@ -32,6 +32,7 @@ int boulep_2d(pMesh mesh,int ip,int *list) {
     
     if ( ilist >= LONMAX ) {
       printf(" **** Problem function boulep_2d; point %d, more than %d points in the ball; abort.\n",ip,LONMAX);
+      exit(0);
     }
     
     list[ilist] = pt->v[i2];
@@ -47,8 +48,63 @@ int boulep_2d(pMesh mesh,int ip,int *list) {
     ilist++;
     if ( ilist >= LONMAX ) {
       printf(" **** Problem function boulep_2d; point %d, more than %d points in the ball; abort.\n",ip,LONMAX);
+      exit(0);
     }
     list[ilist] = ipl;
+  }
+  
+  return(ilist);
+}
+
+/* Store in list the triangles in the ball of point ip in triangle start; return length of the ball */
+int boulet_2d(pMesh mesh,int start,int ip,int *list) {
+  pTria     pt;
+  pPoint    p0;
+  int       k,ilist,*adja;
+  char      i,i1,i2;
+  
+  ilist = 0;
+  k = start;
+  i = ip;
+  
+  /* First loop, in the trigonometric sense */
+  do {
+    list[ilist] = 3*k+i;
+    ilist++;
+    if ( ilist >= LONMAX ) {
+      printf(" **** Problem function boulet_2d; more than %d points in a ball; abort.\n",ip,LONMAX);
+      exit(0);
+    }
+    
+    i1 = inxt2[i];
+    adja = &mesh->adja[3*(k-1)+1];
+    k = adja[i1] / 3;
+    i2 = adja[i1] % 3;
+    i = inxt2[i2];
+  }
+  while( k && k!= start );
+  
+  /* If the loop has ended because start has been reached, return */
+  if ( k == start ) return(ilist);
+  
+  /* Travel in the converse sense */
+  k   = start;
+  i   = ip;
+  
+  while( k ) {
+    i2 = inxt2[inxt2[i]];
+    adja = &mesh->adja[3*(k-1)+1];
+    k = adja[i2] / 3;
+    if ( k == 0 ) break;
+    i1 = adja[i2] % 3;
+    i = inxt2[inxt2[i1]];
+    
+    list[ilist] = 3*k+i;
+    ilist++;
+    if ( ilist >= LONMAX ) {
+      printf(" **** Problem function boulet_2d; more than %d points in a ball; abort.\n",ip,LONMAX);
+      exit(0);
+    }
   }
   
   return(ilist);

@@ -689,9 +689,10 @@ double distPtSeg_3d(pPoint p0, pPoint p1, pPoint pa){
   lx1 = p1->c[0] - p0->c[0];
   ly1 = p1->c[1] - p0->c[1];  
   lz1 = p1->c[2] - p0->c[2];
-  lxa = pa->c[0] - pa->c[0];
-  lya = pa->c[1] - pa->c[1];  
-  lza = pa->c[2] - pa->c[2];	
+  
+  lxa = pa->c[0] - p0->c[0];
+  lya = pa->c[1] - p0->c[1];
+  lza = pa->c[2] - p0->c[2];
   longp0p1 = sqrt(lx1*lx1 + ly1*ly1 + lz1*lz1); 
   
   /* Case when points are too close from each other */

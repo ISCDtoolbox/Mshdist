@@ -3,6 +3,41 @@
 extern unsigned char inxt2[5];
 extern Info  info;
 
+/* Calculate the roots of the second order polynomial stored in a, and put the result in r; return number of real roots (-1 if polynomial is null) */
+int eqquad(double *a,double *r) {
+  double b,c,d,D;
+  
+  /* Polynomial is at most of degree 1*/
+  if ( fabs(a[2]) < EPS1 ) {
+    if ( fabs(a[1]) < EPS1 ) {
+      if ( fabs(a[0]) < EPS1 ) return(-1);
+      else                    return(0);
+    }
+    else {
+      r[0] = -a[0] / a[1];
+      return(1);
+    }
+  }
+  
+  /* Normalize coefficients */
+  b = a[1] / a[2];
+  c = a[0] / a[2];
+  D = b*b - 4.0*c;
+  
+  if ( D < -EPS1 )
+    return(0);
+  else if ( fabs(D) < EPS1 ) {
+    r[0] = -0.5*b;
+    return(1);
+  }
+  else {
+    d    = sqrt(D);
+    r[0] = 0.5*(-b-d);
+    r[1] = 0.5*(-b+d);
+    return(2);
+  }
+}
+
 /* Check whether edge (pa,pb) intersects (p1,p2) */
 int intersec_2d(pPoint p1,pPoint p2,pPoint pa,pPoint pb) {
   double  det1,det2,det3,det4,ux,uy,vx,vy,wx,wy,zx,zy;

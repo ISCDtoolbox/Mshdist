@@ -5,6 +5,24 @@ extern unsigned char inxt3[7];
 extern Info  info;
 extern char ddb;
 
+/* Generate an analytic function (cube) */
+int anafuncsq(pMesh mesh, pSol sol) {
+  pPoint     p0;
+  double     dd;
+  int        k;
+  
+  for(k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    dd = (p0->c[0]-0.5)*(p0->c[0]-0.5) + (p0->c[1]-0.5)*(p0->c[1]-0.5) + (p0->c[2]-0.5)*(p0->c[2]-0.5);
+    dd = sqrt(dd) -0.2;
+    if ( fabs(dd) < 0.05 ) sol->val[k] = dd;
+    else if ( dd < 0.0 ) sol->val[k] = -INIVAL_3d;
+    else sol->val[k] = INIVAL_3d;
+  }
+  
+  return(1);
+}
+
 /* Generate an analytic function (8 branches test-case ) */
 int anafunc(pMesh mesh, pSol sol) {
   pPoint     p0;

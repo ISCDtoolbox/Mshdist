@@ -60,6 +60,19 @@ typedef struct {
 typedef Tria * pTria;
 
 typedef struct {
+  int            indp;
+  double         d;
+} Anod;
+typedef Anod * pAnod;
+
+typedef struct {
+  Anod       *hp;
+  int        *perm;
+  int        siz,sizmax;
+} Queue;
+typedef Queue * pQueue;
+
+typedef struct {
   int            v[4],mark,flag,ref;
   double         h;
   unsigned char  tag;
@@ -72,7 +85,7 @@ typedef struct {
   int      ncpu,libpid,typ[2];          /* for // purposes */
   int      maxit,ref,nsref,*sref;
   int      nexp,nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
-  char     imprim,ddebug,option,bbbc,hausdorff,pcloud,specdist,startref,noscale;
+  char     imprim,ddebug,option,bbbc,fmm,hausdorff,pcloud,specdist,startref,noscale;
   mytime   ctim[TIMEMAX];
 } Info;
 
@@ -129,9 +142,26 @@ int  scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1);
 int  unscaleSol(pSol sol);
 int  locateTetra(pMesh mesh,int nsdep,int base,double *p,double *cb);
 int  locateTria(pMesh mesh,int nsdep,int base,double *p,double *cb);
-int  boulep_2d(pMesh mesh,int ,int* );
+int  boulep_2d(pMesh ,int ,int* );
+int  boulet_2d(pMesh ,int ,int ,int*);
 int  boulet_3d(pMesh mesh, int start, int ip, int * list);
 void freeBucket(pBucket );
+
+/* Heap management */
+int     setQueue(pMesh ,pQueue );
+int     freeQueue(pQueue );
+int     upAnod(pQueue ,int ,double );
+int     insertAnod(pQueue ,int ,double );
+int     upPrio(pQueue ,int ,double );
+int     downPrio(pQueue ,int ,double );
+int     checkHeap(pQueue );
+
+/* Fast Marching routines */
+double actival_2d(pMesh ,pSol ,int ,int );
+double actival1pt_3d(pMesh ,pSol ,int ,int );
+double actival2pt_3d(pMesh ,pSol ,int ,int ,int );
+double actival_3d(pMesh ,pSol ,int ,int );
+int eqquad(double*,double*);
 
 int intersec_2d(pPoint,pPoint,pPoint,pPoint);
 double distpt_2d(pPoint,pPoint,pPoint,int*);
@@ -168,6 +198,8 @@ int     sgndist_2d(pMesh ,pMesh ,pSol ,pBucket );
 int     sgndist_3d(pMesh ,pMesh ,pSol ,pBucket );
 int     ppgdist_2d(pMesh mesh, pSol sol);
 int     ppgdist_3d(pMesh mesh, pSol sol);
+int     ppgdistfmm_2d(pMesh mesh, pSol sol);
+int     ppgdistfmm_3d(pMesh mesh, pSol sol);
 int     iniencdomain_2d(pMesh mesh, pSol sol);
 int     iniencdomain_3d(pMesh mesh, pSol sol);
 int     inireftrias_2d(pMesh mesh, pSol sol);
@@ -201,6 +233,7 @@ int     genHolesStarfish_3d(pMesh,pSol);
 int     holeClCrane(pMesh,pSol);
 int     holeCraneIni(pMesh,pSol);
 int     anafunc(pMesh,pSol);
+int     anafuncsq(pMesh,pSol);
 int     anafuncbuddha(pMesh,pSol);
 int     anafuncsaddle(pMesh,pSol);
 int     anafunctorus(pMesh,pSol);
@@ -232,5 +265,6 @@ int     (*iniencdomain)(pMesh ,pSol );
 int     (*inireftrias)(pMesh, pSol);
 int     (*sgndist)(pMesh ,pMesh ,pSol ,pBucket );
 int     (*ppgdist)(pMesh mesh, pSol sol);
+int     (*ppgdistfmm)(pMesh mesh, pSol sol);
 
 #endif

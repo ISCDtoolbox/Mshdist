@@ -126,6 +126,12 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
           info.ddebug = 1;
 
 		break;
+      
+      /* Calculation of the distance field with the Fast marching method */
+      case 'f':
+        if ( !strcmp(argv[i],"-fmm") )
+          info.fmm = 1;
+        break;
 
       /* Calculate Hausdorff distance */
 	  case 'h':
@@ -166,7 +172,6 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
       case 'p':
         if ( !strcmp(argv[i],"-pcloud") )
           info.pcloud = 1;
-          
         break;
 
       case 'r':
@@ -405,6 +410,7 @@ int setfunc(int dim) {
       iniredist = iniredist_2d;
 
     ppgdist = ppgdist_2d;
+    ppgdistfmm = ppgdistfmm_2d;
   }
   
   else {
@@ -427,6 +433,7 @@ int setfunc(int dim) {
       iniredist = iniredist_3d;
 
     ppgdist = ppgdist_3d;
+    ppgdistfmm = ppgdistfmm_3d;
   }
 
   return(1);
@@ -452,9 +459,10 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
 
   if(info.specdist){
     printf("GENERATING HOLES \n");
-    genHolesPCB_2d(mesh1,sol1);
+    //genHolesPCB_2d(mesh1,sol1);
     //genHolesRadia_2d(mesh1,sol1);
     //anafuncbuddha(mesh1,sol1);
+    anafuncsq(mesh1,sol1);
     //gen2Holes_2d(mesh1,sol1);
     //holeCl_3d(mesh1,sol1);
     //anafunchelix(mesh1,sol1);
@@ -534,9 +542,13 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
   if ( ier > 0 ) {
     chrono(ON,&info.ctim[4]);
     if ( info.imprim )  fprintf(stdout,"  ** Propagation [%d cpu]\n",info.ncpu);
-    ier = ppgdist(mesh1,sol1);
+    
+    if ( info.fmm )
+      ier = ppgdistfmm(mesh1,sol1);
+    else
+      ier = ppgdist(mesh1,sol1);
     chrono(OFF,&info.ctim[4]);
-
+    
 	//assert(errdist(mesh1,mesh2,sol1));
   }
   else if ( ier < 0 )
