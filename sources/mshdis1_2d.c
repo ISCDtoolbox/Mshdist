@@ -1007,7 +1007,7 @@ double actival_2d(pMesh mesh,pSol sol,int k,int i) {
   idet = 1.0 / det;
   
   im[0][0] = idet*m[1][1];     im[0][1] = -idet*m[0][1];
-  im[1][0] = -idet*m[1][0];    im[1][1] = idet*m[0][0];
+  im[1][0] = -idet*m[1][0];    im[1][1] = idet*m[0][0];
   
   Gr[0][0] = -im[0][0] - im[0][1];    Gr[0][1] = im[0][0];    Gr[0][2] = im[0][1];
   Gr[1][0] = -im[1][0] - im[1][1];    Gr[1][1] = im[1][0];    Gr[1][2] = im[1][1];
@@ -1031,7 +1031,7 @@ double actival_2d(pMesh mesh,pSol sol,int k,int i) {
       ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1];
       ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2];
 
-      if ( ( d0 >= 0.0 && ps1 < EPS1 && ps2 < EPS1 ) || ( d0 <= 0.0 && ps1 >- EPS1 && ps2 >- EPS1 )) dist = fabs(r[0]);
+      if ( ( d0 >= 0.0 && ps1 < EPS1 && ps2 < EPS1 ) || ( d0 <= 0.0 && ps1 >- EPS1 && ps2 >- EPS1 )) dist = fabs(r[0]);
     }
   }
   else if ( nr == 2 ) {
@@ -1064,7 +1064,7 @@ double actival_2d(pMesh mesh,pSol sol,int k,int i) {
       ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1];
       ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2];
       
-      if ( ( d0 >= 0.0 && ps1 < EPS1 && ps2 < EPS1 ) || ( d0 <= 0.0 && ps1 >- EPS1 && ps2 >- EPS1 )) dist = fabs(rmin);
+      if ( ( d0 >= 0.0 && ps1 < EPS1 && ps2 < EPS1 ) || ( d0 <= 0.0 && ps1 >- EPS1 && ps2 >- EPS1 )) dist = fabs(rmin);
       
     }
     else if ( (d0 >= 0.0 && rmax >= d1 && rmax >= d2) || (d0 <= 0.0 && rmax <= d1 && rmax <= d2) ) {
@@ -1073,7 +1073,7 @@ double actival_2d(pMesh mesh,pSol sol,int k,int i) {
       ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1];
       ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2];
       
-      if ( ( d0 >= 0.0 && ps1 < EPS1 && ps2 < EPS1 ) || ( d0 <= 0.0 && ps1 >- EPS1 && ps2 >- EPS1 )) dist = fabs(rmax);
+      if ( ( d0 >= 0.0 && ps1 < EPS1 && ps2 < EPS1 ) || ( d0 <= 0.0 && ps1 >- EPS1 && ps2 >- EPS1 )) dist = fabs(rmax);
     }
   }
   

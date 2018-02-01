@@ -14,7 +14,7 @@ int eqquad(double *a,double *r) {
       else                    return(0);
     }
     else {
-      r[0] = -a[0] / a[1];
+      r[0] = -a[0] / a[1];
       return(1);
     }
   }
@@ -33,7 +33,7 @@ int eqquad(double *a,double *r) {
   else {
     d    = sqrt(D);
     r[0] = 0.5*(-b-d);
-    r[1] = 0.5*(-b+d);
+    r[1] = 0.5*(-b+d);
     return(2);
   }
 }

@@ -17,7 +17,7 @@ int anafuncsq(pMesh mesh, pSol sol) {
     dd = sqrt(dd) -0.2;
     if ( fabs(dd) < 0.05 ) sol->val[k] = dd;
     else if ( dd < 0.0 ) sol->val[k] = -INIVAL_3d;
-    else sol->val[k] = INIVAL_3d;
+    else sol->val[k] = INIVAL_3d;
   }
   
   return(1);
