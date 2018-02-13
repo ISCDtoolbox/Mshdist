@@ -394,6 +394,7 @@ int inidistpcloud_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
             dd = (p2->c[0]-ppt->c[0])*(p2->c[0]-ppt->c[0]) + (p2->c[1]-ppt->c[1])*(p2->c[1]-ppt->c[1]);
             sol1->val[ip2] = D_MIN(sol1->val[ip2],dd);
             p2->flag = base;
+            p2->tag = 1;
           }
         }
       }
