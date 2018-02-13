@@ -1222,7 +1222,7 @@ double actival2pt_3d(pMesh mesh,pSol sol,int ip0,int ip1,int ip) {
   }
   
   Gr[0][0] = -mi[0]-mi[1]  ;  Gr[0][1] = mi[0]  ;  Gr[0][2] = mi[1];
-  Gr[1][0] = -mi[3]-mi[4]  ;  Gr[1][1] = mi[3]  ;  Gr[1][2] = mi[4];
+  Gr[1][0] = -mi[3]-mi[4]  ;  Gr[1][1] = mi[3]  ;  Gr[1][2] = mi[4];
   Gr[2][0] = -mi[6]-mi[7]  ;  Gr[2][1] = mi[6]  ;  Gr[2][2] = mi[7];
   
   /* Coefficients of the quadratic equation */
@@ -1230,9 +1230,9 @@ double actival2pt_3d(pMesh mesh,pSol sol,int ip0,int ip1,int ip) {
   u[1] = d0*Gr[1][0] + d1*Gr[1][1];
   u[2] = d0*Gr[2][0] + d1*Gr[2][1];
   
-  a[2] = Gr[0][2]*Gr[0][2] + Gr[1][2]*Gr[1][2] + Gr[2][2]*Gr[2][2];
-  a[1] = Gr[0][2]*u[0] + Gr[1][2]*u[1] + Gr[2][2]*u[2];
-  a[1] = 2.0*a[1];
+  a[2] = Gr[0][2]*Gr[0][2] + Gr[1][2]*Gr[1][2] + Gr[2][2]*Gr[2][2];
+  a[1] = Gr[0][2]*u[0] + Gr[1][2]*u[1] + Gr[2][2]*u[2];
+  a[1] = 2.0*a[1];
   a[0] = u[0]*u[0] + u[1]*u[1] + u[2]*u[2] - 1.0;
   
   nr = eqquad(a,r);
@@ -1240,13 +1240,13 @@ double actival2pt_3d(pMesh mesh,pSol sol,int ip0,int ip1,int ip) {
   if ( nr == 1 ) {
     if ( ( d2 >= 0.0 && r[0] >= d0 && r[0] >= d1 ) || ( d2 <= 0.0 && r[0] <= d0 && r[0] <= d1 ) ) {
       /* Check the direction of the gradient */
-      g[0] = (d0-r[0])*Gr[0][0] + (d1-r[0])*Gr[0][1];
-      g[1] = (d0-r[0])*Gr[1][0] + (d1-r[0])*Gr[1][1];
-      g[2] = (d0-r[0])*Gr[2][0] + (d1-r[0])*Gr[2][1];
-      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
-      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
+      g[0] = (d0-r[0])*Gr[0][0] + (d1-r[0])*Gr[0][1];
+      g[1] = (d0-r[0])*Gr[1][0] + (d1-r[0])*Gr[1][1];
+      g[2] = (d0-r[0])*Gr[2][0] + (d1-r[0])*Gr[2][1];
+      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
+      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
       
-      if ( (d2 >= 0.0 && ps0 < EPS1 && ps1 < EPS1) || (d2 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1) ) dist = fabs(r[0]);
+      if ( (d2 >= 0.0 && ps0 < EPS1 && ps1 < EPS1) || (d2 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1) ) dist = fabs(r[0]);
     }
   }
   else if ( nr == 2 ) {
@@ -1274,23 +1274,23 @@ double actival2pt_3d(pMesh mesh,pSol sol,int ip0,int ip1,int ip) {
     
     /* Try first rmin */
     if ( (d2 >= 0.0 && rmin >= d0 && rmin >= d1) || (d2 <= 0.0 && rmin <= d0 && rmin <= d1) ) {
-      g[0] = (d0-rmin)*Gr[0][0] + (d1-rmin)*Gr[0][1];
-      g[1] = (d0-rmin)*Gr[1][0] + (d1-rmin)*Gr[1][1];
-      g[2] = (d0-rmin)*Gr[2][0] + (d1-rmin)*Gr[2][1];
-      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
-      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
+      g[0] = (d0-rmin)*Gr[0][0] + (d1-rmin)*Gr[0][1];
+      g[1] = (d0-rmin)*Gr[1][0] + (d1-rmin)*Gr[1][1];
+      g[2] = (d0-rmin)*Gr[2][0] + (d1-rmin)*Gr[2][1];
+      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
+      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
       
-      if ( ( d2 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 ) || ( d2 <= 0.0 && ps0 >- EPS1 && ps1 >- EPS1 )) dist = fabs(rmin);
+      if ( ( d2 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 ) || ( d2 <= 0.0 && ps0 >- EPS1 && ps1 >- EPS1 )) dist = fabs(rmin);
       
     }
     else if ( (d2 >= 0.0 && rmax >= d0 && rmax >= d1) || (d2 <= 0.0 && rmax <= d0 && rmax <= d1) ) {
-      g[0] = (d0-rmax)*Gr[0][0] + (d1-rmax)*Gr[0][1];
-      g[1] = (d0-rmax)*Gr[1][0] + (d1-rmax)*Gr[1][1];
-      g[2] = (d0-rmax)*Gr[2][0] + (d1-rmax)*Gr[2][1];
-      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
-      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
+      g[0] = (d0-rmax)*Gr[0][0] + (d1-rmax)*Gr[0][1];
+      g[1] = (d0-rmax)*Gr[1][0] + (d1-rmax)*Gr[1][1];
+      g[2] = (d0-rmax)*Gr[2][0] + (d1-rmax)*Gr[2][1];
+      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
+      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
       
-      if ( ( d2 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 ) || ( d2 <= 0.0 && ps0 >- EPS1 && ps1 >- EPS1 )) dist = fabs(rmax);
+      if ( ( d2 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 ) || ( d2 <= 0.0 && ps0 >- EPS1 && ps1 >- EPS1 )) dist = fabs(rmax);
     }
   }
   
@@ -1357,9 +1357,9 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
 
   /* At this point, ip0, ip1 and ip2 are accepted */
   /* Calculation of the barycentric coordinates */
-  m[0] = p1->c[0] - p0->c[0]    ;    m[1] = p1->c[1] - p0->c[1]     ;     m[2] = p1->c[2] - p0->c[2];
-  m[3] = p2->c[0] - p0->c[0]    ;    m[4] = p2->c[1] - p0->c[1]     ;     m[5] = p2->c[2] - p0->c[2];
-  m[6] = p3->c[0] - p0->c[0]    ;    m[7] = p3->c[1] - p0->c[1]     ;     m[8] = p3->c[2] - p0->c[2];
+  m[0] = p1->c[0] - p0->c[0]    ;    m[1] = p1->c[1] - p0->c[1]     ;     m[2] = p1->c[2] - p0->c[2];
+  m[3] = p2->c[0] - p0->c[0]    ;    m[4] = p2->c[1] - p0->c[1]     ;     m[5] = p2->c[2] - p0->c[2];
+  m[6] = p3->c[0] - p0->c[0]    ;    m[7] = p3->c[1] - p0->c[1]     ;     m[8] = p3->c[2] - p0->c[2];
 
   ier = invmatg(m,mi);
   if (!ier ) {
@@ -1380,9 +1380,9 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
   u[1] = d0*Gr[1][0] + d1*Gr[1][1] + d2*Gr[1][2];
   u[2] = d0*Gr[2][0] + d1*Gr[2][1] + d2*Gr[2][2];
   
-  a[2] = Gr[0][3]*Gr[0][3] + Gr[1][3]*Gr[1][3] + Gr[2][3]*Gr[2][3];
-  a[1] = Gr[0][3]*u[0] + Gr[1][3]*u[1] + Gr[2][3]*u[2];
-  a[1] = 2.0*a[1];
+  a[2] = Gr[0][3]*Gr[0][3] + Gr[1][3]*Gr[1][3] + Gr[2][3]*Gr[2][3];
+  a[1] = Gr[0][3]*u[0] + Gr[1][3]*u[1] + Gr[2][3]*u[2];
+  a[1] = 2.0*a[1];
   a[0] = u[0]*u[0] + u[1]*u[1] + u[2]*u[2] - 1.0;
   
   nr = eqquad(a,r);
@@ -1390,14 +1390,14 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
   if ( nr == 1 ) {
     if ( ( d3 >= 0.0 && r[0] >= d0 && r[0] >= d1 && r[0] >= d2 ) || ( d3 <= 0.0 && r[0] <= d0 && r[0] <= d1 && r[0] <= d2 ) ) {
       /* Check the direction of the gradient */
-      g[0] = (d0-r[0])*Gr[0][0] + (d1-r[0])*Gr[0][1] + (d2-r[0])*Gr[0][2];
-      g[1] = (d0-r[0])*Gr[1][0] + (d1-r[0])*Gr[1][1] + (d2-r[0])*Gr[1][2];
-      g[2] = (d0-r[0])*Gr[2][0] + (d1-r[0])*Gr[2][1] + (d2-r[0])*Gr[2][2];
-      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
-      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
-      ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2] + g[2]*Gr[2][2];
+      g[0] = (d0-r[0])*Gr[0][0] + (d1-r[0])*Gr[0][1] + (d2-r[0])*Gr[0][2];
+      g[1] = (d0-r[0])*Gr[1][0] + (d1-r[0])*Gr[1][1] + (d2-r[0])*Gr[1][2];
+      g[2] = (d0-r[0])*Gr[2][0] + (d1-r[0])*Gr[2][1] + (d2-r[0])*Gr[2][2];
+      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
+      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
+      ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2] + g[2]*Gr[2][2];
       
-      if ( (d3 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 && ps2 < EPS1) || (d3 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1 && ps2 > -EPS1) )
+      if ( (d3 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 && ps2 < EPS1) || (d3 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1 && ps2 > -EPS1) )
         dist = fabs(r[0]);
     }
   }
@@ -1427,26 +1427,26 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
     /* Try first rmin */
     if ( ( d3 >= 0.0 && rmin >= d0 && rmin >= d1 && rmin >= d2 ) || ( d3 <= 0.0 && rmin <= d0 && rmin <= d1 && rmin <= d2 ) ) {
       /* Check the direction of the gradient */
-      g[0] = (d0-rmin)*Gr[0][0] + (d1-rmin)*Gr[0][1] + (d2-rmin)*Gr[0][2];
-      g[1] = (d0-rmin)*Gr[1][0] + (d1-rmin)*Gr[1][1] + (d2-rmin)*Gr[1][2];
-      g[2] = (d0-rmin)*Gr[2][0] + (d1-rmin)*Gr[2][1] + (d2-rmin)*Gr[2][2];
-      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
-      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
-      ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2] + g[2]*Gr[2][2];
+      g[0] = (d0-rmin)*Gr[0][0] + (d1-rmin)*Gr[0][1] + (d2-rmin)*Gr[0][2];
+      g[1] = (d0-rmin)*Gr[1][0] + (d1-rmin)*Gr[1][1] + (d2-rmin)*Gr[1][2];
+      g[2] = (d0-rmin)*Gr[2][0] + (d1-rmin)*Gr[2][1] + (d2-rmin)*Gr[2][2];
+      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
+      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
+      ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2] + g[2]*Gr[2][2];
       
-      if ( (d3 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 && ps2 < EPS1) || (d3 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1 && ps2 > -EPS1) )
+      if ( (d3 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 && ps2 < EPS1) || (d3 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1 && ps2 > -EPS1) )
         dist = fabs(rmin);
     }
     else if ( ( d3 >= 0.0 && rmax >= d0 && rmax >= d1 && rmax >= d2 ) || ( d3 <= 0.0 && rmax <= d0 && rmax <= d1 && rmax <= d2 ) ) {
       /* Check the direction of the gradient */
-      g[0] = (d0-rmax)*Gr[0][0] + (d1-rmax)*Gr[0][1] + (d2-rmax)*Gr[0][2];
-      g[1] = (d0-rmax)*Gr[1][0] + (d1-rmax)*Gr[1][1] + (d2-rmax)*Gr[1][2];
-      g[2] = (d0-rmax)*Gr[2][0] + (d1-rmax)*Gr[2][1] + (d2-rmax)*Gr[2][2];
-      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
-      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
-      ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2] + g[2]*Gr[2][2];
+      g[0] = (d0-rmax)*Gr[0][0] + (d1-rmax)*Gr[0][1] + (d2-rmax)*Gr[0][2];
+      g[1] = (d0-rmax)*Gr[1][0] + (d1-rmax)*Gr[1][1] + (d2-rmax)*Gr[1][2];
+      g[2] = (d0-rmax)*Gr[2][0] + (d1-rmax)*Gr[2][1] + (d2-rmax)*Gr[2][2];
+      ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
+      ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
+      ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2] + g[2]*Gr[2][2];
       
-      if ( (d3 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 && ps2 < EPS1) || (d3 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1 && ps2 > -EPS1) )
+      if ( (d3 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 && ps2 < EPS1) || (d3 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1 && ps2 > -EPS1) )
         dist = fabs(rmax);
     }
   }
@@ -1533,7 +1533,7 @@ int ppgdistfmm_3d(pMesh mesh,pSol sol) {
     
     p0 = &mesh->point[ip];
     p0->tag = 1;
-    sol->val[ip] = sol->val[ip] > 0.0 ? dist : -dist;
+    sol->val[ip] = sol->val[ip] > 0.0 ? dist : -dist;
     
     /* Travel the ball of p0 to update the set of active nodes */
     k   = p0->s;
