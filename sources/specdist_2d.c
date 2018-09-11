@@ -101,7 +101,7 @@ int gen2Holes_2d(pMesh mesh,pSol sol) {
   
   o[0] = 0.5;
   o[1] = 0.5;
-  r = 0.3;
+  r = 0.475;
   
   for(k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];

@@ -462,8 +462,8 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
     //genHolesPCB_2d(mesh1,sol1);
     //genHolesRadia_2d(mesh1,sol1);
     //anafuncbuddha(mesh1,sol1);
-    anafuncsq(mesh1,sol1);
-    //gen2Holes_2d(mesh1,sol1);
+    //anafuncsq(mesh1,sol1);
+    gen2Holes_2d(mesh1,sol1);
     //holeCl_3d(mesh1,sol1);
     //anafunchelix(mesh1,sol1);
     //holeClCrane(mesh1,sol1);
@@ -504,7 +504,7 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
       ier = inidistpcloud(mesh1,mesh2,sol1,bucket);
     else
       ier = inidist(mesh1,mesh2,sol1,bucket);
-
+    
     if ( info.imprim )  fprintf(stdout,"  ** Sign identification\n");
     
     /* Put a sign to the initial distance field */

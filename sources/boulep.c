@@ -28,7 +28,6 @@ int boulep_2d(pMesh mesh,int ip,int *list) {
     pt = &mesh->tria[k];
     i1 = inxt2[i];
     i2 = inxt2[i1];
-    ilist++;
     
     if ( ilist >= LONMAX ) {
       printf(" **** Problem function boulep_2d; point %d, more than %d points in the ball; abort.\n",ip,LONMAX);
@@ -39,18 +38,19 @@ int boulep_2d(pMesh mesh,int ip,int *list) {
     adja = &mesh->adja[3*(k-1)+1];
     k = adja[i1] / 3;
     i = adja[i1] % 3;
+    ilist++;
   }
   while ( k && k != start );
   
   /* If travel of the ball ends because an external boundary has been met, add the first point in the 
    starting triangle to the ball */
   if ( !k ) {
-    ilist++;
     if ( ilist >= LONMAX ) {
       printf(" **** Problem function boulep_2d; point %d, more than %d points in the ball; abort.\n",ip,LONMAX);
       exit(0);
     }
     list[ilist] = ipl;
+    ilist++;
   }
   
   return(ilist);
