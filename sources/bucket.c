@@ -87,7 +87,7 @@ int buckin_3d(pMesh mesh,pBucket bucket,double *c) {
 
   siz = bucket->size;
   dd  = siz / (double)PRECI;
-	
+
   ii = D_MAX(0,(int)(dd * c[0])-1);
   jj = D_MAX(0,(int)(dd * c[1])-1);
   kk = D_MAX(0,(int)(dd * c[2])-1);
@@ -136,7 +136,7 @@ int buckin_3d(pMesh mesh,pBucket bucket,double *c) {
           ic  = (k*siz + j)*siz + i;
           ip1 =  bucket->head[ic];
           if ( !ip1 )  continue;
-          
+
           pp1 = &mesh->point[ip1];
           return(pp1->s);
         }
@@ -146,12 +146,13 @@ int buckin_3d(pMesh mesh,pBucket bucket,double *c) {
   return(0);
 }
 
+
 int buckin_2d(pMesh mesh,pBucket bucket,double *c) {
   pPoint    pp1;
   double    dm,dd,d2,ux,uy;
   int       i,j,ii,jj,d,ic,ip,ip1,siz;
   int       imin,imax,jmin,jmax;
-  
+
   siz = bucket->size;
   dd  = siz / (double)PRECI;
 
@@ -211,3 +212,4 @@ int buckin_2d(pMesh mesh,pBucket bucket,double *c) {
 
   return(0);
 }
+

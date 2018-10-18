@@ -1,12 +1,14 @@
 #include "mshdist.h"
 #include "lplib3.h"
 
+
 unsigned char inxt3[7] = {1,2,3,0,1,2,3};
 
 extern unsigned char idirt[4][3];
 extern Info  info;
 extern hash  hTab;
 char ddb;
+
 
 /* find background tetras intersecting the boundary,
  and initialize distance at their vertices */
@@ -23,84 +25,84 @@ int iniredist_3d(pMesh mesh, pSol sol) {
 
   /* store intersecting background triangles in list bndy */
   for (i=1; i<=mesh->ne; i++) {
-	  pt = &mesh->tetra[i];
-	  i0 = pt->v[0];
-	  i1 = pt->v[1];
-	  i2 = pt->v[2];
-	  i3 = pt->v[3];
+    pt = &mesh->tetra[i];
+    i0 = pt->v[0];
+    i1 = pt->v[1];
+    i2 = pt->v[2];
+    i3 = pt->v[3];
 
-	  if ( (sol->val[i0] * sol->val[i1] <=0.)||(sol->val[i0] * sol->val[i2] <=0.)||
-		  (sol->val[i0] * sol->val[i3] <=0.)||(sol->val[i1] * sol->val[i2] <=0.)||
-		  (sol->val[i1] * sol->val[i3] <=0.)||(sol->val[i2] * sol->val[i3] <=0.)){
-			  nb++;
-			  bndy[nb] = i;
-	  }
+    if ( (sol->val[i0] * sol->val[i1] <=0.)||(sol->val[i0] * sol->val[i2] <=0.)||
+         (sol->val[i0] * sol->val[i3] <=0.)||(sol->val[i1] * sol->val[i2] <=0.)||
+         (sol->val[i1] * sol->val[i3] <=0.)||(sol->val[i2] * sol->val[i3] <=0.)){
+      nb++;
+      bndy[nb] = i;
+    }
   }
 
   bndy = (int*)realloc(bndy,(nb+1)*sizeof(int));
   printf("nb= %d\n",nb);
 
-  /* Temporary values are stored in solTmp, so as not to lose level 0	*/
+  /* Temporary values are stored in solTmp, so as not to lose level 0*/
   solTmp = (double*)calloc(mesh->np+1,sizeof(double));
   assert(solTmp);
 
   /* Check list bndy and compute distance at vertices of its elements */
   for (i=1; i<=nb; i++) {
-	  fflush(stdout);
-	  pt = &mesh->tetra[bndy[i]];
-	  i0 = pt->v[0];
-	  i1 = pt->v[1];
-	  i2 = pt->v[2];
-	  i3 = pt->v[3];
-	  p0 = &mesh->point[i0];
-	  p1 = &mesh->point[i1];
-	  p2 = &mesh->point[i2];
-	  p3 = &mesh->point[i3];
+    fflush(stdout);
+    pt = &mesh->tetra[bndy[i]];
+    i0 = pt->v[0];
+    i1 = pt->v[1];
+    i2 = pt->v[2];
+    i3 = pt->v[3];
+    p0 = &mesh->point[i0];
+    p1 = &mesh->point[i1];
+    p2 = &mesh->point[i2];
+    p3 = &mesh->point[i3];
 
     d = distnv0_3d(mesh, sol, bndy[i], p0, &proj);
 
-  	if (p0->tag == 0) {
-	    solTmp[i0] = d;
-	    p0->tag    = proj;
-	  }
-	  else if (d < fabs(solTmp[i0])) {
+    if (p0->tag == 0) {
       solTmp[i0] = d;
       p0->tag    = proj;
-	  }
+    }
+    else if (d < fabs(solTmp[i0])) {
+      solTmp[i0] = d;
+      p0->tag    = proj;
+    }
 
-	  d = distnv0_3d(mesh, sol, bndy[i], p1, &proj);
+    d = distnv0_3d(mesh, sol, bndy[i], p1, &proj);
 
-	  if (p1->tag == 0) {
-	    solTmp[i1] = d;
-	    p1->tag    = proj;
-  	}
-	  else if (d < fabs(solTmp[i1])) {
-	    solTmp[i1] = d;
-	    p1->tag    = proj;
-	  }
+    if (p1->tag == 0) {
+      solTmp[i1] = d;
+      p1->tag    = proj;
+    }
+    else if (d < fabs(solTmp[i1])) {
+      solTmp[i1] = d;
+      p1->tag    = proj;
+    }
 
-	  d = distnv0_3d(mesh, sol, bndy[i], p2, &proj);
+    d = distnv0_3d(mesh, sol, bndy[i], p2, &proj);
 
-  	if (p2->tag == 0) {
-	    solTmp[i2] = d;
-	    p2->tag    = proj;
-	  }
-	  else if (d < fabs(solTmp[i2])) {
-	    solTmp[i2] = d;
-	    p2->tag    = proj;
-	  }
+    if (p2->tag == 0) {
+      solTmp[i2] = d;
+      p2->tag    = proj;
+    }
+    else if (d < fabs(solTmp[i2])) {
+      solTmp[i2] = d;
+      p2->tag    = proj;
+    }
 
-  	d = distnv0_3d(mesh, sol, bndy[i], p3, &proj);
+    d = distnv0_3d(mesh, sol, bndy[i], p3, &proj);
 
-	  if (p3->tag == 0) {
-	    solTmp[i3] = d;
-	    p3->tag    = proj;
-	  }
+    if (p3->tag == 0) {
+      solTmp[i3] = d;
+      p3->tag    = proj;
+    }
 
     else if (d < fabs(solTmp[i3])) {
-	    solTmp[i3] = d;
-	    p3->tag    = proj;
-	  }
+      solTmp[i3] = d;
+      p3->tag    = proj;
+    }
   }
 
   /* correction procedure, for points whose tag is 2, i.e. min is not achieved through an orthogonal projection */
@@ -111,41 +113,41 @@ int iniredist_3d(pMesh mesh, pSol sol) {
 
   nc = 0;
 
-/*for(i=1; i<=nb; i++){
-  pt = &mesh->tetra[bndy[i]];
+  /*for(i=1; i<=nb; i++){
+    pt = &mesh->tetra[bndy[i]];
 
-  for(j=0; j<4; j++){
-    pa = &mesh->point[pt->v[j]];
-	if(pa->tag<2) continue;
-	solTmp[pt->v[j]] = D_MIN(solTmp[pt->v[j]], distnv0approx_3d(mesh, sol, bndy[i], pa));
+    for(j=0; j<4; j++){
+      pa = &mesh->point[pt->v[j]];
+      if(pa->tag<2) continue;
+      solTmp[pt->v[j]] = D_MIN(solTmp[pt->v[j]], distnv0approx_3d(mesh, sol, bndy[i], pa));
+    }
   }
-}
-
-for (i=1; i<=mesh->np; i++) {
-  pa = &mesh->point[i];
-  if ( pa->tag == 2 )  pa->tag =1;
-}*/
 
   for (i=1; i<=mesh->np; i++) {
-	  pa = &mesh->point[i];
-	  if ( pa->tag < 1 )  continue;
-	  for (j=1; j<=nb; j++) {
-	    xc[0] = circum[4*(j-1)+1];
-	    xc[1] = circum[4*(j-1)+2];
-	    xc[2] = circum[4*(j-1)+3];
-	    r = circum[4*(j-1)+4];
-	    norm = (pa->c[0]-xc[0])*(pa->c[0]-xc[0]) + (pa->c[1]-xc[1])*(pa->c[1]-xc[1])\
-	        + (pa->c[2]-xc[2])*(pa->c[2]-xc[2]);
+    pa = &mesh->point[i];
+    if ( pa->tag == 2 )  pa->tag =1;
+  }*/
 
-	    if(r==0.0) continue;
+  for (i=1; i<=mesh->np; i++) {
+    pa = &mesh->point[i];
+    if ( pa->tag < 1 )  continue;
+    for (j=1; j<=nb; j++) {
+      xc[0] = circum[4*(j-1)+1];
+      xc[1] = circum[4*(j-1)+2];
+      xc[2] = circum[4*(j-1)+3];
+      r = circum[4*(j-1)+4];
+      norm = (pa->c[0]-xc[0])*(pa->c[0]-xc[0]) + (pa->c[1]-xc[1])*(pa->c[1]-xc[1])\
+                                              + (pa->c[2]-xc[2])*(pa->c[2]-xc[2]);
+
+      if(r==0.0) continue;
       if((r<norm)&&(2* sol->val[i] *(r + norm) < (norm -r)*(norm-r))) continue;
 
-	    pt = &mesh->tetra[bndy[j]];
-	    d  = distnv0_3d(mesh,sol,bndy[j],pa,&proj);
-	    if (/* proj == 1 &&*/ d < fabs(solTmp[i]) ) {
-	      solTmp[i] = d;
-	      //break;
-	    }
+      pt = &mesh->tetra[bndy[j]];
+      d  = distnv0_3d(mesh,sol,bndy[j],pa,&proj);
+      if (/* proj == 1 &&*/ d < fabs(solTmp[i]) ) {
+        solTmp[i] = d;
+        //break;
+      }
     }
     pa->tag = 1;
     nc++;
@@ -156,9 +158,9 @@ for (i=1; i<=mesh->np; i++) {
    for (i=1; i<=mesh->np; i++) {
     pa = &mesh->point[i];
     if ( !pa->tag )
-	  sol->val[i] = sol->val[i] < 0.0 ? -sqrt(INIVAL_3d) : sqrt(INIVAL_3d);
+      sol->val[i] = sol->val[i] < 0.0 ? -sqrt(INIVAL_3d) : sqrt(INIVAL_3d);
     else if ( pa->tag )
-	  sol->val[i] = sol->val[i] < 0.0 ? -sqrt(solTmp[i]) : sqrt(solTmp[i]);
+      sol->val[i] = sol->val[i] < 0.0 ? -sqrt(solTmp[i]) : sqrt(solTmp[i]);
   }
 
   free(circum);
@@ -166,6 +168,7 @@ for (i=1; i<=mesh->np; i++) {
   free(bndy);
   return(1);
 }
+
 
 /* Initialize a (unsigned) distance function to a domain already existing in mesh, defined
    by boundary triangles of reference contained in info.sref */
@@ -348,14 +351,14 @@ int inireftrias_3d(pMesh mesh, pSol sol){
   /* Put sign in the function, and take sqrt */
   for(k=1; k<=mesh->ne;k++){
     pt = &mesh->tetra[k];
-	  for(j=0;j<4;j++){
-        np0 = pt->v[j];
-	    p0 = &mesh->point[np0];
+    for(j=0;j<4;j++){
+      np0 = pt->v[j];
+      p0 = &mesh->point[np0];
 
-        if( p0->flag == 1 ) continue;
-	    p0->flag = 1;
-        sol->val[np0] = sqrt(sol->val[np0]);
-  	}
+      if( p0->flag == 1 ) continue;
+      p0->flag = 1;
+      sol->val[np0] = sqrt(sol->val[np0]);
+    }
   }
 
   /* reset point flags and tags */
@@ -367,6 +370,7 @@ int inireftrias_3d(pMesh mesh, pSol sol){
 
   return(1);
 }
+
 
 /* Initialize a signed distance function to a domain already existing in mesh,
  defined by pt->ref = REFINT */
@@ -568,20 +572,20 @@ int iniencdomain_3d(pMesh mesh, pSol sol){
   /* Put sign in the function, and take sqrt */
   for(k=1; k<=mesh->ne;k++){
     pt = &mesh->tetra[k];
-	  for(j=0;j<4;j++){
+    for(j=0;j<4;j++){
       np = pt->v[j];
-	    p0 = &mesh->point[np];
+      p0 = &mesh->point[np];
 
       if(p0->flag ==1) continue;
-	    p0->flag = 1;
+      p0->flag = 1;
 
       if(pt->ref == REFINT){
-	      sol->val[np] = -sqrt(sol->val[np]);
+        sol->val[np] = -sqrt(sol->val[np]);
       }
-	    else{
+      else{
         sol->val[np] = sqrt(sol->val[np]);
-	    }
-  	}
+      }
+    }
   }
 
   /* reset point flags and tags */
@@ -593,6 +597,7 @@ int iniencdomain_3d(pMesh mesh, pSol sol){
 
   return(1);
 }
+
 
 /* Initialize exact unsigned distance function at vertices of tetras intersecting mesh2 */
 int inidist_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
@@ -619,17 +624,17 @@ int inidist_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
     iel = buckin(mesh1,bucket,p1->c);
     iel = locelt(mesh1,iel,p1->c,cb);
 
-	  if(!iel){
-	    iel = buckin(mesh1,bucket,p2->c);
-	    iel = locelt(mesh1,iel,p2->c,cb);
-	  }
+    if(!iel){
+      iel = buckin(mesh1,bucket,p2->c);
+      iel = locelt(mesh1,iel,p2->c,cb);
+    }
 
-	  if(!iel){
-	    iel = buckin(mesh1,bucket,p3->c);
-	    iel = locelt(mesh1,iel,p3->c,cb);
-	  }
+    if(!iel){
+      iel = buckin(mesh1,bucket,p3->c);
+      iel = locelt(mesh1,iel,p3->c,cb);
+    }
 
-   	assert(iel);
+    assert(iel);
 
     ilist       = 1;
     list[ilist] = iel;
@@ -697,14 +702,14 @@ int inidist_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
     pa = &mesh1->point[k];
     if ( pa->tag < 1 )  continue;
     for (i=1; i<=mesh2->nt; i++) {
-	  xc[0] = circum[4*(i-1)+1];
-	  xc[1] = circum[4*(i-1)+2];
-	  xc[2] = circum[4*(i-1)+3];
+      xc[0] = circum[4*(i-1)+1];
+      xc[1] = circum[4*(i-1)+2];
+      xc[2] = circum[4*(i-1)+3];
       r = circum[4*(i-1)+4];
-	  norm = (pa->c[0]-xc[0])*(pa->c[0]-xc[0]) + (pa->c[1]-xc[1])*(pa->c[1]-xc[1])\
-		   + (pa->c[2]-xc[2])*(pa->c[2]-xc[2]);
+      norm = (pa->c[0]-xc[0])*(pa->c[0]-xc[0]) + (pa->c[1]-xc[1])*(pa->c[1]-xc[1])\
+                                              + (pa->c[2]-xc[2])*(pa->c[2]-xc[2]);
 
-	  if((r<norm)&&(2* sol1->val[k] *(r + norm) < (norm -r)*(norm-r))) continue;
+      if((r<norm)&&(2* sol1->val[k] *(r + norm) < (norm -r)*(norm-r))) continue;
       pf = &mesh2->tria[i];
       p1 = &mesh2->point[pf->v[0]];
       p2 = &mesh2->point[pf->v[1]];
@@ -724,6 +729,7 @@ int inidist_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   return(1);
 
 }
+
 
 /* Initialize unsigned distance function to the point cloud contained in mesh2 */
 int inidistpcloud_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
@@ -1073,6 +1079,7 @@ int sgndist_3d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
 }
 */
 
+
 /* Gradient of basis functions */
 static void gradelt_3d(int istart,int istop,int ipth,Param *par) {
  pMesh    mesh;
@@ -1173,15 +1180,16 @@ static void gradelt_3d(int istart,int istop,int ipth,Param *par) {
  //return(1);
 }
 
+
 /* Calculate an active value at point ip from the sole value at point ip0 */
 double actival1pt_3d(pMesh mesh,pSol sol,int ip0,int ip) {
   pPoint    p0,p1;
   double    d0,dist,ll;
-  
+
   p0   = &mesh->point[ip0];
   p1  = &mesh->point[ip];
   d0 = sol->val[ip0];
-  
+
   ll = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1])
        + (p1->c[2]-p0->c[2])*(p1->c[2]-p0->c[2]);
   ll = sqrt(ll);
@@ -1190,51 +1198,52 @@ double actival1pt_3d(pMesh mesh,pSol sol,int ip0,int ip) {
   return(fabs(dist));
 }
 
+
 /* Calculate an active value at point ip from the value v0, v1 at ip0 and ip1 */
 double actival2pt_3d(pMesh mesh,pSol sol,int ip0,int ip1,int ip) {
   pPoint     p0,p1,p2;
   double     d0,d1,d2,ps0,ps1,dist,rmin,rmax,n[3],m[9],mi[9],Gr[3][3],a[3],r[2],u[3],g[3];
   int        ier,nr;
-  
+
   p0 = &mesh->point[ip0];
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip];
-  
+
   d0 = sol->val[ip0];
   d1 = sol->val[ip1];
   d2 = sol->val[ip];
-  
+
   dist = INIVAL_3d;
-  
+
   /* Gr[i]j] is the ith coordinate of the barycentric coordinates at point j inside triangle p0p1p2 */
   m[0] = p1->c[0] - p0->c[0];   m[1] = p1->c[1] - p0->c[1];  m[2] = p1->c[2] - p0->c[2];
   m[3] = p2->c[0] - p0->c[0];   m[4] = p2->c[1] - p0->c[1];  m[5] = p2->c[2] - p0->c[2];
   m[6] = m[1]*m[5]-m[2]*m[4];
   m[7] = m[2]*m[3]-m[0]*m[5];
   m[8] = m[0]*m[4]-m[1]*m[3];
-  
+
   ier = invmatg(m,mi);
-  
+
   if ( !ier ) {
     d0 = actival1pt_3d(mesh,sol,ip0,ip);
     d1 = actival1pt_3d(mesh,sol,ip1,ip);
     return ( D_MIN(d0,d1) );
   }
-  
+
   Gr[0][0] = -mi[0]-mi[1]  ;  Gr[0][1] = mi[0]  ;  Gr[0][2] = mi[1];
   Gr[1][0] = -mi[3]-mi[4]  ;  Gr[1][1] = mi[3]  ;  Gr[1][2] = mi[4];
   Gr[2][0] = -mi[6]-mi[7]  ;  Gr[2][1] = mi[6]  ;  Gr[2][2] = mi[7];
-  
+
   /* Coefficients of the quadratic equation */
   u[0] = d0*Gr[0][0] + d1*Gr[0][1];
   u[1] = d0*Gr[1][0] + d1*Gr[1][1];
   u[2] = d0*Gr[2][0] + d1*Gr[2][1];
-  
+
   a[2] = Gr[0][2]*Gr[0][2] + Gr[1][2]*Gr[1][2] + Gr[2][2]*Gr[2][2];
   a[1] = Gr[0][2]*u[0] + Gr[1][2]*u[1] + Gr[2][2]*u[2];
   a[1] = 2.0*a[1];
   a[0] = u[0]*u[0] + u[1]*u[1] + u[2]*u[2] - 1.0;
-  
+
   nr = eqquad(a,r);
 
   if ( nr == 1 ) {
@@ -1245,7 +1254,7 @@ double actival2pt_3d(pMesh mesh,pSol sol,int ip0,int ip1,int ip) {
       g[2] = (d0-r[0])*Gr[2][0] + (d1-r[0])*Gr[2][1];
       ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
       ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
-      
+
       if ( (d2 >= 0.0 && ps0 < EPS1 && ps1 < EPS1) || (d2 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1) ) dist = fabs(r[0]);
     }
   }
@@ -1271,7 +1280,7 @@ double actival2pt_3d(pMesh mesh,pSol sol,int ip0,int ip1,int ip) {
         rmax = r[0];
       }
     }
-    
+
     /* Try first rmin */
     if ( (d2 >= 0.0 && rmin >= d0 && rmin >= d1) || (d2 <= 0.0 && rmin <= d0 && rmin <= d1) ) {
       g[0] = (d0-rmin)*Gr[0][0] + (d1-rmin)*Gr[0][1];
@@ -1279,9 +1288,9 @@ double actival2pt_3d(pMesh mesh,pSol sol,int ip0,int ip1,int ip) {
       g[2] = (d0-rmin)*Gr[2][0] + (d1-rmin)*Gr[2][1];
       ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
       ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
-      
+
       if ( ( d2 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 ) || ( d2 <= 0.0 && ps0 >- EPS1 && ps1 >- EPS1 )) dist = fabs(rmin);
-      
+
     }
     else if ( (d2 >= 0.0 && rmax >= d0 && rmax >= d1) || (d2 <= 0.0 && rmax <= d0 && rmax <= d1) ) {
       g[0] = (d0-rmax)*Gr[0][0] + (d1-rmax)*Gr[0][1];
@@ -1289,21 +1298,22 @@ double actival2pt_3d(pMesh mesh,pSol sol,int ip0,int ip1,int ip) {
       g[2] = (d0-rmax)*Gr[2][0] + (d1-rmax)*Gr[2][1];
       ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
       ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
-      
+
       if ( ( d2 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 ) || ( d2 <= 0.0 && ps0 >- EPS1 && ps1 >- EPS1 )) dist = fabs(rmax);
     }
   }
-  
+
   /* If no other value has been assigned to dist, calculate a trial value based on both triangle edges */
   if ( fabs( dist - INIVAL_3d ) < EPS2 ) {
     d0 = actival1pt_3d(mesh,sol,ip0,ip);
     d1 = actival1pt_3d(mesh,sol,ip1,ip);
-    
+
     dist = D_MIN(d0,d1);
   }
-  
+
   return(dist);
 }
+
 
 /* Calculate a (positive) active value at vertex i in tetra k based on the values in the other three vertices */
 double actival_3d(pMesh mesh,pSol sol,int k,int i) {
@@ -1312,30 +1322,30 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
   double            dist,d0,d1,d2,d3,m[9],mi[9],Gr[3][4],u[3],a[3],r[2],g[3],ps0,ps1,ps2,rmin,rmax;
   int               ip0,ip1,ip2,ip3,nr;
   char              i0,i1,i2,i3,ier;
-  
+
   i3 = i;
   i0 = inxt3[i3];
   i1 = inxt3[i0];
   i2 = inxt3[i1];
-  
+
   pt = &mesh->tetra[k];
   ip0 = pt->v[i0];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   ip3 = pt->v[i3];
-  
+
   p0 = &mesh->point[ip0];
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];
   p3 = &mesh->point[ip3];
-  
+
   d0 = sol->val[ip0];
   d1 = sol->val[ip1];
   d2 = sol->val[ip2];
   d3 = sol->val[ip3];
-  
+
   dist = INIVAL_3d;
-  
+
   /* Case where value at ip0 is not accepted */
   if ( p0->tag != 1 ) {
     if ( p1->tag != 1 )
@@ -1366,7 +1376,7 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
     d0 = actival2pt_3d(mesh,sol,ip1,ip2,ip3);
     d1 = actival2pt_3d(mesh,sol,ip0,ip2,ip3);
     d2 = actival2pt_3d(mesh,sol,ip0,ip1,ip3);
-    
+
     dist = D_MIN(D_MIN(d0,d1),d2);
     return(dist);
   }
@@ -1374,19 +1384,19 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
   Gr[0][0] = -mi[0]-mi[1]-mi[2] ; Gr[0][1] = mi[0] ; Gr[0][2] = mi[1] ; Gr[0][3] = mi[2];
   Gr[1][0] = -mi[3]-mi[4]-mi[5] ; Gr[1][1] = mi[3] ; Gr[1][2] = mi[4] ; Gr[1][3] = mi[5];
   Gr[2][0] = -mi[6]-mi[7]-mi[8] ; Gr[2][1] = mi[6] ; Gr[2][2] = mi[7] ; Gr[2][3] = mi[8];
-  
+
   /* Calculate possible active values by solving quadratic equation */
   u[0] = d0*Gr[0][0] + d1*Gr[0][1] + d2*Gr[0][2];
   u[1] = d0*Gr[1][0] + d1*Gr[1][1] + d2*Gr[1][2];
   u[2] = d0*Gr[2][0] + d1*Gr[2][1] + d2*Gr[2][2];
-  
+
   a[2] = Gr[0][3]*Gr[0][3] + Gr[1][3]*Gr[1][3] + Gr[2][3]*Gr[2][3];
   a[1] = Gr[0][3]*u[0] + Gr[1][3]*u[1] + Gr[2][3]*u[2];
   a[1] = 2.0*a[1];
   a[0] = u[0]*u[0] + u[1]*u[1] + u[2]*u[2] - 1.0;
-  
+
   nr = eqquad(a,r);
-  
+
   if ( nr == 1 ) {
     if ( ( d3 >= 0.0 && r[0] >= d0 && r[0] >= d1 && r[0] >= d2 ) || ( d3 <= 0.0 && r[0] <= d0 && r[0] <= d1 && r[0] <= d2 ) ) {
       /* Check the direction of the gradient */
@@ -1396,7 +1406,7 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
       ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
       ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
       ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2] + g[2]*Gr[2][2];
-      
+
       if ( (d3 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 && ps2 < EPS1) || (d3 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1 && ps2 > -EPS1) )
         dist = fabs(r[0]);
     }
@@ -1423,7 +1433,7 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
         rmax = r[0];
       }
     }
-    
+
     /* Try first rmin */
     if ( ( d3 >= 0.0 && rmin >= d0 && rmin >= d1 && rmin >= d2 ) || ( d3 <= 0.0 && rmin <= d0 && rmin <= d1 && rmin <= d2 ) ) {
       /* Check the direction of the gradient */
@@ -1433,7 +1443,7 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
       ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
       ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
       ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2] + g[2]*Gr[2][2];
-      
+
       if ( (d3 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 && ps2 < EPS1) || (d3 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1 && ps2 > -EPS1) )
         dist = fabs(rmin);
     }
@@ -1445,23 +1455,24 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
       ps0  = g[0]*Gr[0][0] + g[1]*Gr[1][0] + g[2]*Gr[2][0];
       ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1] + g[2]*Gr[2][1];
       ps2  = g[0]*Gr[0][2] + g[1]*Gr[1][2] + g[2]*Gr[2][2];
-      
+
       if ( (d3 >= 0.0 && ps0 < EPS1 && ps1 < EPS1 && ps2 < EPS1) || (d3 <= 0.0 && ps0 > -EPS1 && ps1 > -EPS1 && ps2 > -EPS1) )
         dist = fabs(rmax);
     }
   }
-  
+
   /* If no other value has been assigned, calculate a default value */
   if ( fabs( dist - INIVAL_3d ) < EPS2 ) {
     d0 = actival2pt_3d(mesh,sol,ip1,ip2,ip3);
     d1 = actival2pt_3d(mesh,sol,ip0,ip2,ip3);
     d2 = actival2pt_3d(mesh,sol,ip0,ip1,ip3);
-    
+
     dist = D_MIN(D_MIN(d0,d1),d2);
   }
-  
+
   return(dist);
 }
+
 
 /* Propagation of the signed distance function by the Fast Marching Method */
 int ppgdistfmm_3d(pMesh mesh,pSol sol) {
@@ -1472,46 +1483,46 @@ int ppgdistfmm_3d(pMesh mesh,pSol sol) {
   double           dist;
   int              nacc,k,l,iel,ip,ip1,ip2,ip3,ilist,*list;
   char             i,j,jj,j1,j2,j3;
-  
+
   pq    = &q;
   nacc  = 0;
-  
+
   /* Memory allocation */
   list = (int*)calloc(LONMAX,sizeof(int));
   assert(list);
-  
+
   /* Memory allocation for the priority queue */
   if ( !setQueue(mesh,pq) ) {
     printf("Impossible to allocate memory for priority queue. Abort program.\n");
     exit(0);
   }
-  
+
   /* Definition of the initial set of active nodes: travel accepted nodes */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     for (i=0; i<4; i++) {
       ip = pt->v[i];
       p0 = &mesh->point[ip];
-      
+
       if ( p0->tag != 1 ) continue;
-      
+
       ilist = boulet_3d(mesh,k,i,list);
-      
+
       for (l=0; l<ilist; l++) {
         iel = list[l] / 4;
         pt1 = &mesh->tetra[iel];
-        
+
         j  = list[l] % 4;
-        
+
         /* Calculate value at the three other points and put it in the queue */
         for (jj=0; jj<3; jj++) {
           j1   = inxt3[j];
           ip1  = pt1->v[j1];
           p1   = &mesh->point[ip1];
-          
+
           if ( p1->tag == 1 ) continue;
           dist = actival_3d(mesh,sol,iel,j1);
-            
+
           if ( p1->tag == 0 ) {
             insertAnod(pq,ip1,dist);
             p1->tag = 2;
@@ -1522,7 +1533,7 @@ int ppgdistfmm_3d(pMesh mesh,pSol sol) {
       }
     }
   }
-  
+
   /* Main loop: pop the smallest active node; it becomes accepted and the neighboring values become active */
   while ( pq->siz ) {
     ip = popAnod(pq,&dist);
@@ -1530,32 +1541,32 @@ int ppgdistfmm_3d(pMesh mesh,pSol sol) {
       printf("Problem in popping in Fast Marching Method. Abort.\n");
       exit(0);
     }
-    
+
     p0 = &mesh->point[ip];
     p0->tag = 1;
     sol->val[ip] = sol->val[ip] > 0.0 ? dist : -dist;
-    
+
     /* Travel the ball of p0 to update the set of active nodes */
     k   = p0->s;
     pt  = &mesh->tetra[k];
     for (i=0; i<4; i++)
       if ( pt->v[i] == ip ) break;
     assert( i < 4 );
-    
+
     ilist = boulet_3d(mesh,k,i,list);
     for (l=0; l<ilist; l++) {
       iel = list[l] / 4;
       j   = list[l] % 4;
       pt  = &mesh->tetra[iel];
-      
+
       for(jj=0; jj<3; jj++) {
         j    = inxt3[j];
         ip1  = pt->v[j];
         p1   = &mesh->point[ip1];
-        
+
         /* Either insert or update active value if the point is not already accepted */
         if ( p1->tag == 1 ) continue;
-        
+
         dist = actival_3d(mesh,sol,iel,j);
         if ( p1->tag == 2 )
           upAnod(pq,ip1,dist);
@@ -1566,15 +1577,16 @@ int ppgdistfmm_3d(pMesh mesh,pSol sol) {
       }
     }
   }
-  
+
   /* Release memory of the queue */
   if ( !freeQueue(pq) ) {
     printf("Impossible to free priority queue. Abort program.\n");
     exit(0);
   }
-  
+
   return(1);
 }
+
 
 /* compute new distance at points in // */
 static void tmpdist_3d(int istart,int istop,int ipth,Param *par) {
@@ -1770,6 +1782,7 @@ static void upddist_3d(int istart,int istop,int ipth,Param *par) {
   par->res[ipth] += res;
 }
 
+
 /* expand distance function to the entire domain by solving the Eikonal eq. using characteristics */
 int ppgdist_3d(pMesh mesh,pSol sol) {
   Param     par;
@@ -1789,9 +1802,9 @@ int ppgdist_3d(pMesh mesh,pSol sol) {
   par.mesh  = mesh;
   par.sol   = sol;
   par.dt    = info.dt;
-	par.dtfin = 0.0;
-	par.res   = (double*)calloc(info.ncpu,sizeof(double));
-	assert(par.res);
+  par.dtfin = 0.0;
+  par.res   = (double*)calloc(info.ncpu,sizeof(double));
+  assert(par.res);
 
   if ( info.ncpu > 1 ) {
     info.libpid = InitParallel(info.ncpu);
@@ -1806,36 +1819,36 @@ int ppgdist_3d(pMesh mesh,pSol sol) {
 
   /* Tets intersecting boundary don't move*/
   for(k=1; k<=mesh->ne; k++) {
-	  pt = &mesh->tetra[k];
-	  if((fabs(sol->val[pt->v[0]])<sqrt(INIVAL_3d))&&(fabs(sol->val[pt->v[1]])<sqrt(INIVAL_3d))\
-	     &&(fabs(sol->val[pt->v[2]])<sqrt(INIVAL_3d))&&(fabs(sol->val[pt->v[3]])<sqrt(INIVAL_3d)))
-		  pt->flag = -1;
+    pt = &mesh->tetra[k];
+    if((fabs(sol->val[pt->v[0]])<sqrt(INIVAL_3d))&&(fabs(sol->val[pt->v[1]])<sqrt(INIVAL_3d))\
+       &&(fabs(sol->val[pt->v[2]])<sqrt(INIVAL_3d))&&(fabs(sol->val[pt->v[3]])<sqrt(INIVAL_3d)))
+      pt->flag = -1;
   }
 
   /* main cvg loop */
   it   = 1;
   res0 = 0.0;
-	if ( info.ddebug )  out = fopen("residual","w");
+  if ( info.ddebug )  out = fopen("residual","w");
   do {
-  	//if(it<=60) par.dt = 0.1 * info.dt;
-	  if ((it>60)&&(it<100)) par.dt = info.dt;
-	  if ( it == 100 )  par.dt = 4.0 * info.dt;
-	  //if(it >40) par.dt += 5e-5;
+    //if(it<=60) par.dt = 0.1 * info.dt;
+    if ((it>60)&&(it<100)) par.dt = info.dt;
+    if ( it == 100 )  par.dt = 4.0 * info.dt;
+    //if(it >40) par.dt += 5e-5;
 
-	  if ( info.ncpu > 1 ) {
-	    LaunchParallel(info.libpid,info.typ[0],0,(void *)gradelt_3d,(void *)&par);
-	  }
-	  else {
-	    gradelt_3d(1,mesh->ne,0,&par);
-  	}
+    if ( info.ncpu > 1 ) {
+      LaunchParallel(info.libpid,info.typ[0],0,(void *)gradelt_3d,(void *)&par);
+    }
+    else {
+      gradelt_3d(1,mesh->ne,0,&par);
+    }
 
     mesh->mark++;
-		memset(par.res,0,info.ncpu*sizeof(double));
+    memset(par.res,0,info.ncpu*sizeof(double));
 
     if ( info.ncpu > 1 ) {
       LaunchParallel(info.libpid,info.typ[0],0,(void *)tmpdist_3d,(void *)&par);
       LaunchParallel(info.libpid,info.typ[1],0,(void *)upddist_3d,(void *)&par);
-			for (i=1; i<info.ncpu; i++)  par.res[0] += par.res[i];
+      for (i=1; i<info.ncpu; i++)  par.res[0] += par.res[i];
     }
     else {
       tmpdist_3d(1,mesh->ne,0,&par);
@@ -1846,10 +1859,10 @@ int ppgdist_3d(pMesh mesh,pSol sol) {
     else if ( par.res[0] < info.res * res0 )  break;
 
     fprintf(stdout,"     %9.7f  %8d\r",par.res[0]/res0,it);  fflush(stdout);
-		if ( info.ddebug ) fprintf(out,"%E\n",par.res[0]);
-		par.dtfin += par.dt;
+    if ( info.ddebug ) fprintf(out,"%E\n",par.res[0]);
+    par.dtfin += par.dt;
   }
-	while ( ++ it < info.maxit );
+  while ( ++ it < info.maxit );
 
   if ( info.ddebug )  fclose(out);
   fprintf(stdout,"     Residual %E after %d iterations\n",par.res[0] / res0,it);
@@ -1866,3 +1879,4 @@ int ppgdist_3d(pMesh mesh,pSol sol) {
 
   return(1);
 }
+

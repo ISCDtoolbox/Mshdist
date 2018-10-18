@@ -10,57 +10,63 @@
 #define HB    11
 #define HC    13
 
+
 extern Info info;
 
 unsigned char idir[5]     = {0,1,2,0,1};
 unsigned char idirt[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
 hash hTab;
 
+
 /* Identify whether ref corresponds to a reference of an interior subdomain */
 inline int isIntDom(int ref) {
   int k;
-  
+
   for (k=0; k<info.nintel; k++)
     if ( info.intel[k] == ref ) return(1);
-  
+
   return(0);
 }
+
 
 /* Identify whether ref corresponds to a starting triangle */
 inline int isStartTri(int ref) {
   int k;
-  
+
   if ( info.nst ) {
     for (k=0; k<info.nst; k++)
       if ( info.st[k] == ref ) return(1);
   }
-  
+
   return(0);
 }
+
 
 /* Identify whether ref corresponds to a starting edges */
 inline int isStartEdg(int ref) {
   int k;
-  
+
   if ( info.nsa ) {
     for (k=0; k<info.nsa; k++)
       if ( info.sa[k] == ref ) return(1);
   }
-  
+
   return(0);
 }
+
 
 /* Identify whether ref corresponds to a starting vertex */
 inline int isStartVer(int ref) {
   int k;
-  
+
   if ( info.nsp ) {
     for (k=0; k<info.nsp; k++)
       if ( info.sp[k] == ref ) return(1);
   }
-  
+
   return(0);
 }
+
 
 int hashelt_3d(pMesh mesh) {
   pTetra    pt,pt1;
@@ -77,7 +83,7 @@ int hashelt_3d(pMesh mesh) {
   hvoy  = (unsigned char*)hcode;
 
   /* init */
-	inival = 2147483647;
+  inival = 2147483647;
   for (k=0; k<=mesh->ne; k++)
     hcode[k] = -inival;
 
@@ -175,7 +181,7 @@ int hashelt_2d(pMesh mesh) {
   hvoy  = (unsigned char*)hcode;
 
   /* init */
-	inival = 2147483647;
+  inival = 2147483647;
   for (k=0; k<=mesh->nt; k++)
     hcode[k] = -inival;
 
@@ -238,7 +244,7 @@ int hashelt_2d(pMesh mesh) {
         mins1 = pt1->v[i2];
         maxs1 = pt1->v[i1];
       }
-      
+
       if ( mins1 == mins  && maxs1 == maxs ) {
         /* adjacent found */
         if ( pp != 0 )  link[pp] = link[ll];
@@ -255,81 +261,83 @@ int hashelt_2d(pMesh mesh) {
   return(1);
 }
 
+
 /* Store all triangles of mesh with refs contained in info.sref in hash table hTab ; return number of
    successfully hashed triangles */
-int hashTriaRef(pMesh mesh){ 
+int hashTriaRef(pMesh mesh){
   pTria    ptt;
   hTria    *tab,*ph;
   int      k,n0,n1,n2,mins,maxs,sum,key,hnxt,l,nb;
-  char     ier; 
-  
+  char     ier;
+
   hTab.thsiz = (int)(0.51*mesh->nt);
   hTab.thmax = (int)(1.51*mesh->nt);
   hnxt = hTab.thsiz;
-  
+
   nb = 0;
-  
+
   hTab.ttab = (hTria*)calloc((int)(1.51*mesh->nt),sizeof(hTria));
   assert(hTab.ttab);
   tab = hTab.ttab;
-  
+
   for(k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    
+
     for(l=1; l<=info.nsref; l++) {
       ier = (ptt->ref == info.sref[l]);
       if(ier) break;
     }
     if(!ier) continue;
-    
+
     nb++;
     n0 = ptt->v[0];
     n1 = ptt->v[1];
     n2 = ptt->v[2];
-    
+
     mins = D_MIN(n0,D_MIN(n1,n2));
     maxs = D_MAX(n0,D_MAX(n1,n2));
     sum = n0+n1+n2;
-    
+
     key = ( KA*mins + KB*maxs )%hTab.thsiz;
-    
+
     /* Uninitialized entry */
     if( tab[key].mins == 0 ){
       ph = &tab[key];
       ph->mins = mins;
       ph->maxs = maxs;
       ph->s  = sum;
-      ph->k    = k; 
+      ph->k    = k;
       ph->nxt  = 0;
     }
     else {
       while( tab[key].nxt ) {
         key = tab[key].nxt;
       }
-      assert( hnxt < hTab.thmax ); 
+      assert( hnxt < hTab.thmax );
       tab[key].nxt = hnxt;
       key = tab[key].nxt;
       ph = &tab[key];
       ph->mins = mins;
       ph->maxs = maxs;
       ph->s  = sum;
-      ph->k    = k; 
+      ph->k    = k;
       ph->nxt  = 0;
       hnxt++;
     }
   }
-  
+
   return(nb);
 }
+
 
 /* Find triangle with keys mins, maxs, sum, and delete entry ; return 0 if not found */
 int getTria(pMesh mesh,int mins,int maxs,int sum){
   hTria    *tab;
   int      key;
-  
+
   tab = hTab.ttab;
   key = ( KA*mins + KB*maxs )%hTab.thsiz;
-  
+
   if( tab[key].mins == 0 ){
     return(0);
   }
@@ -338,8 +346,8 @@ int getTria(pMesh mesh,int mins,int maxs,int sum){
           && tab[key].nxt ) {
       key = tab[key].nxt;
     }
-    
-    /* If key is found, and positive, return it, else, if key is negative (i.e. it has already been 
+
+    /* If key is found, and positive, return it, else, if key is negative (i.e. it has already been
        travelled ) return 0 */
     if( tab[key].mins == mins && tab[key].maxs == maxs && tab[key].s == sum ) {
       if( tab[key].k > 0 ) {
@@ -351,15 +359,17 @@ int getTria(pMesh mesh,int mins,int maxs,int sum){
       }
     }
     else
-      return(0);  
-  } 
+      return(0);
+  }
 }
+
 
 /* Free triangle hashing */
 void delHash(pMesh mesh) {
-  
+
   free(hTab.ttab);
   hTab.thsiz = 0;
   hTab.ttab = 0;
-  
+
 }
+

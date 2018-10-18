@@ -15,6 +15,7 @@
 #include "lplib3.h"
 #include "memory.h"
 
+
 #define D_VER   "1.1b"
 #define D_REL   "June 21, 2010"
 #define D_CPY   "Copyright (c) LJLL, 2010"
@@ -40,6 +41,7 @@
 #define INIVAL_2d     1 //0.25
 #define INIVAL_3d     3.0
 
+
 typedef struct {
   double         c[3],h;
   int            s,flag;
@@ -48,7 +50,7 @@ typedef struct {
 typedef Point * pPoint;
 
 typedef struct {
-	int     v[2],flag,ref;
+  int     v[2],flag,ref;
 } Edge;
 typedef Edge * pEdge;
 
@@ -82,9 +84,9 @@ typedef Tetra * pTetra;
 typedef struct {
   double   delta1[3],delta2[3],min1[3],max1[3],min2[3],max2[3],cen1[3],cen2[3];
   double   dt,ray,res,size,*exp;
-  int      ncpu,libpid,typ[2];          /* for // purposes */
+  int      ncpu,libpid,typ[2];                           /* for // purposes */
   int      maxit,ref,nsref,*sref;
-  int      nexp,nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
+  int      nexp,nintel,*intel,nst,*st,nsa,*sa,nsp,*sp;   /* for -dom option */
   char     imprim,ddebug,option,bbbc,fmm,hausdorff,pcloud,specdist,startref,noscale;
   mytime   ctim[TIMEMAX];
 } Info;
@@ -112,9 +114,9 @@ typedef struct {
 typedef Sol * pSol;
 
 typedef struct {
-	pMesh    mesh;
-	pSol     sol;
-	double  *grad,*dtmp,*res,dt,dtfin;
+  pMesh    mesh;
+  pSol     sol;
+  double  *grad,*dtmp,*res,dt,dtfin;
 } Param;
 
 typedef struct {
@@ -132,6 +134,7 @@ typedef struct {
   hTria         *ttab;
   int           thsiz,thmax;
 } hash;
+
 
 /* prototypes */
 int  loadMesh(pMesh mesh1,pMesh mesh2);
@@ -268,3 +271,4 @@ int     (*ppgdist)(pMesh mesh, pSol sol);
 int     (*ppgdistfmm)(pMesh mesh, pSol sol);
 
 #endif
+

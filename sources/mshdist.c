@@ -1,8 +1,10 @@
 #include "mshdist.h"
 #include "compil.date"
 
+
 #define BUCKSIZ       16
 Info   info;
+
 
 /* Exceptions */
 static void excfun(int sigid) {
@@ -23,13 +25,14 @@ static void excfun(int sigid) {
   exit(1);
 }
 
+
 /* Manual */
 static void usage(char *prog) {
   fprintf(stdout,"usage: %s [-v[n]] [-h] file1[.mesh] [file2[.mesh]] options\n",prog);
 
   fprintf(stdout,"\n** Generic options :\n");
   fprintf(stdout,"-d      Turn on debug mode\n");
-  fprintf(stdout,"-h      Print this message\n");
+  fprintf(stdout,"-?      Print this message\n");
   fprintf(stdout,"-dt     Time stepping (hmin)\n");
   fprintf(stdout,"-it n   Max number of iterations\n");
   fprintf(stdout,"-ncpu n Use n CPUs\n");
@@ -38,6 +41,7 @@ static void usage(char *prog) {
 
   exit(1);
 }
+
 
 /* Release memort contained in Info, if need be */
 static int freeInfo() {
@@ -72,7 +76,7 @@ static int freeInfo() {
       info.sp = NULL;
     }
   }
-  
+
   if ( info.nexp && info.exp ) {
     info.nexp = 0;
     if ( info.exp ) {
@@ -83,6 +87,7 @@ static int freeInfo() {
 
   return(1);
 }
+
 
 /* Parse arguments on the command line */
 static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
@@ -99,11 +104,11 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
         usage(argv[0]);
         break;
 
-	  case 'b':
-		if ( !strcmp(argv[i],"-bbbc") ) {
-		  info.bbbc = 1;
-		}
-		break;
+      case 'b':
+        if ( !strcmp(argv[i],"-bbbc") ) {
+          info.bbbc = 1;
+        }
+        break;
 
       case 'd':
         if ( !strcmp(argv[i],"-dt") ) {
@@ -113,20 +118,20 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
           else
             --i;
         }
-		else if ( !strcmp(argv[i],"-dom") ) {
-		  info.option = 3;
-		  ++i;
-		  if ( i < argc && isdigit(argv[i][0]) )
-			info.ref = atoi(argv[i]);
-		  else{
-			--i;
-		  }
-		}
-		else if ( !strcmp(argv[i],"-d") )
+        else if ( !strcmp(argv[i],"-dom") ) {
+          info.option = 3;
+          ++i;
+          if ( i < argc && isdigit(argv[i][0]) )
+            info.ref = atoi(argv[i]);
+          else{
+            --i;
+          }
+        }
+        else if ( !strcmp(argv[i],"-d") )
           info.ddebug = 1;
 
-		break;
-      
+        break;
+
       /* Calculation of the distance field with the Fast marching method */
       case 'f':
         if ( !strcmp(argv[i],"-fmm") )
@@ -134,11 +139,11 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
         break;
 
       /* Calculate Hausdorff distance */
-	  case 'h':
-		if ( !strcmp(argv[i],"-hausdorff") ) {
-		  info.hausdorff = 1;
-		}
-		break;
+      case 'h':
+        if ( !strcmp(argv[i],"-hausdorff") ) {
+          info.hausdorff = 1;
+        }
+        break;
 
       case 'i':
         if ( ++i < argc ) {
@@ -154,7 +159,7 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
           usage(argv[0]);
         }
         break;
-          
+
       case 'n':
         if ( !strcmp(argv[i],"-ncpu") ) {
           ++i;
@@ -165,9 +170,9 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
         }
         else if ( !strcmp(argv[i],"-noscale") )
           info.noscale = 1;
-          
+
         break;
-          
+
       /* Generate unsigned distance with respect to a point cloud */
       case 'p':
         if ( !strcmp(argv[i],"-pcloud") )
@@ -265,10 +270,11 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
 
   /* Option 3 prevails */
   if ( ( mesh2->name == NULL ) && (info.option != 3) )
-	  info.option = 2;
-  
+    info.option = 2;
+
   return(1);
 }
+
 
 /* Read file DEFAULT.mshdist */
 static int parsop(pMesh mesh) {
@@ -369,6 +375,7 @@ static int parsop(pMesh mesh) {
   return(1);
 }
 
+
 /* Write statistics about the supplied mesh(es) */
 static void stats(pMesh mesh1,pMesh mesh2) {
   fprintf(stdout,"     NUMBER OF GIVEN VERTICES   %8d  %8d\n",mesh1->np,mesh2->np);
@@ -412,7 +419,7 @@ int setfunc(int dim) {
     ppgdist = ppgdist_2d;
     ppgdistfmm = ppgdistfmm_2d;
   }
-  
+
   else {
     newBucket = newBucket_3d;
     buckin  = buckin_3d;
@@ -439,6 +446,7 @@ int setfunc(int dim) {
   return(1);
 }
 
+
 /* Generate distance function according to the selected mode */
 int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
   pBucket  bucket;
@@ -446,12 +454,12 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
 
   /* alloc memory */
   if (( info.option == 1 )||( info.option == 3 )) {  //add : 21/01/2011
-	sol1->bin = mesh1->bin;
-	sol1->ver = GmfDouble;
-	sol1->size    = 1;
-	sol1->type[0] = 1;
-	sol1->typtab[0][0] = GmfSca;
-	sol1->dim = mesh1->dim;
+    sol1->bin = mesh1->bin;
+    sol1->ver = GmfDouble;
+    sol1->size    = 1;
+    sol1->type[0] = 1;
+    sol1->typtab[0][0] = GmfSca;
+    sol1->dim = mesh1->dim;
     sol1->np  = mesh1->np;
     sol1->val = (double*)malloc((sol1->np+1)*sizeof(double));
     assert(sol1->val);
@@ -498,15 +506,15 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
     /* bucket sort */
     bucket = newBucket(mesh1,BUCKSIZ);
     if ( !bucket )  return(0);
-    
+
     if ( info.imprim )  fprintf(stdout,"  ** Initialization\n");
     if ( info.pcloud )
       ier = inidistpcloud(mesh1,mesh2,sol1,bucket);
     else
       ier = inidist(mesh1,mesh2,sol1,bucket);
-    
+
     if ( info.imprim )  fprintf(stdout,"  ** Sign identification\n");
-    
+
     /* Put a sign to the initial distance field */
     if ( !info.pcloud )
       ier = sgndist(mesh1,mesh2,sol1,bucket);
@@ -519,17 +527,17 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
       ier = inireftrias(mesh1,sol1);
 
     }
-  	else {
+    else {
       if ( info.imprim )  fprintf(stdout,"  ** Generation of signed distance function from tria/tets with ref 3\n");
       ier = iniencdomain(mesh1,sol1);
     }
-	  assert(ier);
+    assert(ier);
   }
 
   /* Redistancing */
   else {
-	  if ( info.imprim )  fprintf(stdout,"  ** Redistancing\n");
-	  ier = iniredist(mesh1,sol1);
+    if ( info.imprim )  fprintf(stdout,"  ** Redistancing\n");
+    ier = iniredist(mesh1,sol1);
   }
 
   /* Free fields contained in the Info structure, if need be */
@@ -542,14 +550,14 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
   if ( ier > 0 ) {
     chrono(ON,&info.ctim[4]);
     if ( info.imprim )  fprintf(stdout,"  ** Propagation [%d cpu]\n",info.ncpu);
-    
+
     if ( info.fmm )
       ier = ppgdistfmm(mesh1,sol1);
     else
       ier = ppgdist(mesh1,sol1);
     chrono(OFF,&info.ctim[4]);
-    
-	//assert(errdist(mesh1,mesh2,sol1));
+
+    //assert(errdist(mesh1,mesh2,sol1));
   }
   else if ( ier < 0 )
     fprintf(stdout,"  ## Problem in sign function\n");
@@ -558,6 +566,7 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
 
   return(ier);
 }
+
 
 /* Main program */
 int main(int argc,char **argv) {
@@ -602,27 +611,27 @@ int main(int argc,char **argv) {
   /* Load data */
   if ( info.imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
-  
+
   if ( !loadMesh(&mesh1,&mesh2) )  return(1);
   if ( info.option == 2 )
-	  if (!loadSol(&sol1) )  return(1);
+    if (!loadSol(&sol1) )  return(1);
 
   if ( !setfunc(mesh1.dim) )  return(1);
 
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )
     stats(&mesh1,&mesh2);
-  
+
   /* Read file DEFAULT.mshdist, if any */
   parsop(&mesh1);
-  
+
   /* Default value for the interior domain, if none supplied (used in -dom option only) */
   if ( !info.nintel ) {
     info.nintel = 1;
     info.intel = (int*)calloc(1,sizeof(int));
     info.intel[0] = REFINT;
   }
-  
+
   /* Default value for the starting point if none supplied (used in generating signed distance only) */
   if ( !info.nexp ) {
     info.nexp = -1;
@@ -630,7 +639,7 @@ int main(int argc,char **argv) {
     for (k=0; k<mesh1.dim; k++)
       info.exp[k] = 0.01;
   }
-  
+
   /* Te be deleted, ultimately */
   if ( info.startref && info.nsref < 1 ) {
     printf("    *** No starting ref for triangles found.\n ");
@@ -654,7 +663,7 @@ int main(int argc,char **argv) {
     printim(info.ctim[2].gdif,stim);
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
   }
-  
+
   /* Distance calculation */
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 2 : DISTANCING\n");
   chrono(ON,&info.ctim[3]);
@@ -666,7 +675,7 @@ int main(int argc,char **argv) {
     printim(info.ctim[3].gdif,stim);
     printf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   }
-  
+
   fprintf(stdout,"\n  %s\n   END OF MODULE MSHDIST \n  %s\n",D_STR,D_STR);
 
   /* Save file */
@@ -694,3 +703,4 @@ int main(int argc,char **argv) {
 
   return(0);
 }
+
