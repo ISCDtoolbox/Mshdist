@@ -35,8 +35,10 @@ script:
   - mkdir build
   - cd build
   - cmake ..
-  - head CMakeFiles/Commons.dir/flags.make
-  - head CMakeFiles/Commons.dir/link.txt
+  - head CMakeFiles/Mshdistance.dir/flags.make
+  - head CMakeFiles/Mshdistance.dir/link.txt
+  - head CMakeFiles/mshdist.dir/flags.make
+  - head CMakeFiles/mshdist.dir/link.txt
   - make
   - make install
   - mshdist -?
