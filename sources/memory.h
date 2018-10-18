@@ -19,6 +19,7 @@ int    M_memLeak();
 void   M_memDump();
 size_t M_memSize();
 
+//void primem(int np);
 
 #ifdef __cplusplus
 }

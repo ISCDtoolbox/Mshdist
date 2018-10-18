@@ -137,138 +137,146 @@ typedef struct {
 
 
 /* prototypes */
-int  loadMesh(pMesh mesh1,pMesh mesh2);
-int  loadSol(pSol );
-int  saveSol(pSol sol);
-int  mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1);
-int  scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1);
-int  unscaleSol(pSol sol);
-int  locateTetra(pMesh mesh,int nsdep,int base,double *p,double *cb);
-int  locateTria(pMesh mesh,int nsdep,int base,double *p,double *cb);
-int  boulep_2d(pMesh ,int ,int* );
-int  boulet_2d(pMesh ,int ,int ,int*);
-int  boulet_3d(pMesh mesh, int start, int ip, int * list);
-void freeBucket(pBucket );
+  int  loadMesh(pMesh mesh1,pMesh mesh2);
+  // int  saveMesh(pMesh mesh,char *fileout);    // The function exists in inout.c but it is not used in any *.c files
+  int  loadSol(pSol );
+  int  saveSol(pSol sol);
+  int  mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1);
+  int  scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1);
+  int  unscaleSol(pSol sol);
+  // int  locateTetra(pMesh mesh,int nsdep,int base,double *p,double *cb);    // The function appears here but does not exist anymore in any *.c file
+  // int  locateTria(pMesh mesh,int nsdep,int base,double *p,double *cb);     // The function appears here but does not exist anymore in any *.c file
+  int  boulep_2d(pMesh ,int ,int* );
+  int  boulet_2d(pMesh ,int ,int ,int*);
+  int  boulet_3d(pMesh mesh, int start, int ip, int * list);
+  void freeBucket(pBucket );
 
 /* Heap management */
-int     setQueue(pMesh ,pQueue );
-int     freeQueue(pQueue );
-int     upAnod(pQueue ,int ,double );
-int     insertAnod(pQueue ,int ,double );
-int     upPrio(pQueue ,int ,double );
-int     downPrio(pQueue ,int ,double );
-int     checkHeap(pQueue );
+  int     setQueue(pMesh ,pQueue );
+  int     freeQueue(pQueue );
+  int     upAnod(pQueue ,int ,double );
+  int     insertAnod(pQueue ,int ,double );
+  int     upPrio(pQueue ,int ,double );
+  int     downPrio(pQueue ,int ,double );
+  int     checkHeap(pQueue );
+  int     popAnod(pQueue pq,double *d);
 
 /* Fast Marching routines */
-double actival_2d(pMesh ,pSol ,int ,int );
-double actival1pt_3d(pMesh ,pSol ,int ,int );
-double actival2pt_3d(pMesh ,pSol ,int ,int ,int );
-double actival_3d(pMesh ,pSol ,int ,int );
-int eqquad(double*,double*);
+  double actival_2d(pMesh ,pSol ,int ,int );
+  double actival1pt_3d(pMesh ,pSol ,int ,int );
+  double actival2pt_3d(pMesh ,pSol ,int ,int ,int );
+  double actival_3d(pMesh ,pSol ,int ,int );
+  int eqquad(double*,double*);
 
-int intersec_2d(pPoint,pPoint,pPoint,pPoint);
-double distpt_2d(pPoint,pPoint,pPoint,int*);
-double distnv0_2d(pMesh,pSol,int,pPoint,int*);
-int buildcircum_3d(pMesh,double *);
-int circumcoords(pPoint,pPoint,pPoint,double *);
-double distptplan(pPoint,pPoint,pPoint,pPoint);
-double distpt_3d(pPoint p0,pPoint p1,pPoint p2,pPoint pq,char *proj);
-double distnv0_3d(pMesh,pSol,int,pPoint,char*);
-double distnv0approx_3d(pMesh,pSol,int,pPoint);
-int buildcircumredis_3d(pMesh,pSol,int*,int,double*);
+  int intersec_2d(pPoint,pPoint,pPoint,pPoint);
+  double distpt_2d(pPoint,pPoint,pPoint,int*);
+  double distnv0_2d(pMesh,pSol,int,pPoint,int*);
+  int buildcircum_3d(pMesh,double *);
+  int circumcoords(pPoint,pPoint,pPoint,double *);
+  double distptplan(pPoint,pPoint,pPoint,pPoint);
+  double distpt_3d(pPoint p0,pPoint p1,pPoint p2,pPoint pq,char *proj);
+  double distnv0_3d(pMesh,pSol,int,pPoint,char*);
+  double distnv0approx_3d(pMesh,pSol,int,pPoint);
+  int buildcircumredis_3d(pMesh,pSol,int*,int,double*);
+  int invmatg(double m[9],double mi[9]);
+  int intersec_3d(pPoint p1,pPoint q1,pPoint r1,pPoint p2,pPoint q2,pPoint r2);
+  int interSegTria(pMesh mesh,pPoint pa,pPoint pb,pTria pt);
 
-pBucket newBucket_2d(pMesh ,int );
-pBucket newBucket_3d(pMesh ,int );
-int     buckin_2d(pMesh ,pBucket ,double *);
-int     buckin_3d(pMesh ,pBucket ,double *);
-int     inTetra(pMesh ,int ,double *,double *);
-int     inTria(pMesh ,int ,double *,double *);
-int     locelt_2d(pMesh ,int ,double *,double *);
-int     locelt_3d(pMesh ,int ,double *,double *);
-int     nxtelt_2d(pMesh ,int ,double *,double *);
-int     nxtelt_3d(pMesh ,int ,double *,double *);
-int     closept_2d(pMesh ,double *);
-int     closept_3d(pMesh ,double *);
-int     hashelt_3d(pMesh );
-int     hashelt_2d(pMesh );
-int     inidist_2d(pMesh ,pMesh ,pSol ,pBucket );
-int     inidistpcloud_2d(pMesh ,pMesh ,pSol ,pBucket );
-int     inidist_3d(pMesh ,pMesh ,pSol ,pBucket );
-int     inidistpcloud_3d(pMesh ,pMesh ,pSol ,pBucket );
-int     iniredist_2d(pMesh ,pSol );
-int     iniredist_3d(pMesh ,pSol );
-int     sgndist_2d(pMesh ,pMesh ,pSol ,pBucket );
-int     sgndist_3d(pMesh ,pMesh ,pSol ,pBucket );
-int     ppgdist_2d(pMesh mesh, pSol sol);
-int     ppgdist_3d(pMesh mesh, pSol sol);
-int     ppgdistfmm_2d(pMesh mesh, pSol sol);
-int     ppgdistfmm_3d(pMesh mesh, pSol sol);
-int     iniencdomain_2d(pMesh mesh, pSol sol);
-int     iniencdomain_3d(pMesh mesh, pSol sol);
-int     inireftrias_2d(pMesh mesh, pSol sol);
-int     inireftrias_3d(pMesh mesh, pSol sol);
-int     hashEdge_2d(pMesh mesh);
-int     getEdge(pMesh mesh, int ia, int ib);
-double  hausdorff(pMesh, pMesh);
-int     errdist(pMesh mesh,pMesh mesh2,pSol sol);
-int     hashTriaRef(pMesh);
-int     getTria(pMesh,int,int,int);
-double  volume(double *,double *,double *,double *);
-void    delhash(pMesh);
-int     corrGrad_3d(pMesh,pSol);
-int     isIntDom(int );
-int     isStartTri(int );
-int     isStartEdg(int );
-int     isStartVer(int );
+  pBucket newBucket_2d(pMesh ,int );
+  pBucket newBucket_3d(pMesh ,int );
+  int     buckin_2d(pMesh ,pBucket ,double *);
+  int     buckin_3d(pMesh ,pBucket ,double *);
+  int     inTetra(pMesh ,int ,double *,double *);
+  int     inTria(pMesh ,int ,double *,double *);
+  int     locelt_2d(pMesh ,int ,double *,double *);
+  int     locelt_3d(pMesh ,int ,double *,double *);
+  int     nxtelt_2d(pMesh ,int ,double *,double *);
+  int     nxtelt_3d(pMesh ,int ,double *,double *);
+  // int     closept_2d(pMesh ,double *);    // The function appears here but does not exist anymore in any *.c file
+  // int     closept_3d(pMesh ,double *);    // The function appears here but does not exist anymore in any *.c file
+  int     hashelt_3d(pMesh );
+  int     hashelt_2d(pMesh );
+  int     inidist_2d(pMesh ,pMesh ,pSol ,pBucket );
+  int     inidistpcloud_2d(pMesh ,pMesh ,pSol ,pBucket );
+  int     inidist_3d(pMesh ,pMesh ,pSol ,pBucket );
+  int     inidistpcloud_3d(pMesh ,pMesh ,pSol ,pBucket );
+  int     iniredist_2d(pMesh ,pSol );
+  int     iniredist_3d(pMesh ,pSol );
+  int     sgndist_2d(pMesh ,pMesh ,pSol ,pBucket );
+  int     sgndist_3d(pMesh ,pMesh ,pSol ,pBucket );
+  int     ppgdist_2d(pMesh mesh, pSol sol);
+  int     ppgdist_3d(pMesh mesh, pSol sol);
+  int     ppgdistfmm_2d(pMesh mesh, pSol sol);
+  int     ppgdistfmm_3d(pMesh mesh, pSol sol);
+  int     iniencdomain_2d(pMesh mesh, pSol sol);
+  int     iniencdomain_3d(pMesh mesh, pSol sol);
+  int     inireftrias_2d(pMesh mesh, pSol sol);
+  int     inireftrias_3d(pMesh mesh, pSol sol);
+  int     hashEdge_2d(pMesh mesh);
+  int     getEdge(pMesh mesh, int ia, int ib);
+  double  hausdorff(pMesh, pMesh);
+  int     errdist(pMesh mesh,pMesh mesh2,pSol sol);
+  int     hashTriaRef(pMesh);
+  int     getTria(pMesh,int,int,int);
+  double  volume(double *,double *,double *,double *);
+  void    delHash(pMesh);
+  int     corrGrad_3d(pMesh,pSol);
+  int     isIntDom(int );
+  int     isStartTri(int );
+  int     isStartEdg(int );
+  int     isStartVer(int );
 
 /* Analytical distance functions */
-int     genHolesPCB_2d(pMesh mesh,pSol sol);
-int     gen2Holes_2d(pMesh mesh,pSol sol);
-int     genHolesRadia_2d(pMesh ,pSol );
-int     holeClMast_3d(pMesh mesh, pSol sol);
-int     genHolesMast_3d(pMesh mesh, pSol sol);
-int     holeClBridge_3d(pMesh mesh, pSol sol);
-int     holeClBridge2_3d(pMesh mesh, pSol sol);
-int     genHolesBridge_3d(pMesh,pSol);
-int     genHolesCantia_3d(pMesh mesh,pSol sol);
-int     holeClStarfish_3d(pMesh mesh, pSol sol);
-int     genHolesStarfish_3d(pMesh,pSol);
-int     holeClCrane(pMesh,pSol);
-int     holeCraneIni(pMesh,pSol);
-int     anafunc(pMesh,pSol);
-int     anafuncsq(pMesh,pSol);
-int     anafuncbuddha(pMesh,pSol);
-int     anafuncsaddle(pMesh,pSol);
-int     anafunctorus(pMesh,pSol);
-int     anafuncspherelag(pMesh,pSol);
-int     anafunchelix(pMesh,pSol);
-int     holeClGrip(pMesh,pSol);
-int     holeGripIni(pMesh,pSol);
-int     holeLBeamIni(pMesh,pSol);
-int     holeCl_LBBBeam(pMesh,pSol);
-int     holeLBBBeamIni(pMesh,pSol);
-int     genHolesCanti_2d(pMesh,pSol);
-int     genHolesMast_2d(pMesh,pSol);
-int     genHolesSCantia_3d(pMesh,pSol);
-int     holeCl_Chair(pMesh,pSol);
-int     holeChairIni(pMesh,pSol);
-int     gen1Hole_2d(pMesh mesh,pSol sol);
+  int     genHolesPCB_2d(pMesh mesh,pSol sol);
+  int     gen2Holes_2d(pMesh mesh,pSol sol);
+  int     genHolesRadia_2d(pMesh ,pSol );
+  int     holeClMast_3d(pMesh mesh, pSol sol);
+  int     genHolesMast_3d(pMesh mesh, pSol sol);
+  int     holeClBridge_3d(pMesh mesh, pSol sol);
+  int     holeClBridge2_3d(pMesh mesh, pSol sol);
+  int     genHolesBridge_3d(pMesh,pSol);
+  int     genHolesCantia_3d(pMesh mesh,pSol sol);
+  int     holeClStarfish_3d(pMesh mesh, pSol sol);
+  int     genHolesStarfish_3d(pMesh,pSol);
+  int     holeClCrane(pMesh,pSol);
+  int     holeCraneIni(pMesh,pSol);
+  int     anafunc(pMesh,pSol);
+  int     anafuncsq(pMesh,pSol);
+  int     anafuncbuddha(pMesh,pSol);
+  int     anafuncsaddle(pMesh,pSol);
+  int     anafunctorus(pMesh,pSol);
+  int     anafuncspherelag(pMesh,pSol);
+  int     anafunchelix(pMesh,pSol);
+  int     holeClGrip(pMesh,pSol);
+  int     holeGripIni(pMesh,pSol);
+  int     holeLBeamIni(pMesh,pSol);
+  int     holeCl_LBBBeam(pMesh,pSol);
+  int     holeLBBBeamIni(pMesh,pSol);
+  int     genHolesCanti_2d(pMesh,pSol);
+  int     genHolesMast_2d(pMesh,pSol);
+  int     genHolesSCantia_3d(pMesh,pSol);
+  int     holeCl_Chair(pMesh,pSol);
+  int     holeChairIni(pMesh,pSol);
+  int     gen1Hole_2d(pMesh mesh,pSol sol);
+  // int genholes_3d(pMesh mesh,pSol sol,int m,int n, int o);    // The function exists in specdist_3d.c but it is not used in any *.c file
+  // int genHolesCanti_3d(pMesh mesh,pSol sol);                  // The function exists in specdist_3d.c but it is not used in any *.c file
+  // int holeCl_3d(pMesh mesh, pSol sol);                        // The function exists in specdist_3d.c but it is not used in any *.c file
 
 /* Function pointers */
-pBucket (*newBucket)(pMesh ,int );
-int     (*buckin)(pMesh ,pBucket ,double *);
-int     (*locelt)(pMesh ,int ,double *,double *);
-int     (*nxtelt)(pMesh ,int ,double *,double *);
-int     (*closept)(pMesh ,double *);
-int     (*hashelt)(pMesh );
-int     (*inidist)(pMesh ,pMesh ,pSol ,pBucket );
-int     (*inidistpcloud)(pMesh ,pMesh ,pSol ,pBucket );
-int     (*iniredist)(pMesh ,pSol );
-int     (*iniencdomain)(pMesh ,pSol );
-int     (*inireftrias)(pMesh, pSol);
-int     (*sgndist)(pMesh ,pMesh ,pSol ,pBucket );
-int     (*ppgdist)(pMesh mesh, pSol sol);
-int     (*ppgdistfmm)(pMesh mesh, pSol sol);
+  pBucket (*newBucket)(pMesh ,int );
+  int     (*buckin)(pMesh ,pBucket ,double *);
+  int     (*locelt)(pMesh ,int ,double *,double *);
+  int     (*nxtelt)(pMesh ,int ,double *,double *);
+  // int     (*closept)(pMesh ,double *);    // The function appears here but does not exist anymore in any *.c file
+  int     (*hashelt)(pMesh );
+  int     (*inidist)(pMesh ,pMesh ,pSol ,pBucket );
+  int     (*inidistpcloud)(pMesh ,pMesh ,pSol ,pBucket );
+  int     (*iniredist)(pMesh ,pSol );
+  int     (*iniencdomain)(pMesh ,pSol );
+  int     (*inireftrias)(pMesh, pSol);
+  int     (*sgndist)(pMesh ,pMesh ,pSol ,pBucket );
+  int     (*ppgdist)(pMesh mesh, pSol sol);
+  int     (*ppgdistfmm)(pMesh mesh, pSol sol);
 
 #endif
 

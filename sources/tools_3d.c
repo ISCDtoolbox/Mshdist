@@ -85,7 +85,7 @@ int buildcircum_3d(pMesh mesh, double *circum){
 
 
 /* Compute [p,q,r,s] := det(q-p, r-p, s-p) */
-double detOrient_3d(pPoint p,pPoint q,pPoint r,pPoint s) {
+static double detOrient_3d(pPoint p,pPoint q,pPoint r,pPoint s) {
   double m11, m12, m13, m21, m22, m23, m31, m32, m33;
 
   m11 = q->c[0] - p->c[0];
@@ -105,7 +105,7 @@ double detOrient_3d(pPoint p,pPoint q,pPoint r,pPoint s) {
 
 
 /* Compute det(q-p, r-p, v)*/
-double determinant3Pts1Vct_3d(pPoint p, pPoint q, pPoint r, pPoint v) {
+static double determinant3Pts1Vct_3d(pPoint p, pPoint q, pPoint r, pPoint v) {
   double m11, m21, m31, m12, m22, m32;
 
   m11 = q->c[0] - p->c[0];
@@ -635,7 +635,7 @@ int intersec_3d(pPoint p1,pPoint q1,pPoint r1,pPoint p2,pPoint q2,pPoint r2 ) {
 
 /* return distance from point pa to segment (p1p2)
  vertex tag set to 2 if distance is realized by p1 or p2 */
-double distpt_23d(pPoint p1,pPoint p2,pPoint pa) {
+static double distpt_23d(pPoint p1,pPoint p2,pPoint pa) {
   double   a,b,c,d,dd,ux,uy,vx,vy,wx,wy,xp,yp;
 
   a = p1->c[1] - p2->c[1];
@@ -687,7 +687,7 @@ double distpt_23d(pPoint p1,pPoint p2,pPoint pa) {
 
 
 /* Compute (squared) distance from point pa to segment (p0p1) in 3d */
-double distPtSeg_3d(pPoint p0, pPoint p1, pPoint pa){
+static double distPtSeg_3d(pPoint p0, pPoint p1, pPoint pa){
   double lx1,ly1,lz1,lxa,lya,lza,longp0p1,cosAlpha,sinAlpha;
   double m11,m12,m13,m21,m22,m23,m31,m32,m33;
   double p0XTemp,p0YTemp,p0ZTemp,p1XTemp,p1YTemp,p1ZTemp,paXTemp,paYTemp,paZTemp;
@@ -924,6 +924,7 @@ double distptplan(pPoint p0, pPoint p1, pPoint p2, pPoint pa){
   return(ps/norm);
 
 }
+
 
 int interSegTria(pMesh mesh,pPoint pa,pPoint pb,pTria pt) {
   pPoint   p1,p2,p3;
