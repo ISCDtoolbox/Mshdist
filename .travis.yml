@@ -16,8 +16,12 @@ sudo: false
 
 before_script:
   - cmake --version
+  - cd ..
   - git clone https://github.com/ISCDtoolbox/Commons.git
   - cd Commons
+  - git branch test_future_update
+  - git checkout test_future_update
+  - git pull origin test_future_update 
   - mkdir build
   - cd build
   - cmake .. -DOPENMP=1
