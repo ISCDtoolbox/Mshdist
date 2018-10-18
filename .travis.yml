@@ -41,7 +41,7 @@ script:
   - head CMakeFiles/mshdist.dir/link.txt
   - make
   - make install
-  - mshdist -?
+  - mshdist ../documentation/Examples/thks.mesh -dom -ncpu 4
 
 notifications:
   email: false
