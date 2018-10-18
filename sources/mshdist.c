@@ -673,7 +673,7 @@ int main(int argc,char **argv) {
   chrono(OFF,&info.ctim[3]);
   if ( info.imprim ) {
     printim(info.ctim[3].gdif,stim);
-    printf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   }
 
   fprintf(stdout,"\n  %s\n   END OF MODULE MSHDIST \n  %s\n",D_STR,D_STR);
