@@ -349,7 +349,7 @@ static int parsop(pMesh mesh) {
     /* In generating distance, specify one or several exterior points for the sign */
     if ( !strcmp(data,"exteriorpoints") ) {
       fscanf(in,"%d",&info.nexp);
-      info.exp = (int*)calloc(mesh->dim*info.nexp,sizeof(double));
+      info.exp = (double*)calloc(mesh->dim*info.nexp,sizeof(double));
       for (k=0; k<info.nexp; k++) {
         for (l=0; l<mesh->dim; l++) {
           fscanf(in,"%f",&fbuf);
