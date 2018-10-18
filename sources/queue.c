@@ -77,7 +77,7 @@ int insertAnod(pQueue pq,int ip,double val) {
 
   k = ++pq->siz;
   if ( pq->siz >= pq->sizmax -1 ) {
-    printf("Func. insertAnod: impossible to insert new element. Abort\n",ip);
+    printf("Func. insertAnod: impossible to insert new element. Abort\n");
     exit(0);
   }
 
