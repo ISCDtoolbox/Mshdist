@@ -1,24 +1,42 @@
-language: c++
-compiler:
-  - gcc
-  - clang
+language: c
+
 os:
   - linux
   - osx
+
+compiler:
+  - gcc
+  - clang
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libomp ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew upgrade cmake  ; fi
+
+sudo: false
+
 before_script:
+  - cmake --version
   - git clone https://github.com/ISCDtoolbox/Commons.git
-  - mkdir Commons/build
-  - cd Commons/build
-  - cmake ..
-  - make 
+  - cd Commons
+  - mkdir build
+  - cd build
+  - cmake .. -DOPENMP=1
+  - head CMakeFiles/Commons.dir/flags.make
+  - head CMakeFiles/Commons.dir/link.txt
+  - make
   - make install
-  - cd -
+  - cd ../../Mshdist
+
 script:
   - mkdir build
   - cd build
   - cmake ..
+  - head CMakeFiles/Commons.dir/flags.make
+  - head CMakeFiles/Commons.dir/link.txt
   - make
   - make install
-  - cd -
+  - mshdist -?
+
 notifications:
   email: false
+
