@@ -15,7 +15,7 @@ before_install:
  #                                                                  universe; fi
   #- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install
-                                                           libomp-dev --yes; fi
+                                                           libiomp-dev --yes; fi
   #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
   #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew search omp; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libomp; fi
