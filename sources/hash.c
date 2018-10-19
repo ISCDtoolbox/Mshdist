@@ -352,7 +352,7 @@ int getTria(pMesh mesh,int mins,int maxs,int sum){
     if( tab[key].mins == mins && tab[key].maxs == maxs && tab[key].s == sum ) {
       if( tab[key].k > 0 ) {
         tab[key].k *= -1;
-        return(fabs(tab[key].k));
+        return(abs(tab[key].k));
       }
       else {
         return(0);
