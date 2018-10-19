@@ -9,17 +9,15 @@ compiler:
   - clang
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]];
-    then                                   sudo apt-add-repository universe;
-                                           sudo apt-get update;
-                                           apt-cache search libomp
-                                           sudo apt-get install -y libomp-dev;
+  - if [["$TRAVIS_OS_NAME"=="linux"]]; then sudo apt-add-repository universe;
+                                            sudo apt-get update;
+                                            apt-cache search libomp;
+                                            sudo apt-get install -y libomp-dev;
     fi
 
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];
-    then                                 brew update;
-                                         brew install libomp-devel;
-                                         brew upgrade cmake;
+  - if [["$TRAVIS_OS_NAME"=="osx"]]; then brew update;
+                                          brew install libomp-devel;
+                                          brew upgrade cmake;
     fi
 
 sudo: false
