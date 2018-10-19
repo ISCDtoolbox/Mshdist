@@ -331,7 +331,7 @@ int hashTriaRef(pMesh mesh){
 
 
 /* Find triangle with keys mins, maxs, sum, and delete entry ; return 0 if not found */
-int getTria(pMesh mesh,int mins,int maxs,int sum){
+int getTria(int mins,int maxs,int sum){
   hTria    *tab;
   int      key;
 
@@ -365,7 +365,7 @@ int getTria(pMesh mesh,int mins,int maxs,int sum){
 
 
 /* Free triangle hashing */
-void delHash(pMesh mesh) {
+void delHash(void) {
 
   free(hTab.ttab);
   hTab.thsiz = 0;
