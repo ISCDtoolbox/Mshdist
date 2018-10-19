@@ -13,12 +13,13 @@ before_install:
     then sudo apt-add-repository universe;
          sudo apt-get update;
          apt-cache search libomp;
+         apt-cache search llvm;
          sudo apt-get install libomp-dev --yes;
     fi
 
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]];
     then brew update;
-         brew install libomp-devel;
+         brew install libomp;
          brew upgrade cmake;
     fi
 
