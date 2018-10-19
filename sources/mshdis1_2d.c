@@ -494,7 +494,7 @@ int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   /* At this point, each non-boundary element is associated to a flag */
 
   /* analyze components */
-  if ( fabs(info.imprim) > 3 )  fprintf(stdout,"     %d connected component(s)\n",base);
+  if ( abs(info.imprim) > 3 )  fprintf(stdout,"     %d connected component(s)\n",base);
   if ( base < 2 )  return(-1);
 
   if ( info.ddebug ) {
