@@ -12,13 +12,14 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]];
     then                                   sudo apt-add-repository universe;
                                            sudo apt-get update;
+                                           apt-cache search libomp
                                            sudo apt-get install -y libomp-dev;
     fi
 
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]];
-    then                                 sudo port selfupdate;
-                                         sudo port install libomp-devel;
-                                         sudo port upgrade cmake;
+    then                                 brew update;
+                                         brew install libomp-devel;
+                                         brew upgrade cmake;
     fi
 
 sudo: false
