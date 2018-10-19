@@ -142,8 +142,10 @@ target_include_directories(Mshdistance
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/sources>
         $<BUILD_INTERFACE:$ENV{HOME}/include/iscd/Commons>)
 set_property(TARGET Mshdistance PROPERTY C_STANDARD 99)
-target_link_libraries(Mshdistance PUBLIC ${Commons}#)
-                                         ${M_LIB}
+target_link_libraries(Mshdistance PUBLIC ${Commons})
+
+if (APPLE)
+target_link_libraries(Mshdistance PUBLIC ${M_LIB}
                                          Threads::Threads)
 if (OPENMP_FOUND)
     if (CMAKE_VERSION VERSION_GREATER 3.9)
@@ -152,6 +154,7 @@ if (OPENMP_FOUND)
         target_link_libraries(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
         target_compile_options(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
     endif ()
+endif ()
 endif ()
 target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
 #target_compile_options(Mshdistance PUBLIC -Wall -Wextra -Wpedantic -Wno-char-subscripts) 
