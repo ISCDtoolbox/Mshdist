@@ -61,8 +61,6 @@ int boulep_2d(pMesh mesh,int ip,int *list) {
 
 /* Store in list the triangles in the ball of point ip in triangle start; return length of the ball */
 int boulet_2d(pMesh mesh,int start,int ip,int *list) {
-  pTria     pt;
-  pPoint    p0;
   int       k,ilist,*adja;
   char      i,i1,i2;
 
