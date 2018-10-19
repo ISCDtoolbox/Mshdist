@@ -628,7 +628,7 @@ int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
     for (j=0; j<3; j++) {
       ip = pt->v[j];
       pi = &mesh->point[ip];
-      if (( pi->flag )&&(fabs(sol->val[ip]>EPS)))  break;
+      if ( ( pi->flag ) && ( fabs(sol->val[ip])>EPS ) )  break;
     }
 
     /* unable to correct sign */
