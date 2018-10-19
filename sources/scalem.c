@@ -149,7 +149,7 @@ int unscaleSol(pSol sol) {
   }
 
   dd = dd / (double)PRECI;
-  printf("dd : %f \n", dd);
+  fprintf(stdout,"     dd : %f (scaling factor used to unscale solutions)\n", dd);
 
   for (k=1; k<=sol->np; k++) {
     sol->val[k] *= dd;

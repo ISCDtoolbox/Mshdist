@@ -103,7 +103,7 @@ int iniredist_2d(pMesh mesh, pSol sol){
   }
 
   bndy = (int*)realloc(bndy,(nb+1)*sizeof(int));
-  printf("nb= %d\n",nb);
+  fprintf(stdout,"     nb=%d intersecting background triangles\n",nb);
 
   /* Temporary values stored in solTmp */
   solTmp = (double*)calloc(mesh->np+1,sizeof(double));

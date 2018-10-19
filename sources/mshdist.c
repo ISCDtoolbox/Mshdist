@@ -577,7 +577,7 @@ int main(int argc,char **argv) {
 
   fprintf(stdout,"  -- MSHDIST, Release %s (%s) \n",D_VER,D_REL);
   fprintf(stdout,"     %s\n",D_CPY);
-  fprintf(stdout,"    %s\n",COMPIL);
+  fprintf(stdout,"     %s\n",COMPIL);
 
   /* Trap exceptions */
   signal(SIGABRT,excfun);
