@@ -219,7 +219,7 @@ int loadMesh(pMesh mesh1,pMesh mesh2) {
     mesh2->na = GmfStatKwd(inm,GmfEdges);
   }
 
-  if ( !info.pcloud && ( !mesh2->np || (mesh2->nt+mesh2->na == 0) ) || ( info.pcloud && !mesh2->np ) ) {
+  if ( ( !info.pcloud && ( !mesh2->np || (mesh2->nt+mesh2->na == 0) ) ) || ( info.pcloud && !mesh2->np ) ) {
     fprintf(stdout,"  ** MISSING DATA (expecting elements)\n");
     return(0);
   }
