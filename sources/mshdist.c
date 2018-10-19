@@ -391,7 +391,7 @@ static void endcod() {
 
   chrono(OFF,&info.ctim[0]);
   printim(info.ctim[0].gdif,stim);
-  fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
+  fprintf(stdout,"\n  ELAPSED TIME  %s\n",stim);
 }
 
 
