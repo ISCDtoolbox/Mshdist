@@ -102,10 +102,11 @@ add_library(Mshdistance SHARED sources/boulep.c
 #                add -pthread option instead of -lpthread
 find_library(Commons NAMES Commons HINTS "$ENV{HOME}/lib/iscd")
 if (APPLE)
-find_library(M_LIB m)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-find_package(OpenMP)
+    find_library(M_LIB m)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    find_package(OpenMP)
+endif ()
 
 # Print a warning to suggest what to do if the OpenMp library is not found
 #if (NOT OPENMP_FOUND)
@@ -134,7 +135,6 @@ find_package(OpenMP)
 #        endif ()
 #    endif ()
 #endif ()
-endif ()
 
 # Set all the targets and properties of the Mshdistance library
 target_include_directories(Mshdistance
@@ -145,16 +145,16 @@ set_property(TARGET Mshdistance PROPERTY C_STANDARD 99)
 target_link_libraries(Mshdistance PUBLIC ${Commons})
 
 if (APPLE)
-target_link_libraries(Mshdistance PUBLIC ${M_LIB}
-                                         Threads::Threads)
-if (OPENMP_FOUND)
-    if (CMAKE_VERSION VERSION_GREATER 3.9)
-        target_link_libraries(Mshdistance PUBLIC OpenMP::OpenMP_C)
-    else ()
-        target_link_libraries(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
-        target_compile_options(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
+    target_link_libraries(Mshdistance PUBLIC ${M_LIB}
+                                             Threads::Threads)
+    if (OPENMP_FOUND)
+        if (CMAKE_VERSION VERSION_GREATER 3.9)
+            target_link_libraries(Mshdistance PUBLIC OpenMP::OpenMP_C)
+        else ()
+            target_link_libraries(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
+            target_compile_options(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
+        endif ()
     endif ()
-endif ()
 endif ()
 target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
 #target_compile_options(Mshdistance PUBLIC -Wall -Wextra -Wpedantic -Wno-char-subscripts) 
