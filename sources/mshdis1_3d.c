@@ -217,7 +217,7 @@ int inireftrias_3d(pMesh mesh, pSol sol){
       maxs = D_MAX(n0,D_MAX(n1,n2));
       sum  = n0+n1+n2;
 
-      iel = getTria(mesh,mins,maxs,sum);
+      iel = getTria(mins,maxs,sum);
       if( !iel ) continue;
 
       list[ilist] = 4*k+i;
@@ -230,7 +230,7 @@ int inireftrias_3d(pMesh mesh, pSol sol){
   assert( ilist == nb );
 
   /* Free hashing structure */
-  delHash(mesh);
+  delHash();
 
   /* Travel boundary faces : p->flag = last triangle with respect to which distance
      has been evaluated */
