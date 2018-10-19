@@ -300,7 +300,7 @@ static int parsop(pMesh mesh) {
   while ( !feof(in) ) {
     ret = fscanf(in,"%s",data);
     if ( !ret || feof(in) )  break;
-    for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
+    for (i=0; i<(int)strlen(data); i++) data[i] = tolower(data[i]);
 
     /* in mode -dom: read interior triangles; if none, default reference is REFINT */
     if ( !strcmp(data,"interiordomains") ) {
@@ -449,7 +449,7 @@ int setfunc(int dim) {
 
 /* Generate distance function according to the selected mode */
 int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
-  pBucket  bucket;
+  pBucket  bucket=NULL;
   int      ier;
 
   /* alloc memory */
