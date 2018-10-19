@@ -33,7 +33,7 @@ before_script:
   - git pull origin test_future_update 
   - mkdir build
   - cd build
-  - cmake .. -DOPENMP=1
+  - cmake .. -DOPENMP=1 -DFORCEIOMP=1
   - head CMakeFiles/Commons.dir/flags.make
   - head CMakeFiles/Commons.dir/link.txt
   - make
