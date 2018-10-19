@@ -91,7 +91,7 @@ static int freeInfo() {
 
 /* Parse arguments on the command line */
 static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
-  int      i,ier;
+  int      i;
   char    *ptr;
 
   i = 1;
@@ -250,7 +250,7 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
   if ( mesh1->name == NULL  || info.imprim == -99 ) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
-    ier = fscanf(stdin,"%d",&i);
+    fscanf(stdin,"%d",&i);
     info.imprim = i;
   }
 
@@ -259,7 +259,7 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
     assert(mesh1->name);
     fprintf(stdout,"  -- MESH1 BASENAME ?\n");
     fflush(stdin);
-    ier = fscanf(stdin,"%s",mesh1->name);
+    fscanf(stdin,"%s",mesh1->name);
   }
 
   sol1->name = (char *)calloc(128,sizeof(char));
