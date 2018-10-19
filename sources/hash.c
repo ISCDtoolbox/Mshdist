@@ -268,7 +268,7 @@ int hashTriaRef(pMesh mesh){
   pTria    ptt;
   hTria    *tab,*ph;
   int      k,n0,n1,n2,mins,maxs,sum,key,hnxt,l,nb;
-  char     ier;
+  char     ier='\0';
 
   hTab.thsiz = (int)(0.51*mesh->nt);
   hTab.thmax = (int)(1.51*mesh->nt);
