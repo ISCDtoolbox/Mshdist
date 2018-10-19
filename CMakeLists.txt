@@ -101,10 +101,11 @@ add_library(Mshdistance SHARED sources/boulep.c
 #                well as configure the compilation for threads. Tendancy is to
 #                add -pthread option instead of -lpthread
 find_library(Commons NAMES Commons HINTS "$ENV{HOME}/lib/iscd")
-#find_library(M_LIB m)
-#set(THREADS_PREFER_PTHREAD_FLAG ON)
-#find_package(Threads REQUIRED)
-#find_package(OpenMP)
+if (APPLE)
+find_library(M_LIB m)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+find_package(OpenMP)
 
 # Print a warning to suggest what to do if the OpenMp library is not found
 #if (NOT OPENMP_FOUND)
@@ -133,6 +134,7 @@ find_library(Commons NAMES Commons HINTS "$ENV{HOME}/lib/iscd")
 #        endif ()
 #    endif ()
 #endif ()
+endif ()
 
 # Set all the targets and properties of the Mshdistance library
 target_include_directories(Mshdistance
@@ -140,19 +142,19 @@ target_include_directories(Mshdistance
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/sources>
         $<BUILD_INTERFACE:$ENV{HOME}/include/iscd/Commons>)
 set_property(TARGET Mshdistance PROPERTY C_STANDARD 99)
-target_link_libraries(Mshdistance PUBLIC ${Commons})
-#                                         ${M_LIB}
-#                                         Threads::Threads)
-#if (OPENMP_FOUND)
-#    if (CMAKE_VERSION VERSION_GREATER 3.9)
-#        target_link_libraries(Mshdistance PUBLIC OpenMP::OpenMP_C)
-#    else ()
-#        target_link_libraries(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
-#        target_compile_options(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
-#    endif ()
-#endif ()
-#target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
-target_compile_options(Mshdistance PUBLIC -Wall -Wextra -Wpedantic -Wno-char-subscripts) 
+target_link_libraries(Mshdistance PUBLIC ${Commons}#)
+                                         ${M_LIB}
+                                         Threads::Threads)
+if (OPENMP_FOUND)
+    if (CMAKE_VERSION VERSION_GREATER 3.9)
+        target_link_libraries(Mshdistance PUBLIC OpenMP::OpenMP_C)
+    else ()
+        target_link_libraries(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
+        target_compile_options(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
+    endif ()
+endif ()
+target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
+#target_compile_options(Mshdistance PUBLIC -Wall -Wextra -Wpedantic -Wno-char-subscripts) 
 
 # Set the installation properties of the Mshdistance library
 install(TARGETS Mshdistance LIBRARY DESTINATION "$ENV{HOME}/lib/iscd")
@@ -165,8 +167,8 @@ set(CMAKE_BUILD_TYPE "Release")
 add_executable(mshdist sources/mshdist.c)
 set_property(TARGET mshdist PROPERTY C_STANDARD 99)
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
-#    target_compile_options(mshdist PUBLIC -Wno-unused-result) 
-    target_compile_options(mshdist PUBLIC -Wall -Wextra -Wpedantic) 
+    target_compile_options(mshdist PUBLIC -Wno-unused-result) 
+#    target_compile_options(mshdist PUBLIC -Wall -Wextra -Wpedantic) 
 endif ()
 target_link_libraries(mshdist PUBLIC Mshdistance)
 install(TARGETS mshdist RUNTIME DESTINATION "$ENV{HOME}/bin")
