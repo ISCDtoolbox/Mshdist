@@ -114,8 +114,8 @@ if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
     #target_compile_options(Mshdistance PUBLIC -Wall -Wextra -Wpedantic)
 else ()
-    target_compile_options(mshdist PUBLIC -v)
-    #target_compile_options(mshdist PUBLIC -Weverything)
+    target_compile_options(Mshdistance PUBLIC -v)
+    #target_compile_options(Mshdistance PUBLIC -Weverything)
 endif ()
 
 # Remark: the user can add directly here the path for linking the math and
