@@ -1,21 +1,22 @@
-cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
-#set(CMAKE_C_COMPILER "/usr/bin/clang")
-#set(CMAKE_C_COMPILER_ID Clang)
-
-# Set the installation rpath
+# Set the minimum version of cmake (and default installation rpath if needed)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 if (APPLE)
     set(CMAKE_MACOSX_RPATH TRUE)
 endif ()
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# Define some macro to set the correct date and time at compilation
+# One may want to impose the C-compiler (for example with a specific version)
+#set(CMAKE_C_COMPILER "/usr/bin/clang-3.8")
+#set(CMAKE_C_COMPILER_ID Clang)
+
+# Define some macro to set the correct date and time of compilation
 macro (DATE RESULT)
-  execute_process(COMMAND "date" "+%Y-%m-%d" OUTPUT_VARIABLE ${RESULT}
+    execute_process(COMMAND "date" "+%Y-%m-%d" OUTPUT_VARIABLE ${RESULT}
                                                OUTPUT_STRIP_TRAILING_WHITESPACE)
 endmacro ()
 
 macro (TIME RESULT)
-  execute_process(COMMAND "date" "+%H:%M:%S" OUTPUT_VARIABLE ${RESULT}
+    execute_process(COMMAND "date" "+%H:%M:%S" OUTPUT_VARIABLE ${RESULT}
                                                OUTPUT_STRIP_TRAILING_WHITESPACE)
 endmacro ()
 
@@ -25,6 +26,14 @@ if (NOT UNIX)
     message("systems since it has been tested merely on Linux and Mac OS. ")
     message("The commands 'cmake ..' and 'make' may not work.")
 endif ()
+
+# Define the project of the Mshdistance library depending on cmake version
+if (CMAKE_VERSION VERSION_GREATER 3.0)
+    project(Mshdistance LANGUAGES C)
+else ()
+    project(Mshdistance C)
+endif ()
+set(CMAKE_BUILD_TYPE "Release")
 
 # Print a warning if the compiler is not gcc or clang (apple clang on mac)
 if (NOT ${CMAKE_C_COMPILER_ID} MATCHES GNU
@@ -36,15 +45,32 @@ if (NOT ${CMAKE_C_COMPILER_ID} MATCHES GNU
     message("work.")
 endif ()
 
-project(Mshdistance LANGUAGES C)
-set(CMAKE_BUILD_TYPE "Release")
-
 # Write compilation date in a file entitled compil.date of sources/ directory
 DATE(day)
 TIME(hour)
 file(WRITE sources/compil.date "#define COMPIL \"${day} ${hour}\"")
 
-# Add the source files to the Mshdistance library
+# Add the source files to the Mshdistance library which also uses
+#    * Headers from the C standard library:
+#        - assert.h
+#        - ctype.h
+#        - limits.h
+#        - math.h (the associated static library needs to be linked)
+#        - signal.h
+#        - stdio.h
+#        - stdlib.h
+#        - string.h
+#
+#    * Headers from the external (dynamic) Commons library, which needs to be
+#      properly linked:
+#         - chrono.h
+#         - libmesh5.h
+#         - lplib3.h
+#
+#    * Headers from the local source directory:
+#        - mshdist.h
+#        - memory.h
+#        - compil.date (created only at the compilation by cmake, cf. macro)
 add_library(Mshdistance SHARED sources/boulep.c
                                sources/bucket.c
                                sources/hash.c
@@ -60,119 +86,76 @@ add_library(Mshdistance SHARED sources/boulep.c
                                sources/tools_2d.c
                                sources/tools_3d.c)
 
-# The source files of the Mshdistance library uses:
-#
-#    - Headers from the C standard library: assert.h
-#                                           ctype.h
-#                                           limits.h
-#                                           math.h (it needs to be statically
-#                                                                        linked)
-#                                           signal.h
-#                                           stdio.h
-#                                           stdlib.h
-#                                           string.h
-#
-#    - Headers from the external Commons library, which needs to be dynamically
-#      linked: chrono.h
-#              libmesh5.h
-#              lplib3.h
-#
-#    - Headers from the local sources directory: mshdist.h
-#                                                memory.h
-#                                                compil.date (created only at
-#                                                             cmake compilation)
-#
-# Find the Math (libm.a on Ubuntu 16.04.4, add -lm with gcc compiler) and the
-#      the Commons libraries as well as its dependencies i.e. the Math, 
-#      the Threads (libpthread-stubs0-dev on Ubuntu 16.04.4, add -pthread with
-#                   gcc compiler), and optionally (depending on how the Commons
-#                   library was compiled)
-#      the OpenMp library (libgomp1 on Ubuntu 16.04.4, add -fopenmp with gcc
-#                          compiler).
-#
-# FIRST REMARK: when -fopenmp option is set in gcc, the preprocessor compiler
-#               creates a preprocessor constant _OPENMP yyyymmdd where yyyy is
-#               the year mm the month and dd the day of the preprocessor
-#               compilation.
-#
-# SECOND REMARK: adding -lpthread option with gcc only links the pthread library
-#                while the pre-defined macros do not get defined. The -pthread
-#                option tells the compiler to link in the pthread library as
-#                well as configure the compilation for threads. Tendancy is to
-#                add -pthread option instead of -lpthread
-find_library(Commons NAMES Commons HINTS "$ENV{HOME}/lib/iscd")
-if (APPLE)
-    find_library(M_LIB m)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
-    find_package(OpenMP)
-endif ()
+# Find the Commons library (all the other libraries are its dependancies)
+find_library(COMMONS_LIBRARY NAMES Commons HINTS "$ENV{HOME}/lib/iscd")
 
-# Print a warning to suggest what to do if the OpenMp library is not found
-#if (NOT OPENMP_FOUND)
-#    if (APPLE)
-#        message("Warning: check that the libomp library has been properly ")
-#        message("installed by typing for example 'brew install libomp' ")
-#        message("in your terminal window.")
-#        if (CMAKE_VERSION VERSION_LESS 3.12)
-#            message("Warning: on mac os, your version of cmake ")
-#            message("(=${CMAKE_VERSION}) cannot be currently less than ")
-#            message("3.12 in order to target properly the OpenMp library.")
-#            message("Please, update your version of cmake by typing for ")
-#            message("example 'brew upgrade cmake' in your terminal window.")
-#        endif ()
-#    else ()
-#        if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
-#            message("Warning: check that the libgomp1 library has been ")
-#            message("properly installed by typing for example ")
-#            message("'sudo apt-get install libgomp1' in your terminal ")
-#            message("window (you need administrator rights to do that).")
-#        elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang)
-#            message("Warning: check that the libomp-dev library has been ")
-#            message("properly installed by typing for example ")
-#            message("'sudo apt-get install libomp-dev' in your terminal ")
-#            message("window (you need administrator rights to do that).")
-#        endif ()
-#    endif ()
-#endif ()
+# Find the Math library (libm.a on Ubuntu 16.04.4, add -lm with gcc compiler)
+find_library(MATH_LIBRARY m)
 
 # Set all the targets and properties of the Mshdistance library
 target_include_directories(Mshdistance
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/sources>
         $<BUILD_INTERFACE:$ENV{HOME}/include/iscd/Commons>)
-set_property(TARGET Mshdistance PROPERTY C_STANDARD 99)
-target_link_libraries(Mshdistance PUBLIC ${Commons})
+        # Remark: the user can add directly the path(s) for header file(s) in
+        #         the above target_include_directories command (such as the ones
+        #         associated with the Commons library)
 
-if (APPLE)
-    target_link_libraries(Mshdistance PUBLIC ${M_LIB}
-                                             Threads::Threads)
-    if (OPENMP_FOUND)
-        if (CMAKE_VERSION VERSION_GREATER 3.9)
-            target_link_libraries(Mshdistance PUBLIC OpenMP::OpenMP_C)
-        else ()
-            target_link_libraries(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
-            target_compile_options(Mshdistance PUBLIC ${OpenMP_C_FLAGS})
-        endif ()
-    endif ()
+if (CMAKE_VERSION VERSION_GREATER 3.8)
+    target_compile_features(Mshdistance PUBLIC c_std_99)
+elseif (CMAKE_VERSION VERSION_GREATER 3.1)
+    set_property(TARGET Mshdistance PROPERTY C_STANDARD 99)
+else ()
+    target_compile_options(Mshdistance PUBLIC -std=gnu99)
 endif ()
-target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
-#target_compile_options(Mshdistance PUBLIC -Wall -Wextra -Wpedantic -Wno-char-subscripts) 
+
+
+if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
+    target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
+    #target_compile_options(Mshdistance PUBLIC -Wall -Wextra -Wpedantic)
+#elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
+#                                  OR ${CMAKE_C_COMPILER_ID} MATCHES AppleClang)
+    #target_compile_options(Mshdistance PUBLIC -Wsource-uses-openmp)
+    #target_compile_options(Mshdistance PUBLIC -Weverything)
+endif ()
+
+# Remark: the user can add directly here the path for linking the math and
+#         and Commons libraries (if they have not been found with the above
+#         find_library commands)
+target_link_libraries(Mshdistance PUBLIC ${MATH_LIBRARY}
+                                         ${COMMONS_LIBRARY})
+
 
 # Set the installation properties of the Mshdistance library
+# Remark: the user can change here the paths where the Mshdistance library and
+#         associated header files will be installed at 'cmake install' command
 install(TARGETS Mshdistance LIBRARY DESTINATION "$ENV{HOME}/lib/iscd")
 install(FILES sources/memory.h
               sources/mshdist.h DESTINATION "$ENV{HOME}/include/iscd/Mshdist")
 
 # Create and install the corresponding mshdist executable
-project(mshdist LANGUAGES C)
-set(CMAKE_BUILD_TYPE "Release")
-add_executable(mshdist sources/mshdist.c)
-set_property(TARGET mshdist PROPERTY C_STANDARD 99)
-if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
-    target_compile_options(mshdist PUBLIC -Wno-unused-result) 
-#    target_compile_options(mshdist PUBLIC -Wall -Wextra -Wpedantic) 
+if (CMAKE_VERSION VERSION_GREATER 3.0)
+    project(mshdist LANGUAGES C)
+else ()
+    project(mshdist C)
 endif ()
+set(CMAKE_BUILD_TYPE "Release")
+
+add_executable(mshdist sources/mshdist.c)
+
+if (CMAKE_VERSION VERSION_GREATER 3.8)
+    target_compile_features(mshdist PUBLIC c_std_99)
+elseif (CMAKE_VERSION VERSION_GREATER 3.1)
+    set_property(TARGET mshdist PROPERTY C_STANDARD 99)
+else ()
+    target_compile_options(mshdist PUBLIC -std=gnu99)
+endif ()
+
+if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
+    target_compile_options(mshdist PUBLIC -Wno-unused-result)
+    #target_compile_options(mshdist PUBLIC -Wall -Wextra -Wpedantic)
+endif ()
+
 target_link_libraries(mshdist PUBLIC Mshdistance)
 install(TARGETS mshdist RUNTIME DESTINATION "$ENV{HOME}/bin")
 
