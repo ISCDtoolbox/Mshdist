@@ -66,7 +66,7 @@ script:
   - rm ../documentation/Examples/batkeep.sol
   - cp ../documentation/Examples/batkeep.save.sol
                                            ../documentation/Examples/batkeep.sol
-  - mshdist ../documentation/Examples/batkeep.mesh -ncpu 4
+  - mshdist ../documentation/Examples/batkeep.mesh -ncpu 2
   - rm ../documentation/Examples/batkeep.sol
   - cp ../documentation/Examples/batkeep.save.sol
                                            ../documentation/Examples/batkeep.sol
@@ -110,7 +110,7 @@ script:
                          then cp ../documentation/Examples/batkeep.save.sol
                                       ../documentation/Examples/batkeep.sol ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                then mshdist ../documentation/Examples/batkeep.mesh -ncpu 4 ; fi
+                then mshdist ../documentation/Examples/batkeep.mesh -ncpu 2 ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
                               then rm ../documentation/Examples/batkeep.sol ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
@@ -136,7 +136,7 @@ script:
   - rm ../documentation/Examples/batkeep.sol
   - cp ../documentation/Examples/batkeep.save.sol
                                            ../documentation/Examples/batkeep.sol
-  - mshdist ../documentation/Examples/batkeep.mesh -ncpu 4
+  - mshdist ../documentation/Examples/batkeep.mesh -ncpu 2
   - rm ../documentation/Examples/batkeep.sol
   - cp ../documentation/Examples/batkeep.save.sol
                                            ../documentation/Examples/batkeep.sol
