@@ -8,8 +8,6 @@ compiler:
   - gcc
   - clang
 
-sudo: true
-
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
                      sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
@@ -17,14 +15,15 @@ before_install:
         locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
             else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
                                                 libiomp5.dylib libomp.dylib ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew install libomp ; fi
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew upgrade cmake ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ;
-                                     then sudo /usr/libexec/locate.updatedb ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
-                locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+          sudo apt-get install libiomp-dev --yes ; else brew install libomp ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew upgrade cmake ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+                     sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+        locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
+            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
                                                 libiomp5.dylib libomp.dylib ; fi
-
 
 sudo: false
 
@@ -49,6 +48,8 @@ script:
   - head CMakeFiles/Commons.dir/flags.make
   - head CMakeFiles/Commons.dir/link.txt
   - make
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+                         ldd libCommons.so ; else otool -L libCommons.dylib ; fi
   - make install
   - cd ../../Mshdist
   - mkdir build
@@ -59,6 +60,8 @@ script:
   - head CMakeFiles/mshdist.dir/flags.make
   - head CMakeFiles/mshdist.dir/link.txt
   - make
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+                 ldd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
   - make install
   - cp ../documentation/Examples/batkeep.sol
                                       ../documentation/Examples/batkeep.save.sol
@@ -70,58 +73,16 @@ script:
   - rm ../documentation/Examples/batkeep.sol
   - cp ../documentation/Examples/batkeep.save.sol
                                            ../documentation/Examples/batkeep.sol
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                                then cd ../../Commons/build ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                                             then rm ./* -r ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                     then cmake .. -DOPENMP=1 -DFORCEIOMP=1 ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                then head CMakeFiles/Commons.dir/flags.make ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                  then head CMakeFiles/Commons.dir/link.txt ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                                                  then make ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                                          then make install ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                                then cd ../../Mshdist/build ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                                             then rm ./* -r ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                                              then cmake .. ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                            then head CMakeFiles/Mshdistance.dir/flags.make ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                              then head CMakeFiles/Mshdistance.dir/link.txt ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                then head CMakeFiles/mshdist.dir/flags.make ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                  then head CMakeFiles/mshdist.dir/link.txt ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                                                  then make ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                                                          then make install ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                then mshdist ../documentation/Examples/batkeep.mesh -ncpu 1 ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                              then rm ../documentation/Examples/batkeep.sol ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                         then cp ../documentation/Examples/batkeep.save.sol
-                                      ../documentation/Examples/batkeep.sol ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                then mshdist ../documentation/Examples/batkeep.mesh -ncpu 2 ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                              then rm ../documentation/Examples/batkeep.sol ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                         then cp ../documentation/Examples/batkeep.save.sol
-                                      ../documentation/Examples/batkeep.sol ; fi
+
   - cd ../../Commons/build
   - rm ./* -r
-  - cmake .. -DOPENMP=1
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
+          then cmake .. -DOPENMP=1 -DFORCEIOMP=1 ; else cmake .. -DOPENMP=1 ; fi
   - head CMakeFiles/Commons.dir/flags.make
   - head CMakeFiles/Commons.dir/link.txt
   - make
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+                         ldd libCommons.so ; else otool -L libCommons.dylib ; fi
   - make install
   - cd ../../Mshdist/build
   - rm ./* -r
@@ -131,6 +92,8 @@ script:
   - head CMakeFiles/mshdist.dir/flags.make
   - head CMakeFiles/mshdist.dir/link.txt
   - make
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+                 ldd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
   - make install
   - mshdist ../documentation/Examples/batkeep.mesh -ncpu 1
   - rm ../documentation/Examples/batkeep.sol
