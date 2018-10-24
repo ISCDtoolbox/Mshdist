@@ -31,6 +31,7 @@ sudo: false
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
                                               lsb_release -a ; else sw_vers ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then lscpu ; else sysctl hw ; fi
   - if [[ "$TRAVIS_COMPILER" == "gcc" ]] ; then
                                        gcc --version ; else clang --version ; fi
   - git --version
@@ -102,9 +103,6 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
                                                           then make install ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-                         then cp ../documentation/Examples/batkeep.sol
-                                 ../documentation/Examples/batkeep.save.sol ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
                 then mshdist ../documentation/Examples/batkeep.mesh -ncpu 1 ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
                               then rm ../documentation/Examples/batkeep.sol ; fi
@@ -134,8 +132,6 @@ script:
   - head CMakeFiles/mshdist.dir/link.txt
   - make
   - make install
-  - cp ../documentation/Examples/batkeep.sol
-                                      ../documentation/Examples/batkeep.save.sol
   - mshdist ../documentation/Examples/batkeep.mesh -ncpu 1
   - rm ../documentation/Examples/batkeep.sol
   - cp ../documentation/Examples/batkeep.save.sol

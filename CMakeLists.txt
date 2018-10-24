@@ -113,10 +113,9 @@ endif ()
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
     #target_compile_options(Mshdistance PUBLIC -Wall -Wextra -Wpedantic)
-#elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
-#                                  OR ${CMAKE_C_COMPILER_ID} MATCHES AppleClang)
-    #target_compile_options(Mshdistance PUBLIC -Wsource-uses-openmp)
-    #target_compile_options(Mshdistance PUBLIC -Weverything)
+else ()
+    target_compile_options(mshdist PUBLIC -v)
+    #target_compile_options(mshdist PUBLIC -Weverything)
 endif ()
 
 # Remark: the user can add directly here the path for linking the math and
@@ -154,6 +153,9 @@ endif ()
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(mshdist PUBLIC -Wno-unused-result)
     #target_compile_options(mshdist PUBLIC -Wall -Wextra -Wpedantic)
+else ()
+    target_compile_options(mshdist PUBLIC -v)
+    #target_compile_options(mshdist PUBLIC -Weverything)
 endif ()
 
 target_link_libraries(mshdist PUBLIC Mshdistance)
