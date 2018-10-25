@@ -3,7 +3,7 @@
 
 
 #define BUCKSIZ       16
-Info   info;
+
 
 
 /* Exceptions */

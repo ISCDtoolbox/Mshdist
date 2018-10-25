@@ -80,7 +80,7 @@ if (APPLE)
                                    sources/memory.c
                                    sources/mshdis1_2d.c
                                    sources/mshdis1_3d.c
-                                   sources/mshdist.c      # Apparently I have
+                                   #sources/mshdist.c      # Apparently I have
                                                           # to add it for Apple
                                                           # because of the Info
                                                           # (works for linux) 
@@ -133,7 +133,7 @@ endif ()
 
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
-    #target_compile_options(Mshdistance PUBLIC -Wall -Wextra -Wpedantic)
+    #target_compile_options(Mshdistance PUBLIC -Wpedantic -Wall -Wextra)
 #else ()
     #target_compile_options(Mshdistance PUBLIC -Weverything)
 endif ()
@@ -171,7 +171,7 @@ endif ()
 
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(mshdist PUBLIC -Wno-unused-result)
-    #target_compile_options(mshdist PUBLIC -Wall -Wextra -Wpedantic)
+    #target_compile_options(mshdist PUBLIC -Wpedantic -Wall -Wextra)
 #else ()
     #target_compile_options(mshdist PUBLIC -Weverything)
 endif ()
