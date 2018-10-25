@@ -79,6 +79,7 @@ add_library(Mshdistance SHARED sources/boulep.c
                                sources/memory.c
                                sources/mshdis1_2d.c
                                sources/mshdis1_3d.c
+                               sources/mshdist.c       # Apparently I have to
                                sources/queue.c
                                sources/scalem.c
                                sources/specdist_2d.c
