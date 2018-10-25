@@ -114,7 +114,7 @@ if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
     #target_compile_options(Mshdistance PUBLIC -Wpedantic -Wall -Wextra)
 else ()
-    target_compile_options(mshdist PUBLIC -g)
+    target_compile_options(Mshdistance PUBLIC -g)
     #target_compile_options(Mshdistance PUBLIC -Weverything)
 endif ()
 
