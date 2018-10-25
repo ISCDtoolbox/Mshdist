@@ -16,7 +16,7 @@ before_install:
 #            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
 #                                               libiomp5.dylib libomp.dylib ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-          sudo apt-get install libiomp-dev --yes ; else brew install libomp ; fi
+         sudo apt-get install libiomp-dev --yes ; else brew install libomp ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew upgrade cmake ; fi
 #  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
 #                    sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
@@ -24,18 +24,18 @@ before_install:
 #        locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
 #            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
 #                                               libiomp5.dylib libomp.dylib ; fi
+#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+#                                             lsb_release -a ; else sw_vers ; fi
+#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then lscpu ; else sysctl hw ; fi
+#  - if [[ "$TRAVIS_COMPILER" == "gcc" ]] ; then
+#                                      gcc --version ; else clang --version ; fi
+#  - git --version
+#  - make --version
+#  - cmake --version
 
 sudo: false
 
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-                                              lsb_release -a ; else sw_vers ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then lscpu ; else sysctl hw ; fi
-  - if [[ "$TRAVIS_COMPILER" == "gcc" ]] ; then
-                                       gcc --version ; else clang --version ; fi
-  - git --version
-  - make --version
-  - cmake --version
   - cd ..
   - git clone https://github.com/ISCDtoolbox/Commons.git
   - cd Commons
@@ -49,10 +49,10 @@ script:
   - head CMakeFiles/Commons.dir/link.txt
   - make
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-                         ldd libCommons.so ; else otool -L libCommons.dylib ; fi
+                        ldd libCommons.so ; else otool -L libCommons.dylib ; fi
   - make install
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then ldd ~/lib/iscd/libCommons.so ;
-                                  else otool -L ~/lib/iscd/libCommons.dylib ; fi
+                                 else otool -L ~/lib/iscd/libCommons.dylib ; fi
   - cd ../../Mshdist
   - mkdir build
   - cd build
@@ -63,34 +63,27 @@ script:
   - head CMakeFiles/mshdist.dir/link.txt
   - make
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-                 ldd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
+                 dd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
   - make install
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
                  then ldd ~/lib/iscd/libMshdistance.so ;
-                              else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
-  - cp ../documentation/Examples/batkeep.sol
-                                      ../documentation/Examples/batkeep.save.sol
-  - mshdist ../documentation/Examples/batkeep.mesh -ncpu 1
-  - rm ../documentation/Examples/batkeep.sol
-  - cp ../documentation/Examples/batkeep.save.sol
-                                           ../documentation/Examples/batkeep.sol
-  - mshdist ../documentation/Examples/batkeep.mesh -ncpu 2
-  - rm ../documentation/Examples/batkeep.sol
-  - cp ../documentation/Examples/batkeep.save.sol
-                                           ../documentation/Examples/batkeep.sol
-
+                             else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
+  - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1
+  - rm ../documentation/Examples/saddle3d.sol
+  - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 2
+  - rm ../documentation/Examples/saddle3d.sol
   - cd ../../Commons/build
   - rm ./* -r
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
-          then cmake .. -DOPENMP=1 -DFORCEIOMP=1 ; else cmake .. -DOPENMP=1 ; fi
+         then cmake .. -DOPENMP=1 -DFORCEIOMP=1 ; else cmake .. -DOPENMP=1 ; fi
   - head CMakeFiles/Commons.dir/flags.make
   - head CMakeFiles/Commons.dir/link.txt
   - make
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-                         ldd libCommons.so ; else otool -L libCommons.dylib ; fi
+                        ldd libCommons.so ; else otool -L libCommons.dylib ; fi
   - make install
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then ldd ~/lib/iscd/libCommons.so ;
-                                  else otool -L ~/lib/iscd/libCommons.dylib ; fi
+                                 else otool -L ~/lib/iscd/libCommons.dylib ; fi
   - cd ../../Mshdist/build
   - rm ./* -r
   - cmake ..
@@ -100,19 +93,15 @@ script:
   - head CMakeFiles/mshdist.dir/link.txt
   - make
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-                 ldd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
+                ldd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
   - make install
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
                  then ldd ~/lib/iscd/libMshdistance.so ;
-                              else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
-  - mshdist ../documentation/Examples/batkeep.mesh -ncpu 1
-  - rm ../documentation/Examples/batkeep.sol
-  - cp ../documentation/Examples/batkeep.save.sol
-                                           ../documentation/Examples/batkeep.sol
-  - mshdist ../documentation/Examples/batkeep.mesh -ncpu 2
-  - rm ../documentation/Examples/batkeep.sol
-  - cp ../documentation/Examples/batkeep.save.sol
-                                           ../documentation/Examples/batkeep.sol
+                             else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
+  - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1
+  - rm ../documentation/Examples/saddle3d.sol
+  - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 2
+  - rm ../documentation/Examples/saddle3d.sol
 
 notifications:
   email: false

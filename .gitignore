@@ -10,3 +10,4 @@ CTestTestfile.cmake
 
 build
 sources/compil.date
+documentation/Examples/saddle3d.sol
