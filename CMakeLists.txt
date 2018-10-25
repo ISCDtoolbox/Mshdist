@@ -71,21 +71,42 @@ file(WRITE sources/compil.date "#define COMPIL \"${day} ${hour}\"")
 #        - mshdist.h
 #        - memory.h
 #        - compil.date (created only at the compilation by cmake, cf. macro)
-add_library(Mshdistance SHARED sources/boulep.c
-                               sources/bucket.c
-                               sources/hash.c
-                               sources/inout.c
-                               sources/locelt.c
-                               sources/memory.c
-                               sources/mshdis1_2d.c
-                               sources/mshdis1_3d.c
-                               #sources/mshdist.c       # Apparently I have to
-                               sources/queue.c
-                               sources/scalem.c
-                               sources/specdist_2d.c
-                               sources/specdist_3d.c
-                               sources/tools_2d.c
-                               sources/tools_3d.c)
+if (APPLE)
+    add_library(Mshdistance SHARED sources/boulep.c
+                                   sources/bucket.c
+                                   sources/hash.c
+                                   sources/inout.c
+                                   sources/locelt.c
+                                   sources/memory.c
+                                   sources/mshdis1_2d.c
+                                   sources/mshdis1_3d.c
+                                   sources/mshdist.c      # Apparently I have
+                                                          # to add it for Apple
+                                                          # because of the Info
+                                                          # (works for linux) 
+                                   sources/queue.c
+                                   sources/scalem.c
+                                   sources/specdist_2d.c
+                                   sources/specdist_3d.c
+                                   sources/tools_2d.c
+                                   sources/tools_3d.c)
+else ()
+    add_library(Mshdistance SHARED sources/boulep.c
+                                   sources/bucket.c
+                                   sources/hash.c
+                                   sources/inout.c
+                                   sources/locelt.c
+                                   sources/memory.c
+                                   sources/mshdis1_2d.c
+                                   sources/mshdis1_3d.c
+                                   #sources/mshdist.c
+                                   sources/queue.c
+                                   sources/scalem.c
+                                   sources/specdist_2d.c
+                                   sources/specdist_3d.c
+                                   sources/tools_2d.c
+                                   sources/tools_3d.c)
+endif ()
 
 # Find the Commons library (all the other libraries are its dependancies)
 find_library(COMMONS_LIBRARY NAMES Commons HINTS "$ENV{HOME}/lib/iscd")
