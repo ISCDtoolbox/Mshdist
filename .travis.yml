@@ -63,7 +63,7 @@ script:
   - head CMakeFiles/mshdist.dir/link.txt
   - make
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-                 dd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
+                ldd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
   - make install
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
                  then ldd ~/lib/iscd/libMshdistance.so ;
