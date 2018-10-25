@@ -9,23 +9,21 @@ compiler:
   - clang
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-                     sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-        locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
-            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
-                                                libiomp5.dylib libomp.dylib ; fi
+#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+#                    sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
+#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+#        locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
+#            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
+#                                               libiomp5.dylib libomp.dylib ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
           sudo apt-get install libiomp-dev --yes ; else brew install libomp ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then ls /usr/local/lib/
-             /usr/local/Cellar/libomp/6.0.1/lib/ /usr/local/opt/libomp/lib/ ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew upgrade cmake ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-                     sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-        locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
-            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
-                                                libiomp5.dylib libomp.dylib ; fi
+#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+#                    sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
+#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+#        locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
+#            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
+#                                               libiomp5.dylib libomp.dylib ; fi
 
 sudo: false
 
@@ -53,6 +51,8 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
                          ldd libCommons.so ; else otool -L libCommons.dylib ; fi
   - make install
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then ldd ~/lib/iscd/libCommons.so ;
+                                  else otool -L ~/lib/iscd/libCommons.dylib ; fi
   - cd ../../Mshdist
   - mkdir build
   - cd build
@@ -65,6 +65,9 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
                  ldd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
   - make install
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
+                 then ldd ~/lib/iscd/libMshdistance.so ;
+                              else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
   - cp ../documentation/Examples/batkeep.sol
                                       ../documentation/Examples/batkeep.save.sol
   - mshdist ../documentation/Examples/batkeep.mesh -ncpu 1
@@ -86,6 +89,8 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
                          ldd libCommons.so ; else otool -L libCommons.dylib ; fi
   - make install
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then ldd ~/lib/iscd/libCommons.so ;
+                                  else otool -L ~/lib/iscd/libCommons.dylib ; fi
   - cd ../../Mshdist/build
   - rm ./* -r
   - cmake ..
@@ -97,6 +102,9 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
                  ldd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
   - make install
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
+                 then ldd ~/lib/iscd/libMshdistance.so ;
+                              else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
   - mshdist ../documentation/Examples/batkeep.mesh -ncpu 1
   - rm ../documentation/Examples/batkeep.sol
   - cp ../documentation/Examples/batkeep.save.sol

@@ -87,7 +87,7 @@ add_library(Mshdistance SHARED sources/boulep.c
                                sources/tools_3d.c)
 
 # Find the Commons library (all the other libraries are its dependancies)
-find_library(COMMONS_LIBRARY NAMES Commons HINTS "$ENV{HOME}/lib/iscd")
+find_library(Commons NAMES Commons HINTS "$ENV{HOME}/lib/iscd")
 
 # Find the Math library (libm.a on Ubuntu 16.04.4, add -lm with gcc compiler)
 find_library(MATH_LIBRARY m)
@@ -120,7 +120,7 @@ endif ()
 #         and Commons libraries (if they have not been found with the above
 #         find_library commands)
 target_link_libraries(Mshdistance PUBLIC ${MATH_LIBRARY}
-                                         ${COMMONS_LIBRARY})
+                                         ${Commons})
 
 # Set the installation properties of the Mshdistance library
 # Remark: the user can change here the paths where the Mshdistance library and
