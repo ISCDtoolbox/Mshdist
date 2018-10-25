@@ -113,9 +113,6 @@ if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
     #target_compile_options(Mshdistance PUBLIC -Wall -Wextra -Wpedantic)
 else ()
-    if (APPLE)
-        target_compile_options(Mshdistance PUBLIC -v)
-    endif ()
     #target_compile_options(Mshdistance PUBLIC -Weverything)
 endif ()
 
@@ -124,7 +121,6 @@ endif ()
 #         find_library commands)
 target_link_libraries(Mshdistance PUBLIC ${MATH_LIBRARY}
                                          ${COMMONS_LIBRARY})
-
 
 # Set the installation properties of the Mshdistance library
 # Remark: the user can change here the paths where the Mshdistance library and
@@ -155,9 +151,6 @@ if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(mshdist PUBLIC -Wno-unused-result)
     #target_compile_options(mshdist PUBLIC -Wall -Wextra -Wpedantic)
 else ()
-    if (APPLE)
-        target_compile_options(mshdist PUBLIC -v)
-    endif ()
     #target_compile_options(mshdist PUBLIC -Weverything)
 endif ()
 
