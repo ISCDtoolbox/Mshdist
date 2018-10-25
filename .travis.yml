@@ -9,7 +9,6 @@ compiler:
   - clang
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then echo $DYLD_LIBRARY_PATH ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
                      sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
