@@ -1851,6 +1851,7 @@ int ppgdist_3d(pMesh mesh,pSol sol) {
       for (i=1; i<info.ncpu; i++)  par.res[0] += par.res[i];
     }
     else {
+fprintf(stderr,"Ccou");
       tmpdist_3d(1,mesh->ne,0,&par);
 fprintf(stderr,"Ccoucou");
       upddist_3d(1,mesh->np,0,&par);
