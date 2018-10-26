@@ -95,7 +95,7 @@ find_library(MATH_LIBRARY m)
 
 # Set all the targets and properties of the Mshdistance library
 target_include_directories(Mshdistance
-    PRIVATE
+    PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/sources>
         $<BUILD_INTERFACE:$ENV{HOME}/include/iscd/Commons>)
         # Remark: the user can add directly the path(s) for header file(s) in
