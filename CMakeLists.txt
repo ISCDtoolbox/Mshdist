@@ -95,7 +95,7 @@ find_library(MATH_LIBRARY m)
 
 # Set all the targets and properties of the Mshdistance library
 target_include_directories(Mshdistance
-    PUBLIC
+    PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/sources>
         $<BUILD_INTERFACE:$ENV{HOME}/include/iscd/Commons>)
         # Remark: the user can add directly the path(s) for header file(s) in
@@ -103,16 +103,16 @@ target_include_directories(Mshdistance
         #         associated with the Commons library)
 
 if (CMAKE_VERSION VERSION_GREATER 3.8)
-    target_compile_features(Mshdistance PUBLIC c_std_99)
+    target_compile_features(Mshdistance PRIVATE c_std_99)
 elseif (CMAKE_VERSION VERSION_GREATER 3.1)
     set_property(TARGET Mshdistance PROPERTY C_STANDARD 99)
 else ()
-    target_compile_options(Mshdistance PUBLIC -std=gnu99)
+    target_compile_options(Mshdistance PRIVATE -std=gnu99)
 endif ()
 
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
-    target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
-    #target_compile_options(Mshdistance PUBLIC -Wpedantic -Wall -Wextra)
+    target_compile_options(Mshdistance PRIVATE -Wno-unused-result)
+    #target_compile_options(Mshdistance PRUVATE -Wpedantic -Wall -Wextra)
 elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
                                    OR ${CMAKE_C_COMPILER_ID} MATCHES AppleClang)
     if (APPLE)
@@ -121,8 +121,8 @@ elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
         target_link_libraries(Mshdistance PRIVATE -Wl,-U,_info)
     endif ()
 #else ()
-    target_compile_options(Mshdistance PUBLIC -g)
-    #target_compile_options(Mshdistance PUBLIC -Weverything)
+    target_compile_options(Mshdistance PRIVATE -g)
+    #target_compile_options(Mshdistance PRIVATE -Weverything)
 endif ()
 
 # Remark: the user can add directly here the path for linking the math and
@@ -149,19 +149,19 @@ set(CMAKE_BUILD_TYPE "Release")
 add_executable(mshdist sources/mshdist.c)
 
 if (CMAKE_VERSION VERSION_GREATER 3.8)
-    target_compile_features(mshdist PUBLIC c_std_99)
+    target_compile_features(mshdist PRIVATE c_std_99)
 elseif (CMAKE_VERSION VERSION_GREATER 3.1)
     set_property(TARGET mshdist PROPERTY C_STANDARD 99)
 else ()
-    target_compile_options(mshdist PUBLIC -std=gnu99)
+    target_compile_options(mshdist PRIVATE -std=gnu99)
 endif ()
 
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
-    target_compile_options(mshdist PUBLIC -Wno-unused-result)
-    #target_compile_options(mshdist PUBLIC -Wpedantic -Wall -Wextra)
+    target_compile_options(mshdist PRIVATE -Wno-unused-result)
+    #target_compile_options(mshdist PRIVATE -Wpedantic -Wall -Wextra)
 #else ()
-    #target_compile_options(mshdist PUBLIC -g)
-    #target_compile_options(mshdist PUBLIC -Weverything)
+    target_compile_options(mshdist PRIVATE -g)
+    #target_compile_options(mshdist PRIVATE -Weverything)
 endif ()
 
 target_link_libraries(mshdist PUBLIC Mshdistance)

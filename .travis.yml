@@ -69,7 +69,9 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
                  then ldd ~/lib/iscd/libMshdistance.so ;
                              else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
-  - valgrind mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
+        valgrind mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1 ;
+         else mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1 ; fi
   - rm ../documentation/Examples/saddle3d.sol
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 2
   - rm ../documentation/Examples/saddle3d.sol
