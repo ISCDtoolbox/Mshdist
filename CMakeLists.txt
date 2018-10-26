@@ -79,7 +79,7 @@ add_library(Mshdistance SHARED sources/boulep.c
                                sources/memory.c
                                sources/mshdis1_2d.c
                                sources/mshdis1_3d.c
-                               sources/mshdist.c
+                               #sources/mshdist.c
                                sources/queue.c
                                sources/scalem.c
                                sources/specdist_2d.c
@@ -149,13 +149,13 @@ set(CMAKE_BUILD_TYPE "Release")
 
 add_executable(mshdist sources/mshdist.c)
 
-#if (CMAKE_VERSION VERSION_GREATER 3.8)
-#    target_compile_features(mshdist PRIVATE c_std_99)
-#elseif (CMAKE_VERSION VERSION_GREATER 3.1)
-#    set_property(TARGET mshdist PROPERTY C_STANDARD 99)
-#else ()
-#    target_compile_options(mshdist PRIVATE -std=gnu99)
-#endif ()
+if (CMAKE_VERSION VERSION_GREATER 3.8)
+    target_compile_features(mshdist PRIVATE c_std_99)
+elseif (CMAKE_VERSION VERSION_GREATER 3.1)
+    set_property(TARGET mshdist PROPERTY C_STANDARD 99)
+else ()
+    target_compile_options(mshdist PRIVATE -std=gnu99)
+endif ()
 
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(mshdist PRIVATE -Wno-unused-result)

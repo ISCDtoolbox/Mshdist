@@ -569,7 +569,7 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
 
 
 /* Main program */
-int main(int argc,char **argv) {
+int main(int argc,char* argv[]) {
   Mesh       mesh1,mesh2;
   Sol        sol1;
   int        k;
