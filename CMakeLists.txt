@@ -113,9 +113,13 @@ endif ()
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(Mshdistance PUBLIC -Wno-unused-result)
     #target_compile_options(Mshdistance PUBLIC -Wpedantic -Wall -Wextra)
-elseif (APPLE)
-    message("${CMAKE_C_COMPILER_ID}")
-    target_compile_options(Mshdistance PUBLIC -Wl,-U,_info)
+elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
+                                   OR ${CMAKE_C_COMPILER_ID} MATCHES AppleClang)
+    if (APPLE)
+        # Important remark: on mac os, the 'info' global variable in mshdist.c
+        #                   causes problems when linking the Mshdistance library
+        target_link_libraries(Mshdistance PUBLIC -Wl,-U,_info)
+    endif ()
 #else ()
     #target_compile_options(Mshdistance PUBLIC -g)
     #target_compile_options(Mshdistance PUBLIC -Weverything)
