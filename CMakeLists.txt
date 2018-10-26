@@ -113,15 +113,15 @@ target_include_directories(Mshdistance
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(Mshdistance PRIVATE -Wno-unused-result)
     #target_compile_options(Mshdistance PRIVATE -Wpedantic -Wall -Wextra)
-#elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
-#                                  OR ${CMAKE_C_COMPILER_ID} MATCHES AppleClang)
-#    if (APPLE)
+elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
+                                  OR ${CMAKE_C_COMPILER_ID} MATCHES AppleClang)
+    if (APPLE)
         # Important remark: on apple clang, the 'info' global variable of
         #                   mshdist.c causes problems when linking the
         #                   Mshdistance library
- #       target_link_libraries(Mshdistance PRIVATE -Wl,-U,_info)
-#    endif ()
-else ()
+        target_link_libraries(Mshdistance PRIVATE -Wl,-U,_info)
+    endif ()
+#else ()
     target_compile_options(Mshdistance PRIVATE -g)
     #target_compile_options(Mshdistance PRIVATE -Weverything)
 endif ()
