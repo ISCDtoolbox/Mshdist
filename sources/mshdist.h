@@ -135,7 +135,6 @@ typedef struct {
   int           thsiz,thmax;
 } hash;
 
-Info   info;
 
 /* prototypes */
 int  loadMesh(pMesh mesh1,pMesh mesh2);
