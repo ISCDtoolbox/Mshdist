@@ -118,10 +118,10 @@ elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
     if (APPLE)
         # Important remark: on mac os, the 'info' global variable in mshdist.c
         #                   causes problems when linking the Mshdistance library
-        target_link_libraries(Mshdistance PUBLIC -Wl,-U,_info)
+        target_link_libraries(Mshdistance PRIVATE -Wl,-U,_info)
     endif ()
 #else ()
-    #target_compile_options(Mshdistance PUBLIC -g)
+    target_compile_options(Mshdistance PUBLIC -g)
     #target_compile_options(Mshdistance PUBLIC -Weverything)
 endif ()
 
