@@ -176,7 +176,11 @@ int loadMesh(pMesh mesh1,pMesh mesh2) {
   }
   GmfCloseMesh(inm);
 
-  if ( ( info.option == 2 ) || ( info.option == 3 ) ) {  return(1); }
+  fprintf(stderr,"\ninfo.option=%d\n",info.option);
+
+  if ( ( info.option == 2 ) || ( info.option == 3 ) ) { fprintf(stderr,"coucou");  return(1); }
+
+  fprintf(stderr,"why?"); 
 
   /* load mesh 2 */
   name = mesh2->name;
