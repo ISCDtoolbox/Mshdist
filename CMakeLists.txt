@@ -79,7 +79,7 @@ add_library(Mshdistance SHARED sources/boulep.c
                                sources/memory.c
                                sources/mshdis1_2d.c
                                sources/mshdis1_3d.c
-                               #sources/mshdist.c
+                               sources/mshdist.c
                                sources/queue.c
                                sources/scalem.c
                                sources/specdist_2d.c
@@ -102,13 +102,13 @@ target_include_directories(Mshdistance
         #         the above target_include_directories command (such as the ones
         #         associated with the Commons library)
 
-#if (CMAKE_VERSION VERSION_GREATER 3.8)
-#    target_compile_features(Mshdistance PRIVATE c_std_99)
-#elseif (CMAKE_VERSION VERSION_GREATER 3.1)
-#    set_property(TARGET Mshdistance PROPERTY C_STANDARD 99)
-#else ()
-#    target_compile_options(Mshdistance PRIVATE -std=gnu99)
-#endif ()
+if (CMAKE_VERSION VERSION_GREATER 3.8)
+    target_compile_features(Mshdistance PRIVATE c_std_99)
+elseif (CMAKE_VERSION VERSION_GREATER 3.1)
+    set_property(TARGET Mshdistance PROPERTY C_STANDARD 99)
+else ()
+    target_compile_options(Mshdistance PRIVATE -std=gnu99)
+endif ()
 
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
     target_compile_options(Mshdistance PRIVATE -Wno-unused-result)
