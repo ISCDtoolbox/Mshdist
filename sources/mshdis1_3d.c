@@ -1852,7 +1852,7 @@ int ppgdist_3d(pMesh mesh,pSol sol) {
     }
     else {
       tmpdist_3d(1,mesh->ne,0,&par);
-fprintf(stderr,"Ccoucou")
+fprintf(stderr,"Ccoucou");
       upddist_3d(1,mesh->np,0,&par);
     }
 
