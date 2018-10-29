@@ -64,11 +64,11 @@ script:
   - head CMakeFiles/mshdist.dir/link.txt
   - make
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-                ldd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
+                     ldd libMshdistance.a ; else otool -L libMshdistance.a ; fi
   - make install
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
-                 then ldd ~/lib/iscd/libMshdistance.so ;
-                             else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
+                 then ldd ~/lib/iscd/libMshdistance.a ;
+                                 else otool -L ~/lib/iscd/libMshdistance.a ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
         valgrind mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1 ;
          else mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1 ; fi
@@ -96,11 +96,11 @@ script:
   - head CMakeFiles/mshdist.dir/link.txt
   - make
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-                ldd libMshdistance.so ; else otool -L libMshdistance.dylib ; fi
+                     ldd libMshdistance.a ; else otool -L libMshdistance.a ; fi
   - make install
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
-                 then ldd ~/lib/iscd/libMshdistance.so ;
-                             else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
+                 then ldd ~/lib/iscd/libMshdistance.a ;
+                                 else otool -L ~/lib/iscd/libMshdistance.a ; fi
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1
   - rm ../documentation/Examples/saddle3d.sol
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 2

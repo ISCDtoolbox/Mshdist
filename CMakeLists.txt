@@ -98,7 +98,7 @@ add_library(Mshdistance STATIC sources/boulep.c
                                sources/memory.c
                                sources/mshdis1_2d.c
                                sources/mshdis1_3d.c
-                               #sources/mshdist.c #excluding the main file
+                               #sources/mshdist.c
                                sources/queue.c
                                sources/scalem.c
                                sources/specdist_2d.c
