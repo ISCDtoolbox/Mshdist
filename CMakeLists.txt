@@ -111,8 +111,8 @@ else ()
 endif ()
 
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
-    target_compile_options(Mshdistance PRIVATE -Wno-unused-result)
-    #target_compile_options(Mshdistance PRIVATE -Wpedantic -Wall -Wextra)
+    #target_compile_options(Mshdistance PRIVATE -Wno-unused-result)
+    target_compile_options(Mshdistance PRIVATE -Wpedantic -Wall -Wextra)
 elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
                                   OR ${CMAKE_C_COMPILER_ID} MATCHES AppleClang)
     if (APPLE)
@@ -122,7 +122,7 @@ elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
         target_link_libraries(Mshdistance PRIVATE -Wl,-U,_info)
     endif ()
 #else ()
-    #target_compile_options(Mshdistance PRIVATE -g)
+    target_compile_options(Mshdistance PRIVATE -g)
     #target_compile_options(Mshdistance PRIVATE -Weverything)
 endif ()
 
@@ -158,10 +158,10 @@ else ()
 endif ()
 
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
-    target_compile_options(mshdist PRIVATE -Wno-unused-result)
-    #target_compile_options(mshdist PRIVATE -Wpedantic -Wall -Wextra)
+    #target_compile_options(mshdist PRIVATE -Wno-unused-result)
+    target_compile_options(mshdist PRIVATE -Wpedantic -Wall -Wextra)
 else ()
-    #target_compile_options(mshdist PRIVATE -g)
+    target_compile_options(mshdist PRIVATE -g)
     #target_compile_options(mshdist PRIVATE -Weverything)
 endif ()
 
