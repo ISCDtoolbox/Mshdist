@@ -71,7 +71,26 @@ file(WRITE sources/compil.date "#define COMPIL \"${day} ${hour}\"")
 #        - mshdist.h
 #        - memory.h
 #        - compil.date (created only at the compilation by cmake, cf. macro)
-add_library(Mshdistance SHARED sources/boulep.c
+#
+# Important remark: for some reasons we still do not understand, the mshdist
+#                   software does not work (segmentation fault) when it is
+#                   linked to the Mshdistance library defined as a SHARED one
+#                   (works well on linux for gcc and clang but mysteriously
+#                   fails on mac os with apple clang). It seems to be come from
+#                   the combination of function pointer (mshdist1=mshdist_3d,2d)
+#                   in excfun of mshdist.c with how the pthread parallelization
+#                   of lplib.c is implemented. For example, the valgrind output
+#                   of the segmentation fault is different if -ncpu 1 or -ncpu 2
+#                   and it seems that some errors are produced because one
+#                   thread starts without waiting for the other one to be
+#                   finished and resulting in a conflict of adress for function
+#                   pointers. Moreover, it may be luck (undefined behaviour of
+#                   function pointer casting, see -Wpedantic) that it works on
+#                   linux. This issue is difficult but definitively needs to be
+#                   fixed because maybe there is an important bug inside the
+#                   parallel code of the Mshdistance library. An idea would be
+#                   not to use function pointers.
+add_library(Mshdistance STATIC sources/boulep.c
                                sources/bucket.c
                                sources/hash.c
                                sources/inout.c
@@ -111,18 +130,19 @@ else ()
 endif ()
 
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
-    #target_compile_options(Mshdistance PRIVATE -Wno-unused-result)
-    target_compile_options(Mshdistance PRIVATE -Wpedantic -Wall -Wextra)
+    target_compile_options(Mshdistance PRIVATE -Wno-unused-result)
+    #target_compile_options(Mshdistance PRIVATE -Wpedantic -Wall -Wextra)
 elseif (${CMAKE_C_COMPILER_ID} MATCHES Clang
                                   OR ${CMAKE_C_COMPILER_ID} MATCHES AppleClang)
     if (APPLE)
         # Important remark: on apple clang, the 'info' global variable of
         #                   mshdist.c causes problems when linking the
-        #                   Mshdistance library
+        #                   Mshdistance library because it is not defined
+        #                   inside the library but only in mshdist(.c) software
         target_link_libraries(Mshdistance PRIVATE -Wl,-U,_info)
     endif ()
 #else ()
-    target_compile_options(Mshdistance PRIVATE -g)
+    #target_compile_options(Mshdistance PRIVATE -g)
     #target_compile_options(Mshdistance PRIVATE -Weverything)
 endif ()
 
@@ -135,7 +155,8 @@ target_link_libraries(Mshdistance PUBLIC ${MATH_LIBRARY}
 # Set the installation properties of the Mshdistance library
 # Remark: the user can change here the paths where the Mshdistance library and
 #         associated header files will be installed at 'cmake install' command
-install(TARGETS Mshdistance LIBRARY DESTINATION "$ENV{HOME}/lib/iscd")
+install(TARGETS Mshdistance ARCHIVE DESTINATION "$ENV{HOME}/lib/iscd")
+#install(TARGETS Mshdistance LIBRARY DESTINATION "$ENV{HOME}/lib/iscd")
 install(FILES sources/memory.h
               sources/mshdist.h DESTINATION "$ENV{HOME}/include/iscd/Mshdist")
 
@@ -158,10 +179,10 @@ else ()
 endif ()
 
 if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
-    #target_compile_options(mshdist PRIVATE -Wno-unused-result)
-    target_compile_options(mshdist PRIVATE -Wpedantic -Wall -Wextra)
-else ()
-    target_compile_options(mshdist PRIVATE -g)
+    target_compile_options(mshdist PRIVATE -Wno-unused-result)
+    #target_compile_options(mshdist PRIVATE -Wpedantic -Wall -Wextra)
+#else ()
+    #target_compile_options(mshdist PRIVATE -g)
     #target_compile_options(mshdist PRIVATE -Weverything)
 endif ()
 

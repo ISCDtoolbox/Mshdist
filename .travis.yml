@@ -9,30 +9,30 @@ compiler:
   - clang
 
 before_install:
-#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-#                    sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
-#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-#        locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
-#            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
-#                                               libiomp5.dylib libomp.dylib ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+                    sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+        locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
+            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
+                                               libiomp5.dylib libomp.dylib ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
          sudo apt-get install libiomp-dev --yes ; else brew install libomp ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew upgrade cmake ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew install valgrind ; fi
-#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-#                    sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
-#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-#        locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
-#            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
-#                                               libiomp5.dylib libomp.dylib ; fi
-#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
-#                                             lsb_release -a ; else sw_vers ; fi
-#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then lscpu ; else sysctl hw ; fi
-#  - if [[ "$TRAVIS_COMPILER" == "gcc" ]] ; then
-#                                      gcc --version ; else clang --version ; fi
-#  - git --version
-#  - make --version
-#  - cmake --version
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew install valgrind ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+                    sudo updatedb ; else sudo /usr/libexec/locate.updatedb ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+        locate libc.so libm.so libpthread.so libgomp.so libomp.so libiomp5.so ;
+            else locate libc.dylib libm.dylib libpthread.dylib libgomp.dylib
+                                               libiomp5.dylib libomp.dylib ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+                                             lsb_release -a ; else sw_vers ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then lscpu ; else sysctl hw ; fi
+  - if [[ "$TRAVIS_COMPILER" == "gcc" ]] ; then
+                                      gcc --version ; else clang --version ; fi
+  - git --version
+  - make --version
+  - cmake --version
 
 sudo: false
 
@@ -76,7 +76,7 @@ script:
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 2
   - rm ../documentation/Examples/saddle3d.sol
   - cd ../../Commons/build
-  - rm ./* -r
+  - rm -r ./*
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_COMPILER" == "clang" ]] ;
          then cmake .. -DOPENMP=1 -DFORCEIOMP=1 ; else cmake .. -DOPENMP=1 ; fi
   - head CMakeFiles/Commons.dir/flags.make
@@ -88,7 +88,7 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then ldd ~/lib/iscd/libCommons.so ;
                                  else otool -L ~/lib/iscd/libCommons.dylib ; fi
   - cd ../../Mshdist/build
-  - rm ./* -r
+  - rm -r ./*
   - cmake ..
   - head CMakeFiles/Mshdistance.dir/flags.make
   - head CMakeFiles/Mshdistance.dir/link.txt
