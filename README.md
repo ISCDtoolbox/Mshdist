@@ -96,7 +96,52 @@ You can generate the signed distance function of the France border (edges in frm
 ```
 mshdist carre.mesh frmap.mesh
 ```
-On success, the values of the signed distance function at the vertices of the mesh will be saved in an output carre.sol file.
+On success, the values of the signed distance function at the vertices of the mesh will be saved in an output carre.sol file. Here is an example of output of the mshdist software
+```
+mshdist carre.mesh frmap.mesh 
+  -- MSHDIST, Release 1.1b (June 21, 2010) 
+     Copyright (c) LJLL, 2010
+     2018-10-31 16:26:19
+
+  -- INPUT DATA
+  %% carre.mesh OPENED
+  -- READING DATA FILE carre.mesh
+  %% frmap.mesh OPENED
+  -- READING DATA FILE frmap.mesh
+     NUMBER OF GIVEN VERTICES     107990     18138
+     NUMBER OF GIVEN ELEMENTS     214778      1796
+  -- DATA READING COMPLETED.     0.436s
+
+  &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+   MODULE MSHDIST-LJLL : 1.1b (June 21, 2010)
+  &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+  -- PHASE 1 : ANALYSIS
+  -- PHASE 1 COMPLETED.     0.023s
+
+  -- PHASE 2 : DISTANCING
+  ** Initialization
+     distance
+     323 correction(s)
+  ** Sign identification
+     4 connected component(s)
+  %% 66 elements with a vertex uninitialized
+  %% 12 corrected vertices
+  ** Propagation [1 cpu]
+     Residual 2.782963E-07 after 174 iterations
+  -- PHASE 2 COMPLETED.     4.342s
+
+  &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+   END OF MODULE MSHDIST 
+  &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+  -- WRITING DATA FILE carre
+     dd : 1.000000 (scaling factor used to unscale solutions)
+  %% carre.sol OPENED
+  -- WRITING COMPLETED
+
+  ELAPSED TIME  4.864s
+```
 
 #### With a single *.mesh file and an initial associated *.sol file
 
@@ -167,7 +212,7 @@ Contributors to this project are warmly welcomed.
 The github page of the
 
 * [Commons library](https://github.com/ISCDtoolbox/Commons)
-* [medit software]((https://github.com/ISCDtoolbox/Medit))
+* [medit software](https://github.com/ISCDtoolbox/Medit)
 
 and the link to the
 
