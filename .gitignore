@@ -11,11 +11,11 @@ CTestTestfile.cmake
 build
 sources/compil.date
 
-documentation/Examples/bat2d.sol
-documentation/Examples/bat2dInit.mesh
-documentation/Examples/square2d.sol
-documentation/Examples/frmap2d.sol
-documentation/Examples/thks2d.sol
+documentation/Examples/bat.sol
+documentation/Examples/batInit.mesh
+documentation/Examples/carre.sol
+documentation/Examples/frmap.sol
+documentation/Examples/thks.sol
 
 documentation/Examples/ball3d.sol
 documentation/Examples/ball3dInit.mesh
