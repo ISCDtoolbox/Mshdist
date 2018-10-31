@@ -69,6 +69,11 @@ script:
 #  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
 #                 then ldd ~/lib/iscd/libMshdistance.so ;
 #                             else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
+  - mshdist ../documentation/Examples/carre.mesh 
+                                            ../documentation/Examples/frmap.mesh
+  - cp ../documentation/Examples/batInit.sol ../documentation/Examples/bat.sol
+  - mshdist ../documentation/Examples/bat.mesh
+  - mshdist ../documentation/Examples/thks.mesh -dom
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1
   - rm ../documentation/Examples/saddle3d.sol
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 2
@@ -99,6 +104,11 @@ script:
 #  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
 #                 then ldd ~/lib/iscd/libMshdistance.so ;
 #                             else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
+  - mshdist ../documentation/Examples/carre.mesh 
+                                            ../documentation/Examples/frmap.mesh
+  - cp ../documentation/Examples/batInit.sol ../documentation/Examples/bat.sol
+  - mshdist ../documentation/Examples/bat.mesh
+  - mshdist ../documentation/Examples/thks.mesh -dom
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1
   - rm ../documentation/Examples/saddle3d.sol
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 2
