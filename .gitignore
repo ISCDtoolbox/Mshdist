@@ -16,4 +16,7 @@ documentation/Examples/batInit.mesh
 documentation/Examples/carre.sol
 documentation/Examples/frmap.sol
 documentation/Examples/thks.sol
+
+documentation/Examples/cube.sol
+documentation/Examples/h2mpd.sol
 documentation/Examples/saddle3d.sol
