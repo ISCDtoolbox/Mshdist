@@ -10,7 +10,7 @@ Then, in a command prompt, first navigate to the directory where you want to sav
 ```
 git clone https://github.com/ISCDtoolbox/Mshdist.git
 ```
-to clone the repository on your computer (we recall that it is also possible to download the files manually from github in a *.zip archive format if the git software is not installed on your computer, just go to the upper right part of the current page, click on the button Clone or download, and then Download ZIP). Finally, type successively in the command prompt
+to clone the repository on your computer (we recall that it is also possible to download the files manually from github in a *.zip archive format if the git software is not installed on your computer, just go to the upper right part of the current [project page](https://github.com/ISCDtoolbox/Mshdist), click on the button Clone or download, and then Download ZIP). Finally, type successively in the command prompt
 ```
 cd Mshdist
 ```
@@ -100,7 +100,7 @@ On success, the values of the signed distance function at the vertices of the me
 
 #### With a single *.mesh file and an initial associated *.sol file
 
-Starting from a bat.sol file (saved as batInit.sol since bat.sol will be overwritten) that gives a level-set function of a bat.mesh file (negative inside, positive outside the domain, zero on the boundary), you can modify the level-set function so that it become the signed distance function associated with the bat domain (i.e. the level-set with a unitary gradient norm).
+Starting from a bat.sol file (saved as batInit.sol since bat.sol will be overwritten) that gives a level-set function of a bat.mesh file (negative inside, positive outside the domain, zero on the boundary), you can modify the level-set function so that it become the signed distance function associated with the bat domain (i.e. a level-set function with a unitary gradient norm).
 
 Since such an *.sol is overwritten by mshdist during the renormalization process, we have saved the initial *.sol file as batInit.sol. Hence, in order to perform this test, type successively in a command prompt
 ```
@@ -118,17 +118,27 @@ mshdist thks.mesh -dom
 
 ### In three space dimensions
 
+You can use multi-threading thanks to the -ncpu flag option of mshdist. You can obtain the total number of cpu of your system by typying in a command prompt
+```
+lscpu
+```
+on Linux or
+```
+sysctl hw
+```
+on Mac OS systems.
+
 #### With two *.mesh files
 
 You can generate the signed distance function of an egg-like shape (triangles in mpd3d.mesh file) at the vertices of a cube (given in cube3d.mesh file) by typing in the command prompt
 ```
 mshdist cube3d.mesh mpd3d.mesh -noscale -ncpu 1
 ```
-On success, the values of the signed distance function at the vertices of the mesh will be saved in an output cube3d.sol file.
+On success, the values of the signed distance function at the vertices of the mesh will be saved in an output cube3d.sol file. We refer to the [documentation](https://github.com/ISCDtoolbox/Mshdist/blob/master/documentation/mshdistguide.pdf) for a description of the -noscale option flag.
 
 #### With a single *.mesh file and an initial associated *.sol file
 
-Starting from a ball3d.sol file (saved as ball3dInit.sol since ball3d.sol will be overwritten) that gives a level-set function of a ball3d.mesh file (negative inside, positive outside the domain, zero on the boundary), you can modify the level-set function so that it become the signed distance function associated with the egg-shaped domain (i.e. the level-set with a unitary gradient norm).
+Starting from a ball3d.sol file (saved as ball3dInit.sol since ball3d.sol will be overwritten) that gives a level-set function of a ball3d.mesh file (negative inside, positive outside the domain, zero on the boundary), you can modify the level-set function so that it become the signed distance function associated with the egg-shaped domain (i.e. a level-set function with a unitary gradient norm).
 
 Since such an *.sol is overwritten by mshdist during the renormalization process, we have saved the initial *.sol file as ball3dInit.sol. Hence, in order to perform this test, type successively in a command prompt
 ```
@@ -157,6 +167,7 @@ Contributors to this project are warmly welcomed.
 The github page of the
 
 * [Commons library](https://github.com/ISCDtoolbox/Commons)
+* [medit software]((https://github.com/ISCDtoolbox/Medit))
 
 and the link to the
 
