@@ -10,4 +10,10 @@ CTestTestfile.cmake
 
 build
 sources/compil.date
+
+documentation/Examples/bat.sol
+documentation/Examples/batInit.mesh
+documentation/Examples/carre.sol
+documentation/Examples/frmap.sol
+documentation/Examples/thks.sol
 documentation/Examples/saddle3d.sol
