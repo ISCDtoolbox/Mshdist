@@ -163,7 +163,7 @@ mshdist thks.mesh -dom
 
 ### In three space dimensions
 
-You can use multi-threading thanks to the -ncpu flag option of mshdist. You can obtain the total number of cpu of your system by typying in a command prompt
+You recall that you can decrease the computational time by using the multi-threading offered by the -ncpu flag option of mshdist. You can obtain the total number of cpu of your system by typing in a command prompt
 ```
 lscpu
 ```
