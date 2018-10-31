@@ -86,9 +86,9 @@ The github pages of the Commons library
 
 * [Commons](https://github.com/ISCDtoolbox/Commons)
 
-and the link to the journal article
+and the link to the
 
-* [journal article]((https://link.springer.com/article/10.1007/s10092-011-0051-z))
+* [journal article](https://link.springer.com/article/10.1007/s10092-011-0051-z)
 
 describing the mshdist underlying algorithm.
 
@@ -96,7 +96,7 @@ describing the mshdist underlying algorithm.
 
 * The mshdist software is given under the [GNU Lesser General Public License](https://github.com/ISCDtoolbox/Mshdist/blob/master/LICENSE).
 
-* If you use mshdist in your work, please refer to the journal article:
+* If you use mshdist in your work, please refer to the [journal article](https://link.springer.com/article/10.1007/s10092-011-0051-z) as follows:
 
 C. Dapogny, P. Frey, _Computation of the signed distance function to a discrete contour on adapted triangulation_, Calcolo, Volume 49, Issue 3, pp.193-219 (2012).
 
