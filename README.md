@@ -82,13 +82,13 @@ Contributors to this project are warmly welcomed.
 
 ## Credits
 
-The github pages of the Commons library
+The github page of the
 
-* [Commons](https://github.com/ISCDtoolbox/Commons)
+* [Commons library](https://github.com/ISCDtoolbox/Commons)
 
 and the link to the
 
-* [journal article](https://link.springer.com/article/10.1007/s10092-011-0051-z)
+* [Journal article](https://link.springer.com/article/10.1007/s10092-011-0051-z)
 
 describing the mshdist underlying algorithm.
 
