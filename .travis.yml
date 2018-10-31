@@ -121,8 +121,8 @@ script:
 #  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
 #                 then ldd ~/lib/iscd/libMshdistance.so ;
 #                             else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
-  - mshdist ../documentation/Examples/square2d.mesh 
-                                          ../documentation/Examples/frmap2d.mesh
+  - mshdist ../documentation/Examples/carre.mesh 
+                                          ../documentation/Examples/frmap.mesh
   - rm ../documentation/Examples/carre.sol
   - cp ../documentation/Examples/batInit.sol ../documentation/Examples/bat.sol
   - mshdist ../documentation/Examples/bat.mesh

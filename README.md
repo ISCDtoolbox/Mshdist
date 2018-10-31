@@ -72,6 +72,78 @@ mshdist -?
 ```
 A short [documentation](https://github.com/ISCDtoolbox/Mshdist/blob/master/documentation/mshdistguide.pdf) is also supplied with examples (see the [documentation](https://github.com/ISCDtoolbox/Mshdist/tree/master/documentation) folder).
 
+## Examples
+
+We have provided an example for each different mode that can be treated by the mshdist software. In a command prompt, first navigate to the documentation/Examples/ subdirectory of the Mshdist/ directory in order to test the Examples as follows.
+
+The *.mesh and their associated *.sol files can be vizualized by installing the [medit software](https://github.com/ISCDtoolbox/Medit). In this case, just type in a command prompt
+```
+medit nameOfTheMeshIWantToPlot.mesh
+```
+There is a French [inline HTML documentation](https://www.ljll.math.upmc.fr/frey/logiciels/Docmedit.dir/index.html) written by [C. Dobrzynski](https://www.math.u-bordeaux.fr/~dobrzyns/) (Université de Bordeaux) that describes how to use medit, and also a [technical report](https://www.ljll.math.upmc.fr/frey/publications/RT-0253.pdf) written by [Pascal Frey](https://www.ljll.math.upmc.fr/frey/) (Sorbonne Université). 
+
+For example, you can type the 'F1'or 'F2' key to start or end a plane cut, and the 'm' shortcut plots (if available) the *.sol values associated with the *.mesh file. You can type 'h' during the execution of medit in order to have a summary of all it main features. You can also type in a command prompt
+```
+medit -h
+``` 
+to print the usage of medit. More generally, we refer to the [github page](https://github.com/ISCDtoolbox/Medit) for further details about medit software.
+
+### In two space dimensions
+
+#### With two *.mesh files
+
+You can generate the signed distance function of the France border (edges in frmap.mesh file) at the vertices of a square (given in carre.mesh file) by typing in the command prompt
+```
+mshdist carre.mesh frmap.mesh
+```
+On success, the values of the signed distance function at the vertices of the mesh will be saved in an output carre.sol file.
+
+#### With a single *.mesh file and an initial associated *.sol file
+
+Starting from a bat.sol file (saved as batInit.sol since bat.sol will be overwritten) that gives a level-set function of a bat.mesh file (negative inside, positive outside the domain, zero on the boundary), you can modify the level-set function so that it become the signed distance function associated with the bat domain (i.e. the level-set with a unitary gradient norm).
+
+Since such an *.sol is overwritten by mshdist during the renormalization process, we have saved the initial *.sol file as batInit.sol. Hence, in order to perform this test, type successively in a command prompt
+```
+cp batInit.sol bat.sol
+mshdist bat.mesh
+``` 
+On success, the bat.sol file will be overwritten as the signed distance function of the initial bat domain (that was implicitly encoded in the batInit.sol file)
+
+### With a single *.mesh already encoding a internal domain
+
+You can generate the signed distance function associated with a domain that is already contained in a thks.mesh file (exterior/internal triangles are labelled 2/3, edges of the internal boundary of the word thanks are labelled 5) by typing in the command prompt
+```
+mshdist thks.mesh -dom
+```
+
+### In three space dimensions
+
+#### With two *.mesh files
+
+You can generate the signed distance function of an egg-like shape (triangles in mpd3d.mesh file) at the vertices of a cube (given in cube3d.mesh file) by typing in the command prompt
+```
+mshdist cube3d.mesh mpd3d.mesh -noscale -ncpu 1
+```
+On success, the values of the signed distance function at the vertices of the mesh will be saved in an output cube3d.sol file.
+
+#### With a single *.mesh file and an initial associated *.sol file
+
+Starting from a ball3d.sol file (saved as ball3dInit.sol since ball3d.sol will be overwritten) that gives a level-set function of a ball3d.mesh file (negative inside, positive outside the domain, zero on the boundary), you can modify the level-set function so that it become the signed distance function associated with the egg-shaped domain (i.e. the level-set with a unitary gradient norm).
+
+Since such an *.sol is overwritten by mshdist during the renormalization process, we have saved the initial *.sol file as ball3dInit.sol. Hence, in order to perform this test, type successively in a command prompt
+```
+cp ball3dInit.sol ball3d.sol
+mshdist ball3d.mesh -ncpu 1
+``` 
+On success, the ball3d.sol file will be overwritten as the signed distance function of the initial egg-shaped domain (that was implicitly encoded in the ball3dInit.sol file)
+
+### With a single *.mesh already encoding a internal domain
+
+You can generate the signed distance function associated with a domain that is already contained in a saddle3d.mesh file (exterior/internal triangles are labelled 2/3, edges of the internal boundary of the saddle are labelled 10) by typing in the command prompt
+```
+mshdist saddle3d.mesh -dom -ncpu 1
+```
+
 ## Authors & contributors
 
 The mshdist software is developped and maintained by [Charles Dapogny](http://www-ljk.imag.fr/membres/Charles.Dapogny/) (Université Joseph Fourier) and [Pascal Frey](https://www.ljll.math.upmc.fr/frey/) (Sorbonne Université).
