@@ -69,13 +69,31 @@ script:
 #  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
 #                 then ldd ~/lib/iscd/libMshdistance.so ;
 #                             else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
-  - mshdist ../documentation/Examples/carre.mesh 
-                                            ../documentation/Examples/frmap.mesh
-  - cp ../documentation/Examples/batInit.sol ../documentation/Examples/bat.sol
-  - mshdist ../documentation/Examples/bat.mesh
-  - mshdist ../documentation/Examples/thks.mesh -dom
+  - mshdist ../documentation/Examples/square2d.mesh 
+                                          ../documentation/Examples/frmap2d.mesh
+  - rm ../documentation/Examples/square2d.sol
+  - cp ../documentation/Examples/bat2dInit.sol
+                                             ../documentation/Examples/bat2d.sol
+  - mshdist ../documentation/Examples/bat2d.mesh
+  - rm ../documentation/Examples/bat2d.sol
+  - mshdist ../documentation/Examples/thks2d.mesh -dom
+  - rm ../documentation/Examples/thks2d.sol
+  - mshdist ../documentation/Examples/cube3d.mesh 
+                   ../documentation/Examples/mpd3d.mesh -noscale -it 200 -ncpu 1
+  - rm ../documentation/Examples/cube3d.sol
+  - cp ../documentation/Examples/ball3dInit.sol 
+                                            ../documentation/Examples/ball3d.sol
+  - mshdist ../documentation/Examples/ball3d.mesh -res 0.0001 -ncpu 1
+  - rm ../documentation/Examples/ball3d.sol
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1
   - rm ../documentation/Examples/saddle3d.sol
+  - mshdist ../documentation/Examples/cube3d.mesh 
+                   ../documentation/Examples/mpd3d.mesh -noscale -it 200 -ncpu 2
+  - rm ../documentation/Examples/cube3d.sol
+  - cp ../documentation/Examples/ball3dInit.sol 
+                                            ../documentation/Examples/ball3d.sol
+  - mshdist ../documentation/Examples/ball3d.mesh -res 0.0001 -ncpu 2
+  - rm ../documentation/Examples/ball3d.sol
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 2
   - rm ../documentation/Examples/saddle3d.sol
   - cd ../../Commons/build
@@ -104,13 +122,31 @@ script:
 #  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
 #                 then ldd ~/lib/iscd/libMshdistance.so ;
 #                             else otool -L ~/lib/iscd/libMshdistance.dylib ; fi
-  - mshdist ../documentation/Examples/carre.mesh 
-                                            ../documentation/Examples/frmap.mesh
-  - cp ../documentation/Examples/batInit.sol ../documentation/Examples/bat.sol
-  - mshdist ../documentation/Examples/bat.mesh
-  - mshdist ../documentation/Examples/thks.mesh -dom
+  - mshdist ../documentation/Examples/square2d.mesh 
+                                          ../documentation/Examples/frmap2d.mesh
+  - rm ../documentation/Examples/square2d.sol
+  - cp ../documentation/Examples/bat2dInit.sol
+                                             ../documentation/Examples/bat2d.sol
+  - mshdist ../documentation/Examples/bat2d.mesh
+  - rm ../documentation/Examples/bat2d.sol
+  - mshdist ../documentation/Examples/thks2d.mesh -dom
+  - rm ../documentation/Examples/thks2d.sol
+  - mshdist ../documentation/Examples/cube3d.mesh 
+                   ../documentation/Examples/mpd3d.mesh -noscale -it 200 -ncpu 1
+  - rm ../documentation/Examples/cube3d.sol
+  - cp ../documentation/Examples/ball3dInit.sol 
+                                            ../documentation/Examples/ball3d.sol
+  - mshdist ../documentation/Examples/ball3d.mesh -res 0.0001 -ncpu 1
+  - rm ../documentation/Examples/ball3d.sol
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 1
   - rm ../documentation/Examples/saddle3d.sol
+  - mshdist ../documentation/Examples/cube3d.mesh 
+                   ../documentation/Examples/mpd3d.mesh -noscale -it 200 -ncpu 2
+  - rm ../documentation/Examples/cube3d.sol
+  - cp ../documentation/Examples/ball3dInit.sol 
+                                            ../documentation/Examples/ball3d.sol
+  - mshdist ../documentation/Examples/ball3d.mesh -res 0.0001 -ncpu 2
+  - rm ../documentation/Examples/ball3d.sol
   - mshdist ../documentation/Examples/saddle3d.mesh -dom -ncpu 2
   - rm ../documentation/Examples/saddle3d.sol
 
