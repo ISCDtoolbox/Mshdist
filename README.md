@@ -4,6 +4,11 @@ The mshdist software is a simple algorithm written in C that is able to
 generate the signed distance function of given objects in two and three space
 dimensions.
 
+We mention that during the compilation of the mshdist software, an associated
+static library Mshdistance is generated. Hence, any function appearing in a
+source file (except *mshdistance.c*) can be used in another C-compatible program
+if *libMshdistance.so* (*libMshdistance.dylib* for Mac OS) is linked to it.
+
 ## Install (Linux & Mac OS)
 
 First, you will need to install the ISCD
