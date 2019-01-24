@@ -8,11 +8,11 @@ Please refer to the instructions provided on the ISCD Commons Library page in or
 
 2. download the zip archive of NavierStokes or clone this repository:
 
-   ` git clone https://github.com/ISCDtoolbox/MshDist.git `
+   ` git clone https://github.com/ISCDtoolbox/Mshdist.git `
 
    navigate to the downloaded directory:
 
-   ` cd MshDist `
+   ` cd Mshdist `
 
    then create build directory and compile the project using cmake
    ```
