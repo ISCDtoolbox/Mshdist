@@ -584,12 +584,10 @@ int iniencdomain_3d(pMesh mesh, pSol sol){
   	}
   }
 
-  /* reset point flags and tags */
-  for(k=1; k<=mesh->np; k++){
-    p0 = &mesh->point[k];
-    p0->flag = 0;
-    p0->tag = 0;
-  }
+  /* reset point flags */
+  for(k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+
 
   return(1);
 }

@@ -523,13 +523,13 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
       if ( info.imprim )  fprintf(stdout,"  ** Generation of signed distance function from tria/tets with ref 3\n");
       ier = iniencdomain(mesh1,sol1);
     }
-	  assert(ier);
+    assert(ier);
   }
 
   /* Redistancing */
   else {
-	  if ( info.imprim )  fprintf(stdout,"  ** Redistancing\n");
-	  ier = iniredist(mesh1,sol1);
+    if ( info.imprim )  fprintf(stdout,"  ** Redistancing\n");
+    ier = iniredist(mesh1,sol1);
   }
 
   /* Free fields contained in the Info structure, if need be */
