@@ -28,7 +28,7 @@
 #define EPS1     1.e-20
 #define EPS2     1.e-10
 #define PRECI    1.0    // size for scaling
-#define SIZE     0.95   // size of mesh2 in mesh1
+#define SIZE     0.75   // size of mesh2 in mesh1
 
 #define REFINT        3
 #define REFDIR        1
@@ -161,18 +161,21 @@ double actival_2d(pMesh ,pSol ,int ,int );
 double actival1pt_3d(pMesh ,pSol ,int ,int );
 double actival2pt_3d(pMesh ,pSol ,int ,int ,int );
 double actival_3d(pMesh ,pSol ,int ,int );
-int eqquad(double*,double*);
+int    eqquad(double*,double*);
 
-int intersec_2d(pPoint,pPoint,pPoint,pPoint);
+int    intersec_2d(pPoint,pPoint,pPoint,pPoint);
+int    intersec_3d(pPoint p1,pPoint q1,pPoint r1,pPoint p2,pPoint q2,pPoint r2);
+int    interSegTria(pMesh mesh,pPoint pa,pPoint pb,pTria pt);
 double distpt_2d(pPoint,pPoint,pPoint,int*);
 double distnv0_2d(pMesh,pSol,int,pPoint,int*);
-int buildcircum_3d(pMesh,double *);
-int circumcoords(pPoint,pPoint,pPoint,double *);
+int    buildcircum_3d(pMesh,double *);
+int    circumcoords(pPoint,pPoint,pPoint,double *);
 double distptplan(pPoint,pPoint,pPoint,pPoint);
 double distpt_3d(pPoint p0,pPoint p1,pPoint p2,pPoint pq,char *proj);
 double distnv0_3d(pMesh,pSol,int,pPoint,char*);
 double distnv0approx_3d(pMesh,pSol,int,pPoint);
-int buildcircumredis_3d(pMesh,pSol,int*,int,double*);
+int    buildcircumredis_3d(pMesh,pSol,int*,int,double*);
+int    popAnod(pQueue pq,double *d);
 
 pBucket newBucket_2d(pMesh ,int );
 pBucket newBucket_3d(pMesh ,int );
@@ -188,6 +191,7 @@ int     closept_2d(pMesh ,double *);
 int     closept_3d(pMesh ,double *);
 int     hashelt_3d(pMesh );
 int     hashelt_2d(pMesh );
+void    delHash(pMesh mesh);
 int     inidist_2d(pMesh ,pMesh ,pSol ,pBucket );
 int     inidistpcloud_2d(pMesh ,pMesh ,pSol ,pBucket );
 int     inidist_3d(pMesh ,pMesh ,pSol ,pBucket );
@@ -217,6 +221,7 @@ int     isIntDom(int );
 int     isStartTri(int );
 int     isStartEdg(int );
 int     isStartVer(int );
+int     invmatg(double m[9],double mi[9]);
 
 /* Analytical distance functions */
 int     genHolesPCB_2d(pMesh mesh,pSol sol);

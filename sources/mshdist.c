@@ -343,7 +343,7 @@ static int parsop(pMesh mesh) {
     /* In generating distance, specify one or several exterior points for the sign */
     if ( !strcmp(data,"exteriorpoints") ) {
       fscanf(in,"%d",&info.nexp);
-      info.exp = (int*)calloc(mesh->dim*info.nexp,sizeof(double));
+      info.exp = (double*)calloc(mesh->dim*info.nexp,sizeof(double));
       for (k=0; k<info.nexp; k++) {
         for (l=0; l<mesh->dim; l++) {
           fscanf(in,"%f",&fbuf);
@@ -446,12 +446,12 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
 
   /* alloc memory */
   if (( info.option == 1 )||( info.option == 3 )) {  //add : 21/01/2011
-	sol1->bin = mesh1->bin;
-	sol1->ver = GmfDouble;
-	sol1->size    = 1;
-	sol1->type[0] = 1;
-	sol1->typtab[0][0] = GmfSca;
-	sol1->dim = mesh1->dim;
+    sol1->bin = mesh1->bin;
+    sol1->ver = GmfDouble;
+    sol1->size    = 1;
+    sol1->type[0] = 1;
+    sol1->typtab[0][0] = GmfSca;
+    sol1->dim = mesh1->dim;
     sol1->np  = mesh1->np;
     sol1->val = (double*)malloc((sol1->np+1)*sizeof(double));
     assert(sol1->val);
@@ -506,6 +506,7 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
       ier = inidist(mesh1,mesh2,sol1,bucket);
     
     if ( info.imprim )  fprintf(stdout,"  ** Sign identification\n");
+    puts("ICI");
     
     /* Put a sign to the initial distance field */
     if ( !info.pcloud )
@@ -664,7 +665,7 @@ int main(int argc,char **argv) {
   chrono(OFF,&info.ctim[3]);
   if ( info.imprim ) {
     printim(info.ctim[3].gdif,stim);
-    printf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   }
   
   fprintf(stdout,"\n  %s\n   END OF MODULE MSHDIST \n  %s\n",D_STR,D_STR);

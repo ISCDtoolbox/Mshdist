@@ -5,6 +5,7 @@ extern unsigned char inxt3[7];
 extern Info  info;
 extern char ddb;
 
+
 /* Generate holes in the pcb example */
 int genHolesPCB_2d(pMesh mesh,pSol sol) {
   pPoint   p0;

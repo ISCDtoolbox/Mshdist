@@ -488,7 +488,7 @@ int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   /* At this point, each non-boundary element is associated to a flag */
   
   /* analyze components */
-  if ( fabs(info.imprim) > 3 )  fprintf(stdout,"     %d connected component(s)\n",base);
+  if ( abs(info.imprim) > 3 )  fprintf(stdout,"     %d connected component(s)\n",base);
   if ( base < 2 )  return(-1);
 
   if ( info.ddebug ) {
@@ -622,7 +622,7 @@ int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
     for (j=0; j<3; j++) {
       ip = pt->v[j];
       pi = &mesh->point[ip];
-      if (( pi->flag )&&(fabs(sol->val[ip]>EPS)))  break;
+      if ( ( pi->flag ) && ( fabs(sol->val[ip]) > EPS ) )  break;
     }
    
     /* unable to correct sign */
@@ -1521,11 +1521,11 @@ int errdist(pMesh mesh, pMesh mesh2, pSol sol){
 	           + dist[i2]-fabs(sol->val[i2]));  
 			   
   	/* Exact quadrature formula for \mathbb{P}^2 functions */	
-	  errL2 += (area/3.0)*( (0.5*dist[i0] + 0.5*dist[i1] - 0.5*fabs(sol->val[i0]) - 0.5*fabs(sol->val[i1]))* \  
-	    (0.5*dist[i0] + 0.5*dist[i1] - 0.5*fabs(sol->val[i0]) - 0.5*fabs(sol->val[i1])) + \
-			  (0.5*dist[i0] + 0.5*dist[i2] - 0.5*fabs(sol->val[i0]) - 0.5*fabs(sol->val[i2]))* \  
+	  errL2 += (area/3.0)*( (0.5*dist[i0] + 0.5*dist[i1] - 0.5*fabs(sol->val[i0]) - 0.5*fabs(sol->val[i1]))*\
+	    (0.5*dist[i0] + 0.5*dist[i1] - 0.5*fabs(sol->val[i0]) - 0.5*fabs(sol->val[i1])) +\
+			  (0.5*dist[i0] + 0.5*dist[i2] - 0.5*fabs(sol->val[i0]) - 0.5*fabs(sol->val[i2]))*\
 				  	   (0.5*dist[i0] + 0.5*dist[i2] - 0.5*fabs(sol->val[i0]) - 0.5*fabs(sol->val[i2])) +\
-			  (0.5*dist[i1] + 0.5*dist[i2] - 0.5*fabs(sol->val[i1]) - 0.5*fabs(sol->val[i2]))* \  
+			  (0.5*dist[i1] + 0.5*dist[i2] - 0.5*fabs(sol->val[i1]) - 0.5*fabs(sol->val[i2]))*\
 				  	(0.5*dist[i1] + 0.5*dist[i2] - 0.5*fabs(sol->val[i1]) - 0.5*fabs(sol->val[i2])));
   }
  

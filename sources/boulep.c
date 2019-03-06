@@ -3,6 +3,7 @@
 extern unsigned char inxt2[5];
 extern unsigned char inxt3[7];
 
+
 /* Store in list the points in the ball of ip; return length of the ball */
 int boulep_2d(pMesh mesh,int ip,int *list) {
   pTria     pt;
@@ -72,7 +73,7 @@ int boulet_2d(pMesh mesh,int start,int ip,int *list) {
     list[ilist] = 3*k+i;
     ilist++;
     if ( ilist >= LONMAX ) {
-      printf(" **** Problem function boulet_2d; more than %d points in a ball; abort.\n",ip,LONMAX);
+      fprintf(stdout," **** Problem function boulet_2d; more than %d points in a ball; abort.\n",LONMAX);
       exit(0);
     }
     
@@ -102,7 +103,7 @@ int boulet_2d(pMesh mesh,int start,int ip,int *list) {
     list[ilist] = 3*k+i;
     ilist++;
     if ( ilist >= LONMAX ) {
-      printf(" **** Problem function boulet_2d; more than %d points in a ball; abort.\n",ip,LONMAX);
+      fprintf(stdout," **** Problem function boulet_2d; more than %d points in a ball; abort.\n",LONMAX);
       exit(0);
     }
   }

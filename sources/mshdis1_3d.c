@@ -800,7 +800,7 @@ int sgndist_3d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   }
 
   /* analyze components */
-  if ( fabs(info.imprim) > 3 )  fprintf(stdout,"     %d connected component(s)\n",base);
+  if ( abs(info.imprim) > 3 )  fprintf(stdout,"     %d connected component(s)\n",base);
   if ( base < 2 )  return(-1);
 
   /* store tetrahedra intersected */
@@ -1641,8 +1641,8 @@ static void tmpdist_3d(int istart,int istop,int ipth,Param *par) {
       /* find enclosing tetra, k is guessed */
       iel = nxtelt(mesh,k,p,cb);
       if ( iel < 1 ) {
-        if( fabs(iel) > 0 ) {
-          iel = fabs(iel);
+        if( abs(iel) > 0 ) {
+          iel = abs(iel);
 
           /* P1 Lagrange interpolation */
           pt1  = &mesh->tetra[iel];

@@ -5,6 +5,7 @@ extern unsigned char inxt3[7];
 extern Info  info;
 extern char  ddb;
 
+
 /* Create the queue structure for the Fast Marching method */
 int setQueue(pMesh mesh,pQueue pq) {
   
@@ -69,7 +70,7 @@ int insertAnod(pQueue pq,int ip,double val) {
   
   k = ++pq->siz;
   if ( pq->siz >= pq->sizmax -1 ) {
-    printf("Func. insertAnod: impossible to insert new element. Abort\n",ip);
+    fprintf(stdout,"Func. insertAnod: impossible to insert new element. Abort\n");
     exit(0);
   }
   
@@ -79,7 +80,7 @@ int insertAnod(pQueue pq,int ip,double val) {
   pa->d         = val;
   
   if ( !upPrio(pq,ip,val) ) {
-    printf("Func. insertAnod: impossible to change priority of %d. Abort\n",ip);
+    fprintf(stdout,"Func. insertAnod: impossible to change priority of %d. Abort\n",ip);
     exit(0);
   }
   
