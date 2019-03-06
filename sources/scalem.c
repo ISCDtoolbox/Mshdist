@@ -2,12 +2,13 @@
 
 extern Info  info;
 
+
 /* warning: rectangular bounding box */
 int scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1) {
   pPoint    ppt;
   double    dd,deltb,delta;
   int       i,k;
-  
+
   /* find bounding box */
 	for (i=0; i<mesh1->dim; i++) {
 		info.min1[i] = info.min2[i] =  1.e30;
@@ -32,7 +33,7 @@ int scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1) {
 		fprintf(stdout,"  ## Unable to scale mesh\n");
 		return(0);
 	}
-  
+
 	/* Normalize coordinates of mesh1 */
 	dd = 1.0 / delta;
 	for (k=1; k<=mesh1->np; k++) {
@@ -64,10 +65,14 @@ int scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1) {
   /* Assign a default value */
   else {
     info.nexp = 1;
+    if ( !info.exp) {
+      info.exp  = (double*)calloc(mesh1->dim+1,sizeof(double));
+      assert(info.exp);
+    }
     for (i=0; i<mesh1->dim; i++)
       info.exp[i] = 0.01;
   }
-  
+
   if ( info.option == 3 )
     return(1);
   

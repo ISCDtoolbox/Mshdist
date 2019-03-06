@@ -2,6 +2,7 @@
 #include "compil.date"
 
 #define BUCKSIZ       16
+
 Info   info;
 
 /* Exceptions */
@@ -95,9 +96,9 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
     if ( *argv[i] == '-' ) {
       switch(argv[i][1]) {
 
-      case '?':
-        usage(argv[0]);
-        break;
+    case '?':
+      usage(argv[0]);
+      break;
 
 	  case 'b':
 		if ( !strcmp(argv[i],"-bbbc") ) {
@@ -124,7 +125,6 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
 		}
 		else if ( !strcmp(argv[i],"-d") )
           info.ddebug = 1;
-
 		break;
       
       /* Calculation of the distance field with the Fast marching method */
@@ -138,6 +138,8 @@ static int parsar(int argc,char *argv[],pMesh mesh1,pSol sol1,pMesh mesh2) {
 		if ( !strcmp(argv[i],"-hausdorff") ) {
 		  info.hausdorff = 1;
 		}
+    else 
+      usage(argv[0]);
 		break;
 
       case 'i':
@@ -502,11 +504,10 @@ int mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1) {
     if ( info.imprim )  fprintf(stdout,"  ** Initialization\n");
     if ( info.pcloud )
       ier = inidistpcloud(mesh1,mesh2,sol1,bucket);
-    else
+    else 
       ier = inidist(mesh1,mesh2,sol1,bucket);
-    
+
     if ( info.imprim )  fprintf(stdout,"  ** Sign identification\n");
-    puts("ICI");
     
     /* Put a sign to the initial distance field */
     if ( !info.pcloud )

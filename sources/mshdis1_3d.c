@@ -8,6 +8,7 @@ extern Info  info;
 extern hash  hTab;
 char ddb;
 
+
 /* find background tetras intersecting the boundary,
  and initialize distance at their vertices */
 int iniredist_3d(pMesh mesh, pSol sol) {
@@ -614,9 +615,9 @@ int inidist_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
     p1  = &mesh2->point[pf->v[0]];
     p2  = &mesh2->point[pf->v[1]];
     p3  = &mesh2->point[pf->v[2]];
+
     iel = buckin(mesh1,bucket,p1->c);
     iel = locelt(mesh1,iel,p1->c,cb);
-
 	  if(!iel){
 	    iel = buckin(mesh1,bucket,p2->c);
 	    iel = locelt(mesh1,iel,p2->c,cb);
@@ -684,7 +685,6 @@ int inidist_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   fprintf(stdout,"     distance\n");
 
   /* correction */
-
   circum = (double*)calloc(4*(mesh2->nt)+1,sizeof(double));
   fprintf(stdout,"     Building circumcircle table...");
   buildcircum_3d(mesh2,circum);

@@ -70,7 +70,7 @@ int hashelt_3d(pMesh mesh) {
   unsigned int    key;
 
   /* memory alloc */
-  hcode = (int*)M_calloc(mesh->ne+1,sizeof(int),"hash");
+  hcode = (int*)calloc(mesh->ne+1,sizeof(int));
   assert(hcode);
   link  = mesh->adja;
   hsize = mesh->ne;
@@ -155,7 +155,7 @@ int hashelt_3d(pMesh mesh) {
     }
   }
 
-  M_free(hcode);
+  free(hcode);
   return(1);
 }
 
@@ -168,7 +168,7 @@ int hashelt_2d(pMesh mesh) {
   unsigned int    key;
 
   /* memory alloc */
-  hcode = (int*)M_calloc(mesh->nt+1,sizeof(int),"hash");
+  hcode = (int*)calloc(mesh->nt+1,sizeof(int));
   assert(hcode);
   link  = mesh->adja;
   hsize = mesh->nt;
@@ -251,7 +251,7 @@ int hashelt_2d(pMesh mesh) {
     }
   }
 
-  M_free(hcode);
+  free(hcode);
   return(1);
 }
 
@@ -344,7 +344,7 @@ int getTria(pMesh mesh,int mins,int maxs,int sum){
     if( tab[key].mins == mins && tab[key].maxs == maxs && tab[key].s == sum ) {
       if( tab[key].k > 0 ) {
         tab[key].k *= -1;
-        return(fabs(tab[key].k));
+        return(abs(tab[key].k));
       }
       else {
         return(0);

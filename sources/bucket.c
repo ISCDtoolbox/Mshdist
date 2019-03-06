@@ -9,12 +9,12 @@ pBucket newBucket_3d(pMesh mesh,int nmax) {
   int      k,ic,ii,jj,kk;
 
   /* memory alloc */
-  bucket = (Bucket*)M_malloc(sizeof(Bucket),"newBucket");
+  bucket = (Bucket*)malloc(sizeof(Bucket));
   assert(bucket);
   bucket->size = nmax;
-  bucket->head = (int*)M_calloc(nmax*nmax*nmax+1,sizeof(int),"newBucket");
+  bucket->head = (int*)calloc(nmax*nmax*nmax+1,sizeof(int));
   assert(bucket->head);
-  bucket->link = (int*)M_calloc(mesh->np+1,sizeof(int),"newBucket");
+  bucket->link = (int*)calloc(mesh->np+1,sizeof(int));
   assert(bucket->link);
 
   /* insert vertices */
@@ -45,12 +45,12 @@ pBucket newBucket_2d(pMesh mesh,int nmax) {
   int      k,ic,ii,jj;
 
   /* memory alloc */
-  bucket = (Bucket*)M_malloc(sizeof(Bucket),"newBucket");
+  bucket = (Bucket*)malloc(sizeof(Bucket));
   assert(bucket);
   bucket->size = nmax;
-  bucket->head = (int*)M_calloc(nmax*nmax+1,sizeof(int),"newBucket");
+  bucket->head = (int*)calloc(nmax*nmax+1,sizeof(int));
   assert(bucket->head);
-  bucket->link = (int*)M_calloc(mesh->np+1,sizeof(int),"newBucket");
+  bucket->link = (int*)calloc(mesh->np+1,sizeof(int));
   assert(bucket->link);
 
   /* insert vertices */
@@ -73,9 +73,9 @@ pBucket newBucket_2d(pMesh mesh,int nmax) {
 
 
 void freeBucket(pBucket bucket) {
-  M_free(bucket->head);
-  M_free(bucket->link);
-  M_free(bucket);
+  free(bucket->head);
+  free(bucket->link);
+  free(bucket);
 }
 
 
