@@ -7,8 +7,6 @@ int scaleMesh(Info *info,pMesh mesh1,pMesh mesh2,pSol sol1) {
   double    dd,deltb,delta;
   int       i,k;
 
-  printf("debut scalem info %p   info->exp %p\n",info,&info->exp);
-
   /* find bounding box */
 	for (i=0; i<mesh1->dim; i++) {
 		info->min1[i] = info->min2[i] =  1.e30;

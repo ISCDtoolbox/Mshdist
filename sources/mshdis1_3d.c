@@ -608,7 +608,7 @@ int inidist_3d(Info info,pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   /* memory alloc */
   list = (int*)calloc(mesh1->ne+1,sizeof(int));
   assert(list);
-  puts("1");
+
   nc = 0;
   for (k=1; k<=mesh2->nt; k++) {
     pf  = &mesh2->tria[k];
