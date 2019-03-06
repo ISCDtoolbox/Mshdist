@@ -13,7 +13,6 @@
 #include "chrono.h"
 #include "libmesh5.h"
 #include "lplib3.h"
-#include "memory.h"
 
 #define D_VER   "1.1b"
 #define D_REL   "June 21, 2010"
@@ -80,8 +79,8 @@ typedef struct {
 typedef Tetra * pTetra;
 
 typedef struct {
+  double  *exp,dt,ray,res,size;
   double   delta1[3],delta2[3],min1[3],max1[3],min2[3],max2[3],cen1[3],cen2[3];
-  double   dt,ray,res,size,*exp;
   int      ncpu,libpid,typ[2];          /* for // purposes */
   int      maxit,ref,nsref,*sref;
   int      nexp,nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
@@ -134,12 +133,11 @@ typedef struct {
 } hash;
 
 /* prototypes */
-int  loadMesh(pMesh mesh1,pMesh mesh2);
+int  loadMesh(Info info,pMesh mesh1,pMesh mesh2);
 int  loadSol(pSol );
 int  saveSol(pSol sol);
-int  mshdis1(pMesh mesh1,pMesh mesh2,pSol sol1);
-int  scaleMesh(pMesh mesh1,pMesh mesh2,pSol sol1);
-int  unscaleSol(pSol sol);
+int  scaleMesh(Info *info,pMesh mesh1,pMesh mesh2,pSol sol1);
+int  unscaleSol(Info info,pSol sol);
 int  locateTetra(pMesh mesh,int nsdep,int base,double *p,double *cb);
 int  locateTria(pMesh mesh,int nsdep,int base,double *p,double *cb);
 int  boulep_2d(pMesh ,int ,int* );
@@ -192,35 +190,35 @@ int     closept_3d(pMesh ,double *);
 int     hashelt_3d(pMesh );
 int     hashelt_2d(pMesh );
 void    delHash(pMesh mesh);
-int     inidist_2d(pMesh ,pMesh ,pSol ,pBucket );
+int     inidist_2d(Info info,pMesh ,pMesh ,pSol ,pBucket );
 int     inidistpcloud_2d(pMesh ,pMesh ,pSol ,pBucket );
-int     inidist_3d(pMesh ,pMesh ,pSol ,pBucket );
+int     inidist_3d(Info info,pMesh ,pMesh ,pSol ,pBucket );
 int     inidistpcloud_3d(pMesh ,pMesh ,pSol ,pBucket );
 int     iniredist_2d(pMesh ,pSol );
 int     iniredist_3d(pMesh ,pSol );
-int     sgndist_2d(pMesh ,pMesh ,pSol ,pBucket );
-int     sgndist_3d(pMesh ,pMesh ,pSol ,pBucket );
-int     ppgdist_2d(pMesh mesh, pSol sol);
-int     ppgdist_3d(pMesh mesh, pSol sol);
+int     sgndist_2d(Info info,pMesh ,pMesh ,pSol ,pBucket );
+int     sgndist_3d(Info info,pMesh ,pMesh ,pSol ,pBucket );
+int     ppgdist_2d(Info info,pMesh mesh, pSol sol);
+int     ppgdist_3d(Info info,pMesh mesh, pSol sol);
 int     ppgdistfmm_2d(pMesh mesh, pSol sol);
 int     ppgdistfmm_3d(pMesh mesh, pSol sol);
-int     iniencdomain_2d(pMesh mesh, pSol sol);
-int     iniencdomain_3d(pMesh mesh, pSol sol);
-int     inireftrias_2d(pMesh mesh, pSol sol);
-int     inireftrias_3d(pMesh mesh, pSol sol);
+int     iniencdomain_2d(Info info,pMesh mesh, pSol sol);
+int     iniencdomain_3d(Info info,pMesh mesh, pSol sol);
+int     inireftrias_2d(Info info,pMesh mesh, pSol sol);
+int     inireftrias_3d(Info info,pMesh mesh, pSol sol);
 int     hashEdge_2d(pMesh mesh);
 int     getEdge(pMesh mesh, int ia, int ib);
 double  hausdorff(pMesh, pMesh);
 int     errdist(pMesh mesh,pMesh mesh2,pSol sol);
-int     hashTriaRef(pMesh);
+int     hashTriaRef(Info info,pMesh);
 int     getTria(pMesh,int,int,int);
 double  volume(double *,double *,double *,double *);
 void    delhash(pMesh);
 int     corrGrad_3d(pMesh,pSol);
-int     isIntDom(int );
-int     isStartTri(int );
-int     isStartEdg(int );
-int     isStartVer(int );
+int     isIntDom(Info info, int );
+int     isStartTri(Info info,int );
+int     isStartEdg(Info info,int );
+int     isStartVer(Info info,int );
 int     invmatg(double m[9],double mi[9]);
 
 /* Analytical distance functions */
@@ -258,18 +256,13 @@ int     gen1Hole_2d(pMesh mesh,pSol sol);
 
 /* Function pointers */
 pBucket (*newBucket)(pMesh ,int );
-int     (*buckin)(pMesh ,pBucket ,double *);
-int     (*locelt)(pMesh ,int ,double *,double *);
-int     (*nxtelt)(pMesh ,int ,double *,double *);
 int     (*closept)(pMesh ,double *);
-int     (*hashelt)(pMesh );
-int     (*inidist)(pMesh ,pMesh ,pSol ,pBucket );
+int     (*inidist)(Info info,pMesh ,pMesh ,pSol ,pBucket );
 int     (*inidistpcloud)(pMesh ,pMesh ,pSol ,pBucket );
 int     (*iniredist)(pMesh ,pSol );
-int     (*iniencdomain)(pMesh ,pSol );
-int     (*inireftrias)(pMesh, pSol);
-int     (*sgndist)(pMesh ,pMesh ,pSol ,pBucket );
-int     (*ppgdist)(pMesh mesh, pSol sol);
+int     (*iniencdomain)(Info info,pMesh ,pSol );
+int     (*inireftrias)(Info info,pMesh, pSol);
+int     (*ppgdist)(Info info,pMesh mesh, pSol sol);
 int     (*ppgdistfmm)(pMesh mesh, pSol sol);
 
 #endif

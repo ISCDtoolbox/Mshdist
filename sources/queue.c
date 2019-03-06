@@ -2,7 +2,6 @@
 
 extern unsigned char inxt2[5];
 extern unsigned char inxt3[7];
-extern Info  info;
 extern char  ddb;
 
 

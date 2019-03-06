@@ -3,8 +3,6 @@
 #define EPST    -1.e-21 //12
 #define EPSR     1.e+21 //12
 
-extern Info info;
-
 
 /* check if p in nsdep */
 int inTetra(pMesh mesh,int nsdep,double *p,double *cb) {
@@ -160,11 +158,6 @@ int locelt_3d(pMesh mesh,int nsdep,double *p,double *cb) {
 	}
 	while ( ++it <= mesh->ne );
 	
-	if ( info.ddebug ) {
-		fprintf(stdout,"  ** Exhaustive searching\n");
-		fprintf(stdout,"     coords %f %f %f\n", p[0],p[1],p[2]);	
-	}
-	
 	/* exhaustive search */
 	base = ++mesh->mark;
 	for (nsfin=1; nsfin<=mesh->ne; nsfin++) {
@@ -173,9 +166,7 @@ int locelt_3d(pMesh mesh,int nsdep,double *p,double *cb) {
 			return(nsfin);
 		}
 	}
-	if ( info.ddebug ) {
-		fprintf(stdout,"  ** failed.\n");
-	}
+
 	return(0);
 }
 
@@ -290,15 +281,7 @@ int nxtelt_3d(pMesh mesh,int nsdep,double *p,double *cb) {
     
     return( -nstmp );            
   }
-  
-	if ( info.ddebug ) {
-		fprintf(stdout,"  ** Exhaustive searching\n");
-		fprintf(stdout,"     coords %f %f %f\n", p[0],p[1],p[2]);	
-	}
-	
-	if ( info.ddebug ) {
-		fprintf(stdout,"  ** failed.\n");
-	}
+
 	return(0);
 }
 
@@ -426,11 +409,6 @@ int locelt_2d(pMesh mesh,int nsdep,double *p,double *cb) {
     return(nsfin);
   }
   while ( ++it <= mesh->nt );
-
-  if ( info.ddebug ) {
-		fprintf(stdout,"  ** Exhaustive searching\n");
-    fprintf(stdout,"     points %f %f \n", p[0], p[1]);	
-  }
 
   /* exhaustive search */
   base = ++mesh->mark;

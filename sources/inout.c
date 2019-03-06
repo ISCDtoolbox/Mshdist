@@ -1,9 +1,8 @@
 #include "mshdist.h"
 
-extern Info info;
 
 /* Read mesh data */
-int loadMesh(pMesh mesh1,pMesh mesh2) {
+int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   pPoint       ppt;
   pTetra       pt;
   pTria        pt1;

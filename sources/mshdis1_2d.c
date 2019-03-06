@@ -1,7 +1,6 @@
 #include "mshdist.h"
 
 unsigned char inxt2[5] = {1,2,0,1,2};
-extern Info  info;
 extern char  ddb;
 
 /* Only used when generating a signed distance function
@@ -183,7 +182,7 @@ int iniredist_2d(pMesh mesh, pSol sol){
 
 /* Initialize the exact unsigned distance function 
    to the boundary of mesh2 at vertices of the triangles of mesh1 intersecting this contour */
-int inidist_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
+int inidist_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   pTria      pt,pt1;
   pEdge      pe;
   pPoint     p1,p2,pa,pb;
@@ -200,7 +199,7 @@ int inidist_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   assert(list);
   sol1->ref = (int*)calloc(mesh1->nt+1,sizeof(int));
   assert(sol1->ref);	
-
+  
   /* set all references to -1 by default */	
   for (k=1; k<=sol1->nt; k++)
     sol1->ref[k] = -1;
@@ -214,13 +213,12 @@ int inidist_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
     pe  = &mesh2->edge[k];
     p1  = &mesh2->point[pe->v[0]];
     p2  = &mesh2->point[pe->v[1]];
-    
-    iel = buckin(mesh1,bucket,p1->c);
-    iel = locelt(mesh1,iel,p1->c,cb);
+    iel = buckin_2d(mesh1,bucket,p1->c);
+    iel = locelt_2d(mesh1,iel,p1->c,cb);
     
     if ( !iel ) {
-      iel = buckin(mesh1,bucket,p2->c);
-      iel = locelt(mesh1,iel,p2->c,cb);
+      iel = buckin_2d(mesh1,bucket,p2->c);
+      iel = locelt_2d(mesh1,iel,p2->c,cb);
     }
 	  
     ilist       = 1;
@@ -239,7 +237,6 @@ int inidist_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
 	    if(sol1->ref[iel] == -1)  
 	      sol1->ref[iel] = pe->ref;
 	    else if((sol1->ref[iel] >= 0)&&(sol1->ref[iel] != pe->ref)){
-		    if ( info.ddebug )  fprintf(stdout,"         WARNING : conflict in setting reference in triangle %d \n", iel);
 		    sol1->ref[iel] = pe->ref;
 		    npp++;
 	    }
@@ -372,8 +369,8 @@ int inidistpcloud_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
     base = ++mesh1->flag;
     
     /* Find triangle in mesh1 where ppt falls in */
-    iel = buckin(mesh1,bucket,ppt->c);
-    iel = locelt(mesh1,iel,ppt->c,bc);
+    iel = buckin_2d(mesh1,bucket,ppt->c);
+    iel = locelt_2d(mesh1,iel,ppt->c,bc);
     
     if ( !iel ) continue;
     pt = &mesh1->tria[iel];
@@ -412,7 +409,7 @@ int inidistpcloud_2d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
 }
 
 /* Initialize the sign of the implicit function in each connected component */
-int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
+int sgndist_2d(Info info,pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   pEdge    pe;
   pTria    pt,pt1;
   pPoint   ppt,pi,p1,p2,pa,pb;
@@ -437,8 +434,8 @@ int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
     p[0] = info.exp[2*k];
     p[1] = info.exp[2*k+1];
     
-    iel = buckin(mesh,bucket,p);
-    iel = locelt(mesh,iel,p,cb);
+    iel = buckin_2d(mesh,bucket,p);
+    iel = locelt_2d(mesh,iel,p,cb);
     assert(iel);
     
     ipile++;
@@ -490,18 +487,6 @@ int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   /* analyze components */
   if ( abs(info.imprim) > 3 )  fprintf(stdout,"     %d connected component(s)\n",base);
   if ( base < 2 )  return(-1);
-
-  if ( info.ddebug ) {
-		FILE  *out;
-		
-		out = fopen("cc.sol","w");
-		fprintf(out,"MeshVersionFormatted 1\n\nDimension 2\n\n");
-		fprintf(out,"SolAtTriangles\n%d\n 1 1 \n",mesh->nt);
-		for (k=1; k<=mesh->nt; k++)
-			fprintf(out,"%d\n",mesh->tria[k].flag);
-		fclose(out);
-	}
-	
 	
   /* store triangles intersected */
   bfin  = mesh->flag;   
@@ -554,13 +539,6 @@ int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
         else if ( pt1->flag > 0 && pilcc[pt1->flag] != base )
           pilcc[pt1->flag] = base + 1; 
       }
-    }
-
-    if ( info.ddebug ) {
-      fprintf(stdout,"     component list: ");
-      for (cc=1; cc<=bfin; cc++)
-        if ( pilcc[cc] == base )  printf(" %d  ",cc);
-      printf("\n");
     }
 
     /* update sign */
@@ -687,13 +665,13 @@ int sgndist_2d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
 
 /* Initialize a (unsigned) distance function to a domain already existing in mesh, defined 
  by boundary triangles of reference contained in info.sref */
-int inireftrias_2d(pMesh mesh, pSol sol){
+int inireftrias_2d(Info info,pMesh mesh, pSol sol){
   
   return(1);
 }
 
 /* Initialize a signed distance function to some entities existing in mesh */
-int iniencdomain_2d(pMesh mesh, pSol sol){
+int iniencdomain_2d(Info info,pMesh mesh, pSol sol){
   pTria    pt,pt1;
   pEdge    ped;
   pPoint   pa,pb,p0,p1,p2;
@@ -713,7 +691,7 @@ int iniencdomain_2d(pMesh mesh, pSol sol){
   for(k=1;k<=mesh->nt;k++){
     pt = &mesh->tria[k];
 
-    if ( !isIntDom(pt->ref) ) continue;
+    if ( !isIntDom(info,pt->ref) ) continue;
     for(i=0; i<3; i++){
       i0 = inxt2[i];
       i1 = inxt2[i0];
@@ -722,7 +700,7 @@ int iniencdomain_2d(pMesh mesh, pSol sol){
       iel = adja[i]/3;
       pt1 = &mesh->tria[iel];
       
-      if( iel && !isIntDom(pt1->ref) ) {
+      if( iel && !isIntDom(info,pt1->ref) ) {
         ied = getEdge(mesh,pt->v[i0],pt->v[i1]);
         if ( !ied ) {
           printf("Triangles %d %d \n",k,iel);
@@ -743,7 +721,7 @@ int iniencdomain_2d(pMesh mesh, pSol sol){
   if ( info.nsa ) {
     for (k=1; k<=mesh->na; k++) {
       ped = &mesh->edge[k];
-      if ( !ped->flag && isStartEdg(ped->ref) ) {
+      if ( !ped->flag && isStartEdg(info,ped->ref) ) {
         nb++;
         actiedg[nb] = k;
       }
@@ -874,7 +852,7 @@ int iniencdomain_2d(pMesh mesh, pSol sol){
       p0 = &mesh->point[ip0];
       if ( p0->flag == 1 ) continue;
       p0->flag = 1;
-      if ( isIntDom(pt->ref) )
+      if ( isIntDom(info,pt->ref) )
         sol->val[ip0] = -sqrt(sol->val[ip0]);
       else
         sol->val[ip0] = sqrt(sol->val[ip0]);
@@ -1283,7 +1261,7 @@ static void tmpdist_2d(int istart,int istop,int ipth,Param *par) {
       if ( p[1] <= EPS1 || p[1] >= 1.0-EPS1 )  continue;
   
       /* find enclosing triangle, k is guessed */ 
-      iel = nxtelt(mesh,k,p,cb);
+      iel = nxtelt_2d(mesh,k,p,cb);
       if ( iel < 1 ) {
         fprintf(stdout,"--> exhaustive search: %d",k); fflush(stdout);
         for (iel=1; iel<=mesh->nt; iel++) {
@@ -1358,7 +1336,7 @@ static void upddist_2d(int istart,int istop,int ipth,Param *par) {
 
 /* Expand distance function to the domain by solving
    Eikonal equation using method of characteristics */
-int ppgdist_2d(pMesh mesh,pSol sol) {
+int ppgdist_2d(Info info,pMesh mesh,pSol sol) {
 	Param     par;
 	double    res0;
 	int       it,i,j;

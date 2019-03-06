@@ -1,8 +1,8 @@
 #include "mshdist.h"
 
 extern unsigned char inxt3[7];
-extern Info  info;
 extern char ddb;
+
 
 /* Compute volume of tetra */
 inline double volume(double *a,double *b,double *c,double *d) {

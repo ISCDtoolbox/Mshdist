@@ -1,7 +1,7 @@
 #include "mshdist.h"
 
 extern unsigned char inxt2[5];
-extern Info  info;
+
 
 /* Calculate the roots of the second order polynomial stored in a, and put the result in r; return number of real roots (-1 if polynomial is null) */
 int eqquad(double *a,double *r) {

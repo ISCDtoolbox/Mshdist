@@ -4,7 +4,7 @@
 unsigned char inxt3[7] = {1,2,3,0,1,2,3};
 
 extern unsigned char idirt[4][3];
-extern Info  info;
+
 extern hash  hTab;
 char ddb;
 
@@ -170,7 +170,7 @@ for (i=1; i<=mesh->np; i++) {
 
 /* Initialize a (unsigned) distance function to a domain already existing in mesh, defined
    by boundary triangles of reference contained in info.sref */
-int inireftrias_3d(pMesh mesh, pSol sol){
+int inireftrias_3d(Info info,pMesh mesh, pSol sol){
   pTetra    pt,pt1;
   pPoint    p0,p1,p2,pn0,pn1,pn2;
   int       k,l,nb,n0,n1,n2,np0,np1,np2,mins,maxs,sum,ilist,iel,jel,lball,nc;
@@ -192,7 +192,7 @@ int inireftrias_3d(pMesh mesh, pSol sol){
   sol->ne = mesh->ne;
 
   /* Create hashing with all triangles of the mesh sharing a reference in info.sref */
-  nb = hashTriaRef(mesh);
+  nb = hashTriaRef(info,mesh);
 
   /* Travel all tets of the mesh to store initialization faces under the form 4*iel + iface */
   list = (int*)calloc(nb+1,sizeof(int));
@@ -371,7 +371,7 @@ int inireftrias_3d(pMesh mesh, pSol sol){
 
 /* Initialize a signed distance function to a domain already existing in mesh,
  defined by pt->ref = REFINT */
-int iniencdomain_3d(pMesh mesh, pSol sol){
+int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
   pTetra  pt,pt1;
   pPoint  p0,p1,p2,pn0,pn1,pn2;
   double  dd;
@@ -594,7 +594,7 @@ int iniencdomain_3d(pMesh mesh, pSol sol){
 }
 
 /* Initialize exact unsigned distance function at vertices of tetras intersecting mesh2 */
-int inidist_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
+int inidist_3d(Info info,pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   pTetra   pt,pt1;
   pTria    pf;
   pPoint   p1,p2, p3, pa,pb, pc;
@@ -608,7 +608,7 @@ int inidist_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   /* memory alloc */
   list = (int*)calloc(mesh1->ne+1,sizeof(int));
   assert(list);
-
+  puts("1");
   nc = 0;
   for (k=1; k<=mesh2->nt; k++) {
     pf  = &mesh2->tria[k];
@@ -616,16 +616,16 @@ int inidist_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
     p2  = &mesh2->point[pf->v[1]];
     p3  = &mesh2->point[pf->v[2]];
 
-    iel = buckin(mesh1,bucket,p1->c);
-    iel = locelt(mesh1,iel,p1->c,cb);
-	  if(!iel){
-	    iel = buckin(mesh1,bucket,p2->c);
-	    iel = locelt(mesh1,iel,p2->c,cb);
+    iel = buckin_3d(mesh1,bucket,p1->c);
+    iel = locelt_3d(mesh1,iel,p1->c,cb);
+	  if ( !iel ) {
+	    iel = buckin_3d(mesh1,bucket,p2->c);
+	    iel = locelt_3d(mesh1,iel,p2->c,cb);
 	  }
 
 	  if(!iel){
-	    iel = buckin(mesh1,bucket,p3->c);
-	    iel = locelt(mesh1,iel,p3->c,cb);
+	    iel = buckin_3d(mesh1,bucket,p3->c);
+	    iel = locelt_3d(mesh1,iel,p3->c,cb);
 	  }
 
    	assert(iel);
@@ -730,7 +730,7 @@ int inidistpcloud_3d(pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
 
 
 /* sign the implicit function in each connected component */
-int sgndist_3d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
+int sgndist_3d(Info info,pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   pTetra   pt,pt1;
   pTria    pf;
   pPoint   ppt,pi,p1,p2,p3;
@@ -746,8 +746,8 @@ int sgndist_3d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   p[0] = 0.02;
   p[1] = 0.02;
   p[2] = 0.02;
-  iel = buckin(mesh,bucket,p);
-  iel = locelt(mesh,iel,p,cb);
+  iel = buckin_3d(mesh,bucket,p);
+  iel = locelt_3d(mesh,iel,p,cb);
   assert(iel);
 
   /* reset colors */
@@ -763,7 +763,6 @@ int sgndist_3d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   start    = 1;
   while ( ipile > 0 ) {
     /* search for all elements in the current connected component */
-    if ( info.ddebug )  fprintf(stdout,"     pile start: %d\n",pile[ipile]);
     do {
       k = pile[ipile];
       ipile--;
@@ -800,7 +799,7 @@ int sgndist_3d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   }
 
   /* analyze components */
-  if ( abs(info.imprim) > 3 )  fprintf(stdout,"     %d connected component(s)\n",base);
+  fprintf(stdout,"     %d connected component(s)\n",base);
   if ( base < 2 )  return(-1);
 
   /* store tetrahedra intersected */
@@ -852,13 +851,6 @@ int sgndist_3d(pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
         else if ( pt1->flag > 0 && pilcc[pt1->flag] != base )
           pilcc[pt1->flag] = base + 1;
       }
-    }
-
-    if ( info.ddebug ) {
-      printf("     component list: ");
-      for (cc=1; cc<=bfin; cc++)
-        if ( pilcc[cc] == base )  printf(" %d  ",cc);
-      printf("\n");
     }
 
     /* update sign */
@@ -1639,7 +1631,7 @@ static void tmpdist_3d(int istart,int istop,int ipth,Param *par) {
       if ( p[2] <= EPS1 || p[2] >= 1.0-EPS1 )  continue;
 
       /* find enclosing tetra, k is guessed */
-      iel = nxtelt(mesh,k,p,cb);
+      iel = nxtelt_3d(mesh,k,p,cb);
       if ( iel < 1 ) {
         if( abs(iel) > 0 ) {
           iel = abs(iel);
@@ -1693,17 +1685,13 @@ static void tmpdist_3d(int istart,int istop,int ipth,Param *par) {
           }
         }
         else {
-          if ( info.ddebug )  fprintf(stdout," --> exhaustive search: %d",k); fflush(stdout);
           for (iel=1; iel<=mesh->ne; iel++) {
             pt1 = &mesh->tetra[iel];
             if ( inTetra(mesh,iel,p,cb) )  break;
           }
           if ( iel > mesh->ne ) {
-            if ( info.ddebug )  fprintf(stdout,"\n  ## Oops...no simplex found (%d).\n",k);
             continue;
           }
-          else if ( info.ddebug )
-            fprintf(stdout," %d\n",iel);
         }
       }
 
@@ -1769,7 +1757,7 @@ static void upddist_3d(int istart,int istop,int ipth,Param *par) {
 }
 
 /* expand distance function to the entire domain by solving the Eikonal eq. using characteristics */
-int ppgdist_3d(pMesh mesh,pSol sol) {
+int ppgdist_3d(Info info,pMesh mesh,pSol sol) {
   Param     par;
   double    res0;
   int       it,i;

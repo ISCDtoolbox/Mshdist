@@ -10,14 +10,13 @@
 #define HB    11
 #define HC    13
 
-extern Info info;
 
 unsigned char idir[5]     = {0,1,2,0,1};
 unsigned char idirt[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
 hash hTab;
 
 /* Identify whether ref corresponds to a reference of an interior subdomain */
-inline int isIntDom(int ref) {
+inline int isIntDom(Info info,int ref) {
   int k;
   
   for (k=0; k<info.nintel; k++)
@@ -27,7 +26,7 @@ inline int isIntDom(int ref) {
 }
 
 /* Identify whether ref corresponds to a starting triangle */
-inline int isStartTri(int ref) {
+inline int isStartTri(Info info,int ref) {
   int k;
   
   if ( info.nst ) {
@@ -39,7 +38,7 @@ inline int isStartTri(int ref) {
 }
 
 /* Identify whether ref corresponds to a starting edges */
-inline int isStartEdg(int ref) {
+inline int isStartEdg(Info info,int ref) {
   int k;
   
   if ( info.nsa ) {
@@ -51,7 +50,7 @@ inline int isStartEdg(int ref) {
 }
 
 /* Identify whether ref corresponds to a starting vertex */
-inline int isStartVer(int ref) {
+inline int isStartVer(Info info,int ref) {
   int k;
   
   if ( info.nsp ) {
@@ -257,7 +256,7 @@ int hashelt_2d(pMesh mesh) {
 
 /* Store all triangles of mesh with refs contained in info.sref in hash table hTab ; return number of
    successfully hashed triangles */
-int hashTriaRef(pMesh mesh){ 
+int hashTriaRef(Info info,pMesh mesh){ 
   pTria    ptt;
   hTria    *tab,*ph;
   int      k,n0,n1,n2,mins,maxs,sum,key,hnxt,l,nb;
