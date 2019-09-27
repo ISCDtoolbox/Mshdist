@@ -271,15 +271,6 @@ static int parsop(Info *info,pMesh mesh) {
         fscanf(in,"%d",&info->st[k]);
     }
 
-    /* in mode -dom: read starting vertices */
-    if ( !strcmp(data,"startver") ) {
-      fscanf(in,"%d",&info->nsp);
-      info->sp = (int*)calloc(info->nsp,sizeof(int));
-      assert ( info->nsp );
-      for (k=0; k<info->nsp; k++)
-        fscanf(in,"%d",&info->sp[k]);
-    }
-
     /* in mode -dom: read starting edges */
     if ( !strcmp(data,"startedges") ) {
       fscanf(in,"%d",&info->nsa);
