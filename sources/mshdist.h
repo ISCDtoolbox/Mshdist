@@ -84,7 +84,7 @@ typedef struct {
   int      ncpu,libpid,typ[2];          /* for // purposes */
   int      maxit,ref,nsref,*sref;
   int      nexp,nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
-  char     imprim,ddebug,option,bbbc,fmm,hausdorff,pcloud,specdist,startref,noscale;
+  char     imprim,ddebug,option,bbbc,fmm,fini,hausdorff,pcloud,specdist,startref,noscale;
   mytime   ctim[TIMEMAX];
 } Info;
 
@@ -194,8 +194,8 @@ int     inidist_2d(Info info,pMesh ,pMesh ,pSol ,pBucket );
 int     inidistpcloud_2d(pMesh ,pMesh ,pSol ,pBucket );
 int     inidist_3d(Info info,pMesh ,pMesh ,pSol ,pBucket );
 int     inidistpcloud_3d(pMesh ,pMesh ,pSol ,pBucket );
-int     iniredist_2d(pMesh ,pSol );
-int     iniredist_3d(pMesh ,pSol );
+int     iniredist_2d(Info ,pMesh ,pSol );
+int     iniredist_3d(Info ,pMesh ,pSol );
 int     sgndist_2d(Info info,pMesh ,pMesh ,pSol ,pBucket );
 int     sgndist_3d(Info info,pMesh ,pMesh ,pSol ,pBucket );
 int     ppgdist_2d(Info info,pMesh mesh, pSol sol);
@@ -259,9 +259,9 @@ pBucket (*newBucket)(pMesh ,int );
 int     (*closept)(pMesh ,double *);
 int     (*inidist)(Info info,pMesh ,pMesh ,pSol ,pBucket );
 int     (*inidistpcloud)(pMesh ,pMesh ,pSol ,pBucket );
-int     (*iniredist)(pMesh ,pSol );
-int     (*iniencdomain)(Info info,pMesh ,pSol );
-int     (*inireftrias)(Info info,pMesh, pSol);
+int     (*iniredist)(Info ,pMesh ,pSol );
+int     (*iniencdomain)(Info ,pMesh ,pSol );
+int     (*inireftrias)(Info ,pMesh, pSol);
 int     (*ppgdist)(Info info,pMesh mesh, pSol sol);
 int     (*ppgdistfmm)(pMesh mesh, pSol sol);
 

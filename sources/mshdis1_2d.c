@@ -74,7 +74,7 @@ int getEdge(pMesh mesh,int ia,int ib) {
 
 /* find background triangles intersecting the boundary, 
  and initialize distance at their vertices */
-int iniredist_2d(pMesh mesh, pSol sol){
+int iniredist_2d(Info info, pMesh mesh, pSol sol){
   pTria    pt;
   pPoint   p0,p1,p2,pa;
   double  *solTmp,d;

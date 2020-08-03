@@ -2,16 +2,14 @@
 #include "lplib3.h"
 
 unsigned char inxt3[7] = {1,2,3,0,1,2,3};
-
 extern unsigned char idirt[4][3];
 
 extern hash  hTab;
 char ddb;
 
-
 /* find background tetras intersecting the boundary,
  and initialize distance at their vertices */
-int iniredist_3d(pMesh mesh, pSol sol) {
+int iniredist_3d(Info info, pMesh mesh, pSol sol) {
   pTetra  pt;
   pPoint  p0,p1,p2,p3,pa;
   double  *solTmp,d, *circum, xc[3],r,norm;
@@ -105,41 +103,25 @@ int iniredist_3d(pMesh mesh, pSol sol) {
   }
 
   /* correction procedure, for points whose tag is 2, i.e. min is not achieved through an orthogonal projection */
-  circum = (double*)calloc(4*nb+1,sizeof(double));
-  fprintf(stdout,"     Building circumcircle table...");
-  buildcircumredis_3d(mesh, sol, bndy, nb, circum);
-  fprintf(stdout,"done. \n");
+  if ( !info.fini ) {
+    circum = (double*)calloc(4*nb+1,sizeof(double));
+    fprintf(stdout,"     Building circumcircle table...");
+    buildcircumredis_3d(mesh,sol,bndy,nb,circum);
+    nc = 0;
 
-  nc = 0;
+    for (i=1; i<=mesh->np; i++) {
+      pa = &mesh->point[i];
+      if ( pa->tag < 1 )  continue;
+      for (j=1; j<=nb; j++) {
+        xc[0] = circum[4*(j-1)+1];
+        xc[1] = circum[4*(j-1)+2];
+        xc[2] = circum[4*(j-1)+3];
+        r = circum[4*(j-1)+4];
+        norm = (pa->c[0]-xc[0])*(pa->c[0]-xc[0]) + (pa->c[1]-xc[1])*(pa->c[1]-xc[1])\
+            + (pa->c[2]-xc[2])*(pa->c[2]-xc[2]);
 
-/*for(i=1; i<=nb; i++){
-  pt = &mesh->tetra[bndy[i]];
-
-  for(j=0; j<4; j++){
-    pa = &mesh->point[pt->v[j]];
-	if(pa->tag<2) continue;
-	solTmp[pt->v[j]] = D_MIN(solTmp[pt->v[j]], distnv0approx_3d(mesh, sol, bndy[i], pa));
-  }
-}
-
-for (i=1; i<=mesh->np; i++) {
-  pa = &mesh->point[i];
-  if ( pa->tag == 2 )  pa->tag =1;
-}*/
-
-  for (i=1; i<=mesh->np; i++) {
-	  pa = &mesh->point[i];
-	  if ( pa->tag < 1 )  continue;
-	  for (j=1; j<=nb; j++) {
-	    xc[0] = circum[4*(j-1)+1];
-	    xc[1] = circum[4*(j-1)+2];
-	    xc[2] = circum[4*(j-1)+3];
-	    r = circum[4*(j-1)+4];
-	    norm = (pa->c[0]-xc[0])*(pa->c[0]-xc[0]) + (pa->c[1]-xc[1])*(pa->c[1]-xc[1])\
-	        + (pa->c[2]-xc[2])*(pa->c[2]-xc[2]);
-
-	    if(r==0.0) continue;
-      if((r<norm)&&(2* sol->val[i] *(r + norm) < (norm -r)*(norm-r))) continue;
+        if ( r == 0.0 ) continue;
+        if ((r<norm)&&(2* sol->val[i] *(r + norm) < (norm -r)*(norm-r))) continue;
 
 	    pt = &mesh->tetra[bndy[j]];
 	    d  = distnv0_3d(mesh,sol,bndy[j],pa,&proj);
@@ -147,9 +129,11 @@ for (i=1; i<=mesh->np; i++) {
 	      solTmp[i] = d;
 	      //break;
 	    }
+      }
+      pa->tag = 1;
+      nc++;
     }
-    pa->tag = 1;
-    nc++;
+    free(circum);
   }
 
   if ( nc )   fprintf(stdout,"     %d correction(s)\n",nc);
@@ -162,7 +146,6 @@ for (i=1; i<=mesh->np; i++) {
 	  sol->val[i] = sol->val[i] < 0.0 ? -sqrt(solTmp[i]) : sqrt(solTmp[i]);
   }
 
-  free(circum);
   free(solTmp);
   free(bndy);
   return(1);
@@ -369,8 +352,7 @@ int inireftrias_3d(Info info,pMesh mesh, pSol sol){
   return(1);
 }
 
-/* Initialize a signed distance function to a domain already existing in mesh,
- defined by pt->ref = REFINT */
+/* Initialize a l.s. function to a domain already existing in mesh, defined by isIntDom(info,pt->ref) = 1 */
 int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
   pTetra  pt,pt1;
   pPoint  p0,p1,p2,pn0,pn1,pn2;
@@ -391,8 +373,7 @@ int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
   /* Compute nb = number of boundary faces to be considered */
   for(k=1; k<= mesh->ne; k++){
     pt = &mesh->tetra[k];
-    if(pt->ref != REFINT)
-      continue;
+    if ( !isIntDom(info,pt->ref) ) continue;
 
     for(i=0; i<4; i++){
       adja = &mesh->adja[4*(k-1)+1];
@@ -400,16 +381,11 @@ int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
 
       /* Exclude outer boundary triangles from starting boundary */
       if( !iel ) continue;
-      if( mesh->tetra[iel].ref != REFINT )
-        nb++;
-
-      /* Include outer boundary triangles as starting boundary */
-      /*if( !iel || mesh->tetra[iel].ref != REFINT )
-        nb++;*/
+      if ( !isIntDom(info,mesh->tetra[iel].ref) ) nb++;
     }
   }
 
-  if(!nb){
+  if ( !nb ) {
     printf("****** Error - No boundary face found \n");
     return(0);
   }
@@ -426,8 +402,7 @@ int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
   /* Store boundary faces under the form 4*iel+iface */
   for(k=1; k<= mesh->ne; k++){
     pt = &mesh->tetra[k];
-    if(pt->ref != REFINT)
-      continue;
+    if ( !isIntDom(info,pt->ref) ) continue;
 
     for(i=0; i<4; i++){
       adja = &mesh->adja[4*(k-1)+1];
@@ -435,7 +410,7 @@ int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
 
       /* Exclude outer boundary triangles from starting boundary */
       if( !iel ) continue;
-      if( mesh->tetra[iel].ref != REFINT ) {
+      if ( !isIntDom(info,mesh->tetra[iel].ref) ) {
         list[nc] = 4*k+i;
         nc++;
       }
@@ -466,7 +441,8 @@ int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
 
     for(j=0; j<3; j++){
       ip =idirt[iface][j];
-
+      
+      /* To Do: try to take several layers of balls, using an adapted function */
       lball = boulet_3d(mesh,iel,ip,ball);
       assert(lball);
 
@@ -487,26 +463,27 @@ int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
         pn1 = &mesh->point[pt1->v[j1]];
         pn2 = &mesh->point[pt1->v[j2]];
 
-        if(pn0->flag != k){
+        if ( pn0->flag != k ) {
           dd = distpt_3d(p0,p1,p2,pn0,&proj);
-          if(dd < sol->val[np0]){
+          if ( dd < sol->val[np0] ) {
             sol->val[np0] = dd;
             pn0->tag = proj;
           }
           pn0->flag = k;
         }
-        if(pn1->flag != k){
+        
+        if ( pn1->flag != k ) {
           dd = distpt_3d(p0,p1,p2,pn1,&proj);
-          if(dd < sol->val[np1]){
+          if ( dd < sol->val[np1] ) {
             sol->val[np1] = dd;
             pn1->tag = proj;
           }
           pn1 ->flag = k;
         }
 
-        if(pn2->flag != k){
+        if ( pn2->flag != k ) {
           dd = distpt_3d(p0,p1,p2,pn2,&proj);
-          if(dd < sol->val[np2]){
+          if ( dd < sol->val[np2] ) {
             sol->val[np2] = dd;
             pn2->tag = proj;
           }
@@ -516,13 +493,13 @@ int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
     }
   }
 
-  /* set distance to all boundary points to 0 */
-  for(k=0; k<nb; k++){
+  /* Set distance to all boundary points to 0 */
+  for (k=0; k<nb; k++) {
     iel = list[k] / 4;
     iface = list[k] % 4;
     pt = &mesh->tetra[iel];
 
-    for(j=0; j<3; j++){
+    for (j=0; j<3; j++) {
       np0 = pt->v[idirt[iface][j]];
       sol->val[np0] = 0.0;
     }
@@ -531,29 +508,31 @@ int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
   /* Correction procedure */
   nc = 0;
 
-  for(k=1; k<=mesh->np; k++){
-    pn0 = &mesh->point[k];
-    if(pn0->tag < 2) continue;
+  if ( !info.fini ) {
+    for (k=1; k<=mesh->np; k++) {
+      pn0 = &mesh->point[k];
+      if ( pn0->tag < 2 ) continue;
 
-    for(l=0; l<nb; l++){
-      iel = list[l] / 4;
-      iface = list[l] % 4;
+      for (l=0; l<nb; l++) {
+        iel = list[l] / 4;
+        iface = list[l] % 4;
 
-      i0 = idirt[iface][0];
-      i1 = idirt[iface][1];
-      i2 = idirt[iface][2];
+        i0 = idirt[iface][0];
+        i1 = idirt[iface][1];
+        i2 = idirt[iface][2];
 
-      p0 = &mesh->point[pt->v[i0]];
-      p1 = &mesh->point[pt->v[i1]];
-      p2 = &mesh->point[pt->v[i2]];
+        p0 = &mesh->point[pt->v[i0]];
+        p1 = &mesh->point[pt->v[i1]];
+        p2 = &mesh->point[pt->v[i2]];
 
-      dd = distpt_3d(p0,p1,p2,pn0,&proj);
-      if(dd < sol->val[k]){
-        nc++;
-        sol->val[k] = dd;
-        if(proj == 1){
-          pn0->tag = 1;
-          break;
+        dd = distpt_3d(p0,p1,p2,pn0,&proj);
+        if ( dd < sol->val[k] ) {
+          nc++;
+          sol->val[k] = dd;
+          if ( proj == 1 ) {
+            pn0->tag = 1;
+            break;
+          }
         }
       }
     }
@@ -561,32 +540,30 @@ int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
   if ( nc )   fprintf(stdout,"     %d correction(s)\n",nc);
 
   /* reset point flags */
-  for(k=1; k<=mesh->np; k++){
+  for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
     p0->flag = 0;
   }
 
   /* Put sign in the function, and take sqrt */
-  for(k=1; k<=mesh->ne;k++){
+  for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-	  for(j=0;j<4;j++){
+    for (j=0; j<4; j++) {
       np = pt->v[j];
-	    p0 = &mesh->point[np];
+      p0 = &mesh->point[np];
 
-      if(p0->flag ==1) continue;
-	    p0->flag = 1;
+      if ( p0->flag ==1 ) continue;
+      p0->flag = 1;
 
-      if(pt->ref == REFINT){
+      if ( isIntDom(info,pt->ref) )
 	      sol->val[np] = -sqrt(sol->val[np]);
-      }
-	    else{
+      else
         sol->val[np] = sqrt(sol->val[np]);
-	    }
   	}
   }
 
   /* reset point flags */
-  for(k=1; k<=mesh->np; k++)
+  for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
 
 
@@ -685,40 +662,42 @@ int inidist_3d(Info info,pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   fprintf(stdout,"     distance\n");
 
   /* correction */
-  circum = (double*)calloc(4*(mesh2->nt)+1,sizeof(double));
-  fprintf(stdout,"     Building circumcircle table...");
-  buildcircum_3d(mesh2,circum);
-  fprintf(stdout,"done. \n");
+  if ( !info.fini ) {
+    circum = (double*)calloc(4*(mesh2->nt)+1,sizeof(double));
+    fprintf(stdout,"     Building circumcircle table...");
+    buildcircum_3d(mesh2,circum);
+    fprintf(stdout,"done. \n");
 
-  nc = 0;
-  for (k=1; k<=mesh1->np; k++) {
-    pa = &mesh1->point[k];
-    if ( pa->tag < 1 )  continue;
-    for (i=1; i<=mesh2->nt; i++) {
-	  xc[0] = circum[4*(i-1)+1];
-	  xc[1] = circum[4*(i-1)+2];
-	  xc[2] = circum[4*(i-1)+3];
-      r = circum[4*(i-1)+4];
-	  norm = (pa->c[0]-xc[0])*(pa->c[0]-xc[0]) + (pa->c[1]-xc[1])*(pa->c[1]-xc[1])\
-		   + (pa->c[2]-xc[2])*(pa->c[2]-xc[2]);
+    nc = 0;
+    for (k=1; k<=mesh1->np; k++) {
+      pa = &mesh1->point[k];
+      if ( pa->tag < 1 )  continue;
+      for (i=1; i<=mesh2->nt; i++) {
+	    xc[0] = circum[4*(i-1)+1];
+	    xc[1] = circum[4*(i-1)+2];
+	    xc[2] = circum[4*(i-1)+3];
+        r = circum[4*(i-1)+4];
+	    norm = (pa->c[0]-xc[0])*(pa->c[0]-xc[0]) + (pa->c[1]-xc[1])*(pa->c[1]-xc[1])\
+		     + (pa->c[2]-xc[2])*(pa->c[2]-xc[2]);
 
-	  if((r<norm)&&(2* sol1->val[k] *(r + norm) < (norm -r)*(norm-r))) continue;
-      pf = &mesh2->tria[i];
-      p1 = &mesh2->point[pf->v[0]];
-      p2 = &mesh2->point[pf->v[1]];
-      p3 = &mesh2->point[pf->v[2]];
-      d  = distpt_3d(p1,p2,p3,pa,&tag);
-      if ( d < sol1->val[k] ) {
-        sol1->val[k] = d;
+	    if((r<norm)&&(2* sol1->val[k] *(r + norm) < (norm -r)*(norm-r))) continue;
+        pf = &mesh2->tria[i];
+        p1 = &mesh2->point[pf->v[0]];
+        p2 = &mesh2->point[pf->v[1]];
+        p3 = &mesh2->point[pf->v[2]];
+        d  = distpt_3d(p1,p2,p3,pa,&tag);
+        if ( d < sol1->val[k] ) {
+          sol1->val[k] = d;
+        }
       }
+      pa->tag = 1;
+      nc++;
     }
-    pa->tag = 1;
-    nc++;
+    free(circum);
   }
   if ( nc )  fprintf(stdout,"     %d correction(s)\n",nc);
 
   free(list);
-  free(circum);
   return(1);
 
 }

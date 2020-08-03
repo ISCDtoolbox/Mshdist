@@ -1,6 +1,5 @@
 #include "mshdist.h"
 
-
 /* create bucket structure and store initial vertices */
 pBucket newBucket_3d(pMesh mesh,int nmax) {
   pPoint   ppt;
@@ -36,7 +35,6 @@ pBucket newBucket_3d(pMesh mesh,int nmax) {
 
   return(bucket);
 }
-
 
 pBucket newBucket_2d(pMesh mesh,int nmax) {
   pPoint   ppt;

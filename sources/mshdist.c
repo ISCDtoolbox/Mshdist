@@ -86,6 +86,8 @@ static int parsar(int argc,char *argv[],Info *info,pMesh mesh1,pSol sol1,pMesh m
       case 'f':
         if ( !strcmp(argv[i],"-fmm") )
           info->fmm = 1;
+        else if ( !strcmp(argv[i],"-fini") )
+          info->fini = 1;
         break;
 
       /* Calculate Hausdorff distance */
@@ -93,8 +95,8 @@ static int parsar(int argc,char *argv[],Info *info,pMesh mesh1,pSol sol1,pMesh m
 		if ( !strcmp(argv[i],"-hausdorff") ) {
 		  info->hausdorff = 1;
 		}
-    else 
-      usage(argv[0]);
+        else
+          usage(argv[0]);
 		break;
 
       case 'i':
@@ -460,7 +462,7 @@ static int mshdis1(Info info,pMesh mesh1,pMesh mesh2,pSol sol1) {
   /* Redistancing */
   else {
     if ( info.imprim )  fprintf(stdout,"  ** Redistancing\n");
-    ier = iniredist(mesh1,sol1);
+    ier = iniredist(info,mesh1,sol1);
   }
 
   /* Signed distance propagation */
