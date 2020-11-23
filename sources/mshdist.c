@@ -341,7 +341,7 @@ int setfunc(Info info,int dim) {
       inidist = inidist_2d;
       inidistpcloud = inidistpcloud_2d;
     }
-    else if(info.option == 3){
+    else if ( info.option == 3 ){
       inireftrias = inireftrias_2d;
       iniencdomain = iniencdomain_2d;
     }
@@ -352,22 +352,31 @@ int setfunc(Info info,int dim) {
     ppgdistfmm = ppgdistfmm_2d;
   }
   
+  /* Three-dimensional case */
   else {
     newBucket = newBucket_3d;
 
-    if ( info.option == 1 ) {
-      inidist = inidist_3d;
-      inidistpcloud = inidistpcloud_3d;
+    /* 3d surface mesh */
+    if ( info.dsurf ) {
+      iniencdomain = iniencdomain_s;
+      exit(0);
     }
-    else if(info.option == 3){
-      inireftrias = inireftrias_3d;
-      iniencdomain = iniencdomain_3d;
-    }
-    else
-      iniredist = iniredist_3d;
+    /* 3d volume mesh */
+    else {
+      if ( info.option == 1 ) {
+        inidist = inidist_3d;
+        inidistpcloud = inidistpcloud_3d;
+      }
+      else if ( info.option == 3 ) {
+        inireftrias = inireftrias_3d;
+        iniencdomain = iniencdomain_3d;
+      }
+      else
+        iniredist = iniredist_3d;
 
-    ppgdist = ppgdist_3d;
-    ppgdistfmm = ppgdistfmm_3d;
+      ppgdist = ppgdist_3d;
+      ppgdistfmm = ppgdistfmm_3d;
+    }
   }
 
   return(1);
@@ -531,7 +540,7 @@ int main(int argc,char **argv) {
 
   /* Parse command line arguments */
   if ( !parsar(argc,argv,&info,&mesh1,&sol1,&mesh2) )  return(1);
-
+  
   /* Load data */
   if ( info.imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
