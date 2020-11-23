@@ -62,20 +62,18 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
     //return(0);
   }
 
-  /* mem alloc */
+  /* Memory allocation for vertices, triangles and tetrahedra */
   mesh1->point = (pPoint)calloc(mesh1->np+1,sizeof(Point));
   assert(mesh1->point);
+  
   if ( mesh1->dim == 3 ) {
     mesh1->tetra = (pTetra)calloc(mesh1->ne+1,sizeof(Tetra));
     assert(mesh1->tetra);
-    mesh1->adja = (int*)calloc(4*mesh1->ne+5,sizeof(int));
-    assert(mesh1->adja);
     
     if( info.option == 3 && info.startref ) {
       mesh1->tria  = (pTria)calloc(mesh1->nt+1,sizeof(Tria));
       assert(mesh1->tria);
     }
-    
   }
   else {
     mesh1->tria  = (pTria)calloc(mesh1->nt+1,sizeof(Tria));
@@ -86,8 +84,15 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
 	    mesh1->edge  = (pEdge)calloc(mesh1->na+1,sizeof(Edge));
 	    assert(mesh1->edge);
   	}
-	
+  }
+  
+  /* Memory allocation for adjacencies */
+  if ( mesh1->dim == 2 || ( mesh1->dim ==3 && info.dsurf) ) {
     mesh1->adja = (int*)calloc(3*mesh1->nt+5,sizeof(int));
+    assert(mesh1->adja);
+  }
+  else {
+    mesh1->adja = (int*)calloc(4*mesh1->ne+5,sizeof(int));
     assert(mesh1->adja);
   }
 
