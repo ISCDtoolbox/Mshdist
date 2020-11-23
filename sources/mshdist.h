@@ -203,6 +203,7 @@ int     ppgdist_3d(Info info,pMesh mesh, pSol sol);
 int     ppgdistfmm_2d(pMesh mesh, pSol sol);
 int     ppgdistfmm_3d(pMesh mesh, pSol sol);
 int     iniencdomain_2d(Info info,pMesh mesh, pSol sol);
+int     iniencdomain_s(Info info,pMesh mesh, pSol sol);
 int     iniencdomain_3d(Info info,pMesh mesh, pSol sol);
 int     inireftrias_2d(Info info,pMesh mesh, pSol sol);
 int     inireftrias_3d(Info info,pMesh mesh, pSol sol);
