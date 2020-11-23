@@ -84,7 +84,7 @@ typedef struct {
   int      ncpu,libpid,typ[2];          /* for // purposes */
   int      maxit,ref,nsref,*sref;
   int      nexp,nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
-  char     imprim,ddebug,option,bbbc,fmm,fini,hausdorff,pcloud,specdist,startref,noscale;
+  char     imprim,ddebug,option,bbbc,dsurf,fmm,fini,hausdorff,pcloud,specdist,startref,noscale;
   mytime   ctim[TIMEMAX];
 } Info;
 
