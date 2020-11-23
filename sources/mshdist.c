@@ -163,6 +163,9 @@ static int parsar(int argc,char *argv[],Info *info,pMesh mesh1,pSol sol1,pMesh m
             info->startref = 1;
             info->option = 3;
         }
+        else if ( !strcmp(argv[i],"-surf") )
+          info->dsurf = 1;
+          
         break;
 
       case 'v':
