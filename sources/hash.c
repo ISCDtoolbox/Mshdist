@@ -61,11 +61,12 @@ inline int isStartVer(Info info,int ref) {
   return(0);
 }
 
+/* Create adjacency table in a 3d mesh */
 int hashelt_3d(pMesh mesh) {
   pTetra    pt,pt1;
   int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
   int      *hcode,*link,inival,hsize;
-  unsigned char  *hvoy,i,ii,i1,i2,i3;
+  unsigned char   i,ii,i1,i2,i3;
   unsigned int    key;
 
   /* memory alloc */
@@ -73,10 +74,9 @@ int hashelt_3d(pMesh mesh) {
   assert(hcode);
   link  = mesh->adja;
   hsize = mesh->ne;
-  hvoy  = (unsigned char*)hcode;
 
   /* init */
-	inival = 2147483647;
+  inival = 2147483647;
   for (k=0; k<=mesh->ne; k++)
     hcode[k] = -inival;
 
@@ -125,7 +125,6 @@ int hashelt_3d(pMesh mesh) {
     ll = -link[l];
     pp = 0;
     link[l] = 0;
-    hvoy[l] = 0;
     while ( ll != inival ) {
       kk = ((ll-1) >> 2) + 1;
       ii = (ll-1) % 4;
@@ -158,12 +157,12 @@ int hashelt_3d(pMesh mesh) {
   return(1);
 }
 
-
+/* Create adjacency table in a 2d mesh: mesh->adja[3*(k-1)+1+i], i=0,1,2 = neighbors of k through vertex i */
 int hashelt_2d(pMesh mesh) {
   pTria     pt,pt1;
   int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
   int      *hcode,*link,inival,hsize;
-  unsigned char  *hvoy,i,ii,i1,i2;
+  unsigned char   i,ii,i1,i2;
   unsigned int    key;
 
   /* memory alloc */
@@ -171,10 +170,9 @@ int hashelt_2d(pMesh mesh) {
   assert(hcode);
   link  = mesh->adja;
   hsize = mesh->nt;
-  hvoy  = (unsigned char*)hcode;
 
   /* init */
-	inival = 2147483647;
+  inival = 2147483647;
   for (k=0; k<=mesh->nt; k++)
     hcode[k] = -inival;
 
@@ -222,7 +220,6 @@ int hashelt_2d(pMesh mesh) {
     ll = -link[l];
     pp = 0;
     link[l] = 0;
-    hvoy[l] = 0;
     while ( ll != inival ) {
       kk = (ll-1) / 3 + 1;
       ii = (ll-1) % 3;
