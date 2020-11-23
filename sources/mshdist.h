@@ -201,6 +201,7 @@ int     sgndist_3d(Info info,pMesh ,pMesh ,pSol ,pBucket );
 int     ppgdist_2d(Info info,pMesh mesh, pSol sol);
 int     ppgdist_3d(Info info,pMesh mesh, pSol sol);
 int     ppgdistfmm_2d(pMesh mesh, pSol sol);
+int     ppgdistfmm_s(pMesh mesh, pSol sol);
 int     ppgdistfmm_3d(pMesh mesh, pSol sol);
 int     iniencdomain_2d(Info info,pMesh mesh, pSol sol);
 int     iniencdomain_s(Info info,pMesh mesh, pSol sol);
