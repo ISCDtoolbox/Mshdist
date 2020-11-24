@@ -1157,7 +1157,7 @@ int ppgdistfmm_2d(pMesh mesh,pSol sol){
     }
   }
   
-/* Main loop: pop the smallest active node; it becomes accepted and the neighboring values become active */
+  /* Main loop: pop the smallest active node; it becomes accepted and the neighboring values become active */
   while ( pq->siz ) {
     ip = popAnod(pq,&dist);
     if ( !ip ) {
