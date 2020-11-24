@@ -592,7 +592,9 @@ int main(int argc,char **argv) {
   }
 
   info.nexp = info.nexp == -1 ? 1 : info.nexp;
-  ier = mesh1.dim == 2 ? hashelt_2d(&mesh1) : hashelt_3d(&mesh1);
+  
+  /* Create adjacencies */
+  ier = ( mesh1.dim == 2 || ( mesh1.dim ==3 && info.dsurf ) )? hashelt_2d(&mesh1) : hashelt_3d(&mesh1);
   if ( !ier )  return(1);
 
   chrono(OFF,&info.ctim[2]);
