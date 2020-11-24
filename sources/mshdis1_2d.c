@@ -1056,7 +1056,8 @@ double actival_2d(pMesh mesh,pSol sol,int k,int i) {
       if ( ( d0 >= 0.0 && ps1 < EPS1 && ps2 < EPS1 ) || ( d0 <= 0.0 && ps1 >- EPS1 && ps2 >- EPS1 )) dist = fabs(rmin);
       
     }
-    else if ( (d0 >= 0.0 && rmax >= d1 && rmax >= d2) || (d0 <= 0.0 && rmax <= d1 && rmax <= d2) ) {
+    /* Then try rmax if no update from rmin */
+    if ( (fabs( dist - INIVAL_2d ) < EPS2) && ((d0 >= 0.0 && rmax >= d1 && rmax >= d2) || (d0 <= 0.0 && rmax <= d1 && rmax <= d2)) ) {
       g[0] = (d1-rmax)*Gr[0][1] + (d2-rmax)*Gr[0][2];
       g[1] = (d1-rmax)*Gr[1][1] + (d2-rmax)*Gr[1][2];
       ps1  = g[0]*Gr[0][1] + g[1]*Gr[1][1];
