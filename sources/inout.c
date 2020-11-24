@@ -37,26 +37,28 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   if ( abs(info.imprim) > 3 )
     fprintf(stdout,"  -- READING DATA FILE %s\n",data);
 
-  if ( mesh1->dim == 3 ) {
+  /* Load tetrahedra and vertices in the case of a full (volumic) 3d mesh */
+  if ( mesh1->dim == 3 && !info.dsurf ) {
     mesh1->np = GmfStatKwd(inm,GmfVertices);
     mesh1->ne = GmfStatKwd(inm,GmfTetrahedra);
     nh = GmfStatKwd(inm,GmfHexahedra);
     if ( nh ) {
-			fprintf(stdout,"  ## Non simplicial mesh\n");
-			return(0);
-	  }
+      fprintf(stdout,"  ## Non simplicial mesh\n");
+      return(0);
+    }
     if( info.option == 3 && info.startref ) mesh1->nt = GmfStatKwd(inm,GmfTriangles);
-	}
-	else {
+  }
+  
+  else {
     mesh1->np = GmfStatKwd(inm,GmfVertices);
-	  if((info.option == 3)||(info.bbbc)||(info.hausdorff)) mesh1->na = GmfStatKwd(inm,GmfEdges);   //add 21/01/2011
+    if((info.option == 3)||(info.bbbc)||(info.hausdorff)) mesh1->na = GmfStatKwd(inm,GmfEdges);   //add 21/01/2011
     mesh1->nt = GmfStatKwd(inm,GmfTriangles);
     nq = GmfStatKwd(inm,GmfQuadrilaterals);
     if ( nq ) {
-			fprintf(stdout,"  ## Non simplicial mesh\n");
-			return(0);
-	  }
-	}
+      fprintf(stdout,"  ## Non simplicial mesh\n");
+      return(0);
+    }
+  }
   if ( !mesh1->np || (mesh1->ne+mesh1->nt == 0)  ) {
     fprintf(stdout,"  ** MISSING DATA (expecting elements)\n");
     //return(0);
@@ -66,7 +68,7 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   mesh1->point = (pPoint)calloc(mesh1->np+1,sizeof(Point));
   assert(mesh1->point);
   
-  if ( mesh1->dim == 3 ) {
+  if ( mesh1->dim == 3 && !info.dsurf ) {
     mesh1->tetra = (pTetra)calloc(mesh1->ne+1,sizeof(Tetra));
     assert(mesh1->tetra);
     
@@ -96,7 +98,7 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
     assert(mesh1->adja);
   }
 
-  /* read mesh vertices */
+  /* Read mesh vertices */
   GmfGotoKwd(inm,GmfVertices);
   if ( mesh1->dim == 3 ) {
     for (k=1; k<=mesh1->np; k++) {
@@ -125,7 +127,7 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
         GmfGetLin(inm,GmfVertices,&ppt->c[0],&ppt->c[1],&ref);
     }
   }
-  /* read mesh edges : add 21/01/2011 */
+  /* Read mesh edges : add 21/01/2011 */
   if(((mesh1->dim == 2)&&(info.option == 3)&&(mesh1->na))||(((mesh1->dim == 2)&&(info.bbbc)&&(mesh1->na)))||((info.hausdorff)&&(mesh1->na))){
 	GmfGotoKwd(inm,GmfEdges);
     for (k=1; k<=mesh1->na; k++) {
@@ -135,8 +137,8 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
 
   }
   
-  /* read mesh elements */
-  if ( mesh1->dim == 3 ) {
+  /* Read mesh elements */
+  if ( mesh1->dim == 3 && !info.dsurf ) {
     GmfGotoKwd(inm,GmfTetrahedra);
     for (k=1; k<=mesh1->ne; k++) {
       pt = &mesh1->tetra[k];
@@ -352,6 +354,7 @@ int saveMesh(pMesh mesh,char *fileout) {
 }
 
 
+/* Load function defined at the verticles of the mesh */
 int loadSol(pSol sol) {
   double       dbuf[ GmfMaxTyp ];
   float        fbuf[ GmfMaxTyp ];
@@ -405,7 +408,7 @@ int loadSol(pSol sol) {
   return(1);
 }
 
-
+/* Save solution, defined at the vertices of the mesh */
 int saveSol(pSol sol) {
   float        fbuf;
   int          k,inm;

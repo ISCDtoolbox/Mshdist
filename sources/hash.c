@@ -164,7 +164,7 @@ int hashelt_2d(pMesh mesh) {
   int      *hcode,*link,inival,hsize;
   unsigned char   i,ii,i1,i2;
   unsigned int    key;
-
+  
   /* memory alloc */
   hcode = (int*)calloc(mesh->nt+1,sizeof(int));
   assert(hcode);
@@ -180,7 +180,7 @@ int hashelt_2d(pMesh mesh) {
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !pt->v[0] )  continue;
-
+    
     for (i=0; i<3; i++) {
       i1 = idir[i+1];
       i2 = idir[i+2];
