@@ -34,6 +34,7 @@ int iniencdomain_s(Info info,pMesh mesh, pSol sol){
       p1 = &mesh->point[ip];
       dd = (p1->c[0]-p0->c[0])* (p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])* (p1->c[1]-p0->c[1]) + (p1->c[2]-p0->c[2])* (p1->c[2]-p0->c[2]);
       sol->val[ip] = D_MIN(sol->val[ip],dd);
+      p1->tag = 1;
     }
   }
   
@@ -185,7 +186,7 @@ double actival_s(pMesh mesh,pSol sol,int k,int i) {
       
     }
     /* Then try rmax if no update from rmin */
-    if ( (fabs( dist - INIVAL_2d ) < EPS2) && ((d0 >= 0.0 && rmax >= d1 && rmax >= d2) || (d0 <= 0.0 && rmax <= d1 && rmax <= d2)) ) {
+    if ( (fabs( dist - INIVAL_3d ) < EPS2) && ((d0 >= 0.0 && rmax >= d1 && rmax >= d2) || (d0 <= 0.0 && rmax <= d1 && rmax <= d2)) ) {
       g[0] = (d1-rmax)*Gr[0][1] + (d2-rmax)*Gr[0][2];
       g[1] = (d1-rmax)*Gr[1][1] + (d2-rmax)*Gr[1][2];
       g[2] = (d1-rmax)*Gr[2][1] + (d2-rmax)*Gr[2][2];
@@ -196,7 +197,7 @@ double actival_s(pMesh mesh,pSol sol,int k,int i) {
     }
     
     /* If no other value has been assigned to dist, calculate a trial value based on both triangle edges */
-    if ( fabs( dist - INIVAL_2d ) < EPS2 ) {
+    if ( fabs( dist - INIVAL_3d ) < EPS2 ) {
       ll = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1]) + (p1->c[2]-p0->c[2])*(p1->c[2]-p0->c[2]);
       ll = sqrt(ll);
       defval1 = (d0 < 0.0) ? d1 -ll : d1 + ll;
@@ -209,12 +210,128 @@ double actival_s(pMesh mesh,pSol sol,int k,int i) {
     }
   }
   
-  return(dist);
+  return (dist);
 }
 
 /* Propagation of the signed distance function by the Fast Marching Method */
 int ppgdistfmm_s(pMesh mesh,pSol sol) {
-
+  Queue       q;
+  pQueue      pq;
+  pTria       pt,pt1;
+  pPoint      p0,p1,p2;
+  double      dist;
+  int         nacc,k,l,iel,ip,ip1,ip2,ilist,list[LONMAX];
+  char        i,j,j1,j2,jj;
+  
+  pq = &q;
+  nacc = 0;
+  
+  /* Memory allocation for the priority queue */
+  if ( !setQueue(mesh,pq) ) {
+    printf("Impossible to allocate memory for priority queue. Abort program.\n");
+    exit(0);
+  }
+  
+  /* Definition of the initial set of active nodes: travel accepted nodes */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    for(i=0; i<3; i++) {
+      ip = pt->v[i];
+      p0 = &mesh->point[ip];
+      
+      if ( p0->tag != 1 ) continue;
+      
+      ilist = boulet_2d(mesh,k,i,list);
+      
+      for (l=0; l<ilist; l++) {
+        iel = list[l] / 3;
+        pt1 = &mesh->tria[iel];
+        
+        j   = list[l] % 3;
+        j1  = inxt2[j];
+        j2  = inxt2[j1];
+        
+        ip1 = pt1->v[j1];
+        ip2 = pt1->v[j2];
+        p1 = &mesh->point[ip1];
+        p2 = &mesh->point[ip2];
+        
+        /* Calculate value at ip1 and put it in the queue */
+        if ( p1->tag != 1 ) {
+          dist = actival_s(mesh,sol,iel,j1);
+          
+          if ( p1->tag == 0 ) {
+            insertAnod(pq,ip1,dist);
+            p1->tag = 2;
+          }
+          else
+            upAnod(pq,ip1,dist);
+        }
+        
+        /* Calculate value at ip2 and put it in the queue */
+        if ( p2->tag != 1 ) {
+          dist = actival_s(mesh,sol,iel,j2);
+          if ( p2->tag == 0 ) {
+            insertAnod(pq,ip2,dist);
+            
+            p2->tag = 2;
+          }
+          else
+            upAnod(pq,ip2,dist);
+        }
+      }
+    }
+  }
+  
+  /* Main loop: pop the smallest active node; it becomes accepted and the neighboring values become active */
+  while ( pq->siz ) {
+    ip = popAnod(pq,&dist);
+    if ( !ip ) {
+      printf("Problem in popping in Fast Marching Method. Abort\n");
+      exit(0);
+    }
+    
+    p0 = &mesh->point[ip];
+    p0->tag = 1;
+    sol->val[ip] = sol->val[ip] > 0.0 ? dist : -dist;
+    
+    /* Travel the ball of p0 to update the set of active nodes */
+    k = p0->s;
+    pt = &mesh->tria[k];
+    for (i=0; i<3; i++)
+      if ( pt->v[i] == ip ) break;
+    assert ( i < 3 );
+    
+    ilist = boulet_2d(mesh,k,i,list);
+    for (l=0; l<ilist; l++) {
+      iel = list[l] / 3;
+      j   = list[l] % 3;
+      pt  = &mesh->tria[iel];
+      
+      for(jj=0; jj<2; jj++) {
+        j   = inxt2[j];
+        ip1 = pt->v[j];
+        p1  = &mesh->point[ip1];
+        
+        /* Either insert or update active value if the point is not already accepted */
+        if ( p1->tag == 1 ) continue;
+        
+        dist = actival_s(mesh,sol,iel,j);
+        if ( p1->tag == 2 )
+          upAnod(pq,ip1,dist);
+        else {
+          insertAnod(pq,ip1,dist);
+          p1->tag = 2;
+        }
+      }
+    }
+  }
+  
+  /* Release memory of the queue */
+  if ( !freeQueue(pq) ) {
+    printf("Impossible to free priority queue. Abort program.\n");
+    exit(0);
+  }
   
   return(1);
 }
