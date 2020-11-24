@@ -144,6 +144,8 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
       pt = &mesh1->tetra[k];
       if(info.option ==3) GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&pt->ref);
       else GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&ref);
+      
+      /* Attribute the number of one tetra containing p0 */
       for (i=0; i<4; i++) {
         ppt = &mesh1->point[pt->v[i]];
         if ( !ppt->s )  ppt->s = k;
@@ -157,7 +159,9 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
         pt1 = &mesh1->tria[k];
         if(info.option ==3) GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);//add : 21/01/2011
         else GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&ref);
-        for (i=0; i<3; i++) {    
+        
+        /* Attribute the number of one tria containing p0 */
+        for (i=0; i<3; i++) {
           ppt = &mesh1->point[pt1->v[i]];
           if ( !ppt->s )  ppt->s = k;
         }

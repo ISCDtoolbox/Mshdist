@@ -156,6 +156,7 @@ int     checkHeap(pQueue );
 
 /* Fast Marching routines */
 double actival_2d(pMesh ,pSol ,int ,int );
+double actival_s(pMesh ,pSol ,int ,int );
 double actival1pt_3d(pMesh ,pSol ,int ,int );
 double actival2pt_3d(pMesh ,pSol ,int ,int ,int );
 double actival_3d(pMesh ,pSol ,int ,int );
