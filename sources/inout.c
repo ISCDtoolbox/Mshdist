@@ -127,6 +127,7 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
         GmfGetLin(inm,GmfVertices,&ppt->c[0],&ppt->c[1],&ref);
     }
   }
+  
   /* Read mesh edges : add 21/01/2011 */
   if(((mesh1->dim == 2)&&(info.option == 3)&&(mesh1->na))||(((mesh1->dim == 2)&&(info.bbbc)&&(mesh1->na)))||((info.hausdorff)&&(mesh1->na))){
 	GmfGotoKwd(inm,GmfEdges);
