@@ -156,6 +156,7 @@ int     checkHeap(pQueue );
 
 /* Fast Marching routines */
 double actival_2d(pMesh ,pSol ,int ,int );
+double actival2pt_s(double *,double *,double *,double ,double );
 double actival_s(pMesh ,pSol ,int ,int );
 double actival1pt_3d(pMesh ,pSol ,int ,int );
 double actival2pt_3d(pMesh ,pSol ,int ,int ,int );
@@ -169,6 +170,7 @@ double distpt_2d(pPoint,pPoint,pPoint,int*);
 double distnv0_2d(pMesh,pSol,int,pPoint,int*);
 int    buildcircum_3d(pMesh,double *);
 int    circumcoords(pPoint,pPoint,pPoint,double *);
+double distpt_s(pPoint,pPoint,pPoint,int*);
 double distptplan(pPoint,pPoint,pPoint,pPoint);
 double distpt_3d(pPoint p0,pPoint p1,pPoint p2,pPoint pq,char *proj);
 double distnv0_3d(pMesh,pSol,int,pPoint,char*);

@@ -516,6 +516,7 @@ int iniencdomain_3d(Info info,pMesh mesh, pSol sol){
       for (l=0; l<nb; l++) {
         iel = list[l] / 4;
         iface = list[l] % 4;
+        pt = &mesh->tetra[iel];
 
         i0 = idirt[iface][0];
         i1 = idirt[iface][1];
