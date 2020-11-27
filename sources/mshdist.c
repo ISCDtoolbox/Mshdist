@@ -537,6 +537,7 @@ int main(int argc,char **argv) {
   info.dt     = 0.001;
   info.maxit  = 1000;
   info.size   = SIZE;
+  info.nintel = -1;
 
   /* Parse command line arguments */
   if ( !parsar(argc,argv,&info,&mesh1,&sol1,&mesh2) )  return(1);
@@ -559,7 +560,7 @@ int main(int argc,char **argv) {
   parsop(&info,&mesh1);
   
   /* Default value for the interior domain, if none supplied (used in -dom option only) */
-  if ( !info.nintel ) {
+  if ( info.nintel < 0 ) {
     info.nintel = 1;
     info.intel = (int*)calloc(1,sizeof(int));
     info.intel[0] = REFINT;
