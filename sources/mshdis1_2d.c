@@ -72,8 +72,7 @@ int getEdge(pMesh mesh,int ia,int ib) {
   return(0);
 }
 
-/* find background triangles intersecting the boundary, 
- and initialize distance at their vertices */
+/* find background triangles intersecting the boundary and initialize distance at their vertices */
 int iniredist_2d(Info info, pMesh mesh, pSol sol){
   pTria    pt;
   pPoint   p0,p1,p2,pa;
@@ -84,7 +83,7 @@ int iniredist_2d(Info info, pMesh mesh, pSol sol){
   bndy = (int*)calloc(mesh->nt+1,sizeof(int));
   assert(bndy);	  
 
-  /* store intersecting background triangles in list bndy */
+  /* Store intersecting background triangles in list bndy */
   for (i=1; i<=mesh->nt; i++) {
 	pt = &mesh->tria[i];
 	i0 = pt->v[0]; 
@@ -95,11 +94,11 @@ int iniredist_2d(Info info, pMesh mesh, pSol sol){
 		 (sol->val[i1] * sol->val[i2] <=0.)){
 	  nb++;
 	  bndy[nb] = i;
-	}	
+	}
   }
   
   bndy = (int*)realloc(bndy,(nb+1)*sizeof(int));	
-	printf("nb= %d\n",nb);
+  printf("nb= %d\n",nb);
   
   /* Temporary values stored in solTmp */	
   solTmp = (double*)calloc(mesh->np+1,sizeof(double));
@@ -107,73 +106,84 @@ int iniredist_2d(Info info, pMesh mesh, pSol sol){
 
   /* Check list bndy and compute distance at vertices of its elements */
   for (i=1; i<=nb; i++) {
-	  pt = &mesh->tria[bndy[i]];
-	  i0 = pt->v[0]; 
-	  i1 = pt->v[1]; 
-	  i2 = pt->v[2];
+    ddb = 0;
+    pt = &mesh->tria[bndy[i]];
+    i0 = pt->v[0];
+    i1 = pt->v[1];
+    i2 = pt->v[2];
 
-	  p0 = &mesh->point[i0]; 
-	  p1 = &mesh->point[i1]; 
-	  p2 = &mesh->point[i2]; 
-	  
-	  d = distnv0_2d(mesh, sol, bndy[i], p0, &proj);
-	  
-	  if (p0->tag == 0) {
-	    solTmp[i0] = d;
-	    p0->tag    = proj;
-	  }
-	  else if (d < fabs(solTmp[i0])) {
-	    solTmp[i0] = d;
-	    p0->tag    = proj;			
-	  }
-	  d = distnv0_2d(mesh, sol, bndy[i], p1, &proj);
-	  
-	  if (p1->tag == 0) {
-	    solTmp[i1] = d;
-	    p1->tag    = proj;
-	  }
-	  else if (d < fabs(solTmp[i1])) {
-      solTmp[i1] = d;
-	    p1->tag    = proj;			
-	  }
+    p0 = &mesh->point[i0];
+    p1 = &mesh->point[i1];
+    p2 = &mesh->point[i2];
     
-    d = distnv0_2d(mesh, sol, bndy[i], p2, &proj);
+    /* Distance from i0 to the 0 level set from triangle bndy[i] */
+    d = distnv0_2d(mesh,sol,bndy[i],p0,&proj);
 	  
-  	if (p2->tag == 0) {
-	    solTmp[i2] = d;
-	    p2->tag    = proj;
-	  }
-	  else if (d < fabs(solTmp[i2])) {
-	    solTmp[i2] = d;
-	    p2->tag    = proj;			
-	  }
+    if ( p0->tag == 0 ) {
+      solTmp[i0] = d;
+      p0->tag    = proj;
+    }
+    else if ( d < fabs(solTmp[i0]) ) {
+      solTmp[i0] = d;
+      p0->tag    = proj;
+    }
+          
+    /* Distance from i1 to the 0 level set from triangle bndy[i] */
+    if ( bndy[i] == 6131 && i1 == 3097 )
+      ddb = 1;
+      
+    d = distnv0_2d(mesh,sol,bndy[i],p1,&proj);
+	  
+    if ( p1->tag == 0 ) {
+      solTmp[i1] = d;
+      p1->tag    = proj;
+    }
+    else if ( d < fabs(solTmp[i1]) ) {
+      solTmp[i1] = d;
+      p1->tag    = proj;
+    }
+    
+    ddb = 0;
+    
+    /* Distance from i2 to the 0 level set from triangle bndy[i] */
+    d = distnv0_2d(mesh,sol,bndy[i],p2,&proj);
+	  
+  	if ( p2->tag == 0 ) {
+      solTmp[i2] = d;
+      p2->tag    = proj;
+    }
+    else if ( d < fabs(solTmp[i2]) ) {
+      solTmp[i2] = d;
+      p2->tag    = proj;
+    }
   }
   
-  /* correction procedure, for points whose tag is 2 */
+  /* Correction procedure, for points whose tag is 2 */
   nc = 0;
   for (i=1; i<=mesh->np; i++) {
-	  pa = &mesh->point[i];
-	  if ( pa->tag < 2 )  continue;
-	  for (j=1; j<=nb; j++) {
-	    pt = &mesh->tria[bndy[j]];
-	    d  = distnv0_2d(mesh,sol,bndy[j],pa,&proj);
-	    if ( proj == 1 && d < fabs(solTmp[i]) ) {
-		    solTmp[i] = d;
-		    break;
-	    }
-	  }
-	  pa->tag = 1;
-	  nc++;
+    pa = &mesh->point[i];
+    if ( pa->tag < 2 )  continue;
+    for (j=1; j<=nb; j++) {
+      pt = &mesh->tria[bndy[j]];
+      d  = distnv0_2d(mesh,sol,bndy[j],pa,&proj);
+      if ( proj == 1 && d < fabs(solTmp[i]) ) {
+        solTmp[i] = d;
+        break;
+      }
+    }
+    pa->tag = 1;
+    nc++;
   }
+    
   if ( nc )   fprintf(stdout,"     %d correction(s)\n",nc);
  
   for (i=1; i<=mesh->np; i++){
-	  pa = &mesh->point[i];
-	  if ( !pa->tag ) 
-	    sol->val[i] = sol->val[i] < 0.0 ? -sqrt(INIVAL_2d) : sqrt(INIVAL_2d);
-	  else if ( pa->tag ) 
-	    sol->val[i] = sol->val[i] < 0.0 ? -sqrt(solTmp[i]) : sqrt(solTmp[i]);
-	}
+    pa = &mesh->point[i];
+    if ( !pa->tag )
+      sol->val[i] = sol->val[i] < 0.0 ? -sqrt(INIVAL_2d) : sqrt(INIVAL_2d);
+    else if ( pa->tag )
+      sol->val[i] = sol->val[i] < 0.0 ? -sqrt(solTmp[i]) : sqrt(solTmp[i]);
+  }
 
   free(solTmp);
   free(bndy);
@@ -1332,7 +1342,6 @@ static void upddist_2d(int istart,int istop,int ipth,Param *par) {
   }
   par->res[ipth] += res;
 }
-
 
 /* Expand distance function to the domain by solving
    Eikonal equation using method of characteristics */

@@ -1,7 +1,7 @@
 #include "mshdist.h"
 
 extern unsigned char inxt2[5];
-
+extern char  ddb;
 
 /* Calculate the roots of the second order polynomial stored in a, and put the result in r; return number of real roots (-1 if polynomial is null) */
 int eqquad(double *a,double *r) {
@@ -138,12 +138,12 @@ double distpt_2d(pPoint p1,pPoint p2,pPoint pa,int *proj) {
 }
 
 /* compute (squared) distance from pa to the 0 level set in triangle ntria ; same use of proj as before */
-double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa,int *proj) {
+double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa, int *proj) {
   pTria   pt; 
-  pPoint  p0, p1, p2;
-  Point   q, r;
-  double  aux, lambda, mu, v0, v1, v2;
-  int     i0, i1, i2; 
+  pPoint  p0,p1,p2;
+  Point   q,r;
+  double  aux,lambda,mu,v0,v1,v2;
+  int     i0,i1,i2;
   
   pt = &mesh->tria[ntria];
   i0 = pt->v[0]; 
@@ -156,10 +156,10 @@ double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa,int *proj) {
   v1 = sol->val[i1]; 
   v2 = sol->val[i2];
 	
-  /* wrong configuration : flat level set function */
+  /* Wrong configuration : flat level set function */
   if ( !((v0 != 0.0)||(v1 != 0.0)||(v2 != 0.0)) )
     printf("ntria = %d: %E %E %E\n",ntria,v0,v1,v2);
-  assert((v0 != 0.0)||(v1 != 0.0)||(v2 != 0.0));
+  assert( (v0 != 0.0)||(v1 != 0.0)||(v2 != 0.0) );
 	
   /* 2 of the vertices are 0.*/
   if ( (v0 == 0.0) && (v1 == 0.0) ){
@@ -173,13 +173,13 @@ double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa,int *proj) {
   if ( (v1 == 0.0) && (v2 == 0.0) ){
     return(distpt_2d(p1, p2, pa, proj));
   }
-	
-  /* only 1 of the vertices is 0.*/
-  if (v0 == 0.0){
+	    
+  /* Only 1 of the vertices is 0.*/
+  if ( v0 == 0.0 ){
     if ( v1*v2 < 0.0 ){
       lambda = v1 / (v1-v2);
       q.c[0] = p1->c[0] + lambda*(p2->c[0] - p1->c[0]);
-      q.c[1] = p1->c[1] + lambda*(p2->c[1] - p2->c[1]);
+      q.c[1] = p1->c[1] + lambda*(p2->c[1] - p1->c[1]);
       return (distpt_2d(p0, &q, pa, proj));
     }
     else {
@@ -188,7 +188,7 @@ double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa,int *proj) {
     }		
   }
 	
-  if (v1 ==0.0){
+  if ( v1 == 0.0 ){
     if ( v0*v2 < 0.0 ){
       lambda = v0/(v0-v2);
       q.c[0] = p0->c[0] + lambda*(p2->c[0] - p0->c[0]);
@@ -201,7 +201,7 @@ double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa,int *proj) {
     }
   }
 	
-  if (v2 ==0.0){
+  if ( v2 == 0.0 ){
     if ( v0*v1 < 0.0 ){
       lambda = v0/(v0-v1);
       q.c[0] = p0->c[0] + lambda*(p1->c[0] - p0->c[0]);
@@ -213,9 +213,9 @@ double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa,int *proj) {
       return((pa->c[0]-p2->c[0])*(pa->c[0]-p2->c[0]) + (pa->c[1]-p2->c[1])*(pa->c[1]-p2->c[1]));
     }
   }
-	
-  /* general case ; make a permutation of indices so that p1 and p2 have same sign*/
-  if (v0*v1 >=0.0){
+	    
+  /* General case; make a permutation of indices so that p1 and p2 have same sign*/
+  if ( v0*v1 >= 0.0 ){
     p0  = &mesh->point[i2];
     aux = v0;
     v0  = v2;
@@ -223,7 +223,7 @@ double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa,int *proj) {
     p2 = &mesh->point[i0];
     v2 = aux;
   }	
-  else if (v0*v2 >=0.0){
+  else if ( v0*v2 >= 0.0 ){
     p0  = &mesh->point[i1];
     aux = v0;
     v0  = v1;
@@ -232,7 +232,7 @@ double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa,int *proj) {
     v1 = aux;
   }
 	
-  assert((v0 != v1)&&(v0 != v2)); 	
+  assert( (v0 != v1) && (v0 != v2) );
   lambda = v0/(v0-v1);
   mu     = v0/(v0-v2); 
   
@@ -242,7 +242,7 @@ double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa,int *proj) {
   r.c[0] = p0->c[0] + mu*(p2->c[0] - p0->c[0]);
   r.c[1] = p0->c[1] + mu*(p2->c[1] - p0->c[1]);
 	
-  return(distpt_2d(&q, &r, pa, proj));
+  return( distpt_2d(&q, &r, pa, proj) );
 }
 
 /* Compute Hausdorff distance between two set of edges already appearing in mesh */

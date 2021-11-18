@@ -464,7 +464,7 @@ static int mshdis1(Info info,pMesh mesh1,pMesh mesh2,pSol sol1) {
     if ( info.imprim )  fprintf(stdout,"  ** Redistancing\n");
     ier = iniredist(info,mesh1,sol1);
   }
-
+    
   /* Signed distance propagation */
   if ( ier > 0 ) {
     chrono(ON,&info.ctim[4]);
@@ -535,7 +535,7 @@ int main(int argc,char **argv) {
   
   if ( !loadMesh(info,&mesh1,&mesh2) )  return(1);
   if ( info.option == 2 )
-	  if (!loadSol(&sol1) )  return(1);
+	  if ( !loadSol(&sol1) )  return(1);
 
   if ( !setfunc(info,mesh1.dim) )  return(1);
 
