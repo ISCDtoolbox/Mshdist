@@ -174,7 +174,7 @@ double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa, int *proj) {
     return(distpt_2d(p1, p2, pa, proj));
   }
 	    
-  /* Only 1 of the vertices is 0.*/
+  /* Only 1 of the vertices is 0. */
   if ( v0 == 0.0 ){
     if ( v1*v2 < 0.0 ){
       lambda = v1 / (v1-v2);

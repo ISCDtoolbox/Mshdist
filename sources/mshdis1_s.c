@@ -3,6 +3,118 @@
 extern char  ddb;
 extern unsigned char inxt2[5];
 
+/* Find triangles intersecting the boundary and initialize distance at their vertices */
+int iniredist_s(Info info, pMesh mesh, pSol sol){
+  pTria    pt;
+  pPoint   p0,p1,p2;
+  double  *solTmp,d;
+  int     *bndy,i,j,nb,nc,i0,i1,i2,proj;
+  
+  nb   = 0;
+  bndy = (int*)calloc(mesh->nt+1,sizeof(int));
+  assert(bndy);
+
+  /* Store intersecting background triangles in list bndy */
+  for (i=1; i<=mesh->nt; i++) {
+    pt = &mesh->tria[i];
+    i0 = pt->v[0];
+    i1 = pt->v[1];
+    i2 = pt->v[2];
+
+    if ( (sol->val[i0] * sol->val[i1] <= 0.) || (sol->val[i0] * sol->val[i2] <= 0.) || (sol->val[i1] * sol->val[i2] <= 0.)) {
+      nb++;
+      bndy[nb] = i;
+    }
+  }
+  
+  bndy = (int*)realloc(bndy,(nb+1)*sizeof(int));
+  printf("nb= %d\n",nb);
+  
+  /* Temporary values stored in solTmp */
+  solTmp = (double*)calloc(mesh->np+1,sizeof(double));
+  assert(solTmp);
+
+  /* Travel list bndy and compute distance at vertices of its elements */
+  for (i=1; i<=nb; i++) {
+    pt = &mesh->tria[bndy[i]];
+    i0 = pt->v[0];
+    i1 = pt->v[1];
+    i2 = pt->v[2];
+
+    p0 = &mesh->point[i0];
+    p1 = &mesh->point[i1];
+    p2 = &mesh->point[i2];
+    
+    /* Distance from i0 to the 0 level set from triangle bndy[i] */
+    d = distnv0_s(mesh,sol,bndy[i],p0,&proj);
+    
+    if ( p0->tag == 0 ) {
+      solTmp[i0] = d;
+      p0->tag    = proj;
+    }
+    else if ( d < fabs(solTmp[i0]) ) {
+      solTmp[i0] = d;
+      p0->tag    = proj;
+    }
+          
+    /* Distance from i1 to the 0 level set from triangle bndy[i] */
+    d = distnv0_s(mesh,sol,bndy[i],p1,&proj);
+    
+    if ( p1->tag == 0 ) {
+      solTmp[i1] = d;
+      p1->tag    = proj;
+    }
+    else if ( d < fabs(solTmp[i1]) ) {
+      solTmp[i1] = d;
+      p1->tag    = proj;
+    }
+        
+    /* Distance from i2 to the 0 level set from triangle bndy[i] */
+    d = distnv0_s(mesh,sol,bndy[i],p2,&proj);
+    
+    if ( p2->tag == 0 ) {
+      solTmp[i2] = d;
+      p2->tag    = proj;
+    }
+    else if ( d < fabs(solTmp[i2]) ) {
+      solTmp[i2] = d;
+      p2->tag    = proj;
+    }
+  }
+  
+  /* Correction procedure, for points with tag 2 */
+  nc = 0;
+  for (i=1; i<=mesh->np; i++) {
+    p0 = &mesh->point[i];
+    if ( p0->tag < 2 )  continue;
+    for (j=1; j<=nb; j++) {
+      pt = &mesh->tria[bndy[j]];
+      d  = distnv0_s(mesh,sol,bndy[j],p0,&proj);
+      if ( proj == 1 && d < fabs(solTmp[i]) ) {
+        solTmp[i] = d;
+        break;
+      }
+    }
+    p0->tag = 1;
+    nc++;
+  }
+    
+  if ( nc )   fprintf(stdout,"     %d correction(s)\n",nc);
+ 
+  /* Tke square root */
+  for (i=1; i<=mesh->np; i++){
+    p0 = &mesh->point[i];
+    if ( !p0->tag )
+      sol->val[i] = sol->val[i] < 0.0 ? -sqrt(INIVAL_3d) : sqrt(INIVAL_3d);
+    else if ( p0->tag )
+      sol->val[i] = sol->val[i] < 0.0 ? -sqrt(solTmp[i]) : sqrt(solTmp[i]);
+  }
+
+  free(solTmp);
+  free(bndy);
+  return(1);
+}
+
 /* Initialize the signed distance function from entities existing in mesh */
 int iniencdomain_s(Info info,pMesh mesh, pSol sol){
   pTria       pt,pt1;
@@ -227,8 +339,6 @@ double actival2pt_s(double o1[3], double o2[3], double a[3], double d1, double d
   
   dist = INIVAL_3d;
   
-  if ( ddb ) printf("Coucou\n");
-
   /* Calculation of the gradient of basis functions */
   m[0][0]            = (o1[0]-a[0])*(o1[0]-a[0]) + (o1[1]-a[1])*(o1[1]-a[1]) + (o1[2]-a[2])*(o1[2]-a[2]);
   m[0][1] = m[1][0]  = (o1[0]-a[0])*(o2[0]-a[0]) + (o1[1]-a[1])*(o2[1]-a[1]) + (o1[2]-a[2])*(o2[2]-a[2]);
@@ -444,7 +554,7 @@ int ppgdistfmm_s(pMesh mesh,pSol sol) {
   double      dist;
   int         nacc,k,l,iel,ip,ip1,ip2,ilist,list[LONMAX];
   char        i,j,j1,j2,jj;
-  
+    
   pq = &q;
   nacc = 0;
   

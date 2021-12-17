@@ -104,9 +104,8 @@ int iniredist_2d(Info info, pMesh mesh, pSol sol){
   solTmp = (double*)calloc(mesh->np+1,sizeof(double));
   assert(solTmp);
 
-  /* Check list bndy and compute distance at vertices of its elements */
+  /* Travel list bndy and compute distance at vertices of its elements */
   for (i=1; i<=nb; i++) {
-    ddb = 0;
     pt = &mesh->tria[bndy[i]];
     i0 = pt->v[0];
     i1 = pt->v[1];
@@ -129,9 +128,6 @@ int iniredist_2d(Info info, pMesh mesh, pSol sol){
     }
           
     /* Distance from i1 to the 0 level set from triangle bndy[i] */
-    if ( bndy[i] == 6131 && i1 == 3097 )
-      ddb = 1;
-      
     d = distnv0_2d(mesh,sol,bndy[i],p1,&proj);
 	  
     if ( p1->tag == 0 ) {
@@ -142,9 +138,7 @@ int iniredist_2d(Info info, pMesh mesh, pSol sol){
       solTmp[i1] = d;
       p1->tag    = proj;
     }
-    
-    ddb = 0;
-    
+        
     /* Distance from i2 to the 0 level set from triangle bndy[i] */
     d = distnv0_2d(mesh,sol,bndy[i],p2,&proj);
 	  

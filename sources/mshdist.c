@@ -359,8 +359,10 @@ int setfunc(Info info,int dim) {
     /* 3d surface mesh */
     if ( info.dsurf ) {
       iniencdomain = iniencdomain_s;
+      iniredist = iniredist_s;
       ppgdistfmm = ppgdistfmm_s;
     }
+    
     /* 3d volume mesh */
     else {
       if ( info.option == 1 ) {
