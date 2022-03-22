@@ -57,7 +57,7 @@ int invmatg(double m[9],double mi[9]) {
   return(1);
 }
 
-/* stores in circum the 3 coordinates of circumcenter of each surface triangle of mesh 
+/* Store in circum the 3 coordinates of circumcenter of each surface triangle of mesh
  and the associated (squared) circumradius. circum is a table of length 4* mesh->ntria +1*/
 int buildcircum_3d(pMesh mesh, double *circum){
   int i;
@@ -115,12 +115,12 @@ double determinant3Pts1Vct_3d(pPoint p, pPoint q, pPoint r, pPoint v) {
 }
 
 
-/* stores in the 3 first components of circ the coordinates of the circumcenter of tria p0p1p2
- and in the 4th its circumradius */ 
+/* Store in (circ[0],circ[1],circ[2]) the coordinates of the circumcenter of tria p0p1p2
+ and in circ[3] its squared circumradius */
 int circumcoords(pPoint p0, pPoint p1, pPoint p2, double *circ){
   double r;  
-	
-  circ[0] = 0.33333*(p0->c[0]+p1->c[0]+p2->c[0]); 
+  
+  circ[0] = 0.33333*(p0->c[0]+p1->c[0]+p2->c[0]);
   circ[1] = 0.33333*(p0->c[1]+p1->c[1]+p2->c[1]); 
   circ[2] = 0.33333*(p0->c[2]+p1->c[2]+p2->c[2]);
 	
@@ -136,8 +136,7 @@ int circumcoords(pPoint p0, pPoint p1, pPoint p2, double *circ){
 	(p2->c[2]-circ[2])*(p2->c[2]-circ[2]);	
 	
   circ[3] = D_MAX(circ[3], r);	
-  
-  return(1);	
+  return(1);
 	
   /*int     ier;
    double  a,b,c,norm, det1,det2,det3;
@@ -1545,75 +1544,78 @@ double distnv0approx_3d(pMesh mesh, pSol sol, int ntetra, pPoint pa){
 }
 
 
-/* stores in circum the 3 coordinates of circumcenter of each surface triangle defined by the
- 0 level in each triangle in bndy and the associated (squared) circumradius. 
- circum is a table of length 4* mesh->ntria +1 ; by convention, radius = 0 in a tetra in which intersection is
- not a triangle*/
+/* Store in circum (length 4* nb +1)
+   - the 3 coordinates of circumcenter of the surface triangle defined by the
+     0 level of sol in each triangle in bndy
+   - the associated (squared) circumradius.
+*/
 int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum){
-  int         i, i0,i1,i2,i3; 
   pTetra      pt;
   pPoint      p0,p1,p2,p3,p0p,p1p,p2p,p3p;
-  double      v0,v1,v2,v3,v0p,v1p,v2p,v3p,*circ,lambda;
   Point       p,q,r,t;
-  int         nzeros,nplus,nmoins;  
-  
+  double      v0,v1,v2,v3,v0p,v1p,v2p,v3p,*circ,lambda;
+  int         i, i0,i1,i2,i3,nzeros,nplus,nmoins;
+
+  /* Travel tetras crossed by the 0 lv of sol */
   for(i=1; i<=nb; i++){
     pt = &mesh->tetra[bndy[i]];
     i0 = pt->v[0];	
     i1 = pt->v[1];	
     i2 = pt->v[2];	
-    i3 = pt->v[3];	
+    i3 = pt->v[3];
+        
     p0 = &mesh->point[i0];
     p1 = &mesh->point[i1];
     p2 = &mesh->point[i2];
     p3 = &mesh->point[i3];
+    
     v0 = sol->val[i0];
     v1 = sol->val[i1];
     v2 = sol->val[i2];
     v3 = sol->val[i3];
+    
     nplus =0;
     nmoins = 0;
     nzeros =0;
-    if(v0>0.0)  ++nplus;	
-    if(v0==0.0) ++nzeros;	
-    if(v0<0.0)  ++nmoins;
-    if(v1>0.0)  ++nplus;	
-    if(v1==0.0) ++nzeros;	
-    if(v1<0.0)  ++nmoins;
-    if(v2>0.0)  ++nplus;	
-    if(v2==0.0) ++nzeros;	
-    if(v2<0.0)  ++nmoins; 
-    if(v3>0.0)  ++nplus;	
-    if(v3==0.0) ++nzeros;	
-    if(v3<0.0)  ++nmoins; 
+    
+    if ( v0 > 0.0 )  ++nplus;
+    if ( v0 == 0.0 ) ++nzeros;
+    if ( v0 < 0.0 )  ++nmoins;
+    if ( v1 > 0.0 )  ++nplus;
+    if ( v1 == 0.0 ) ++nzeros;
+    if ( v1 < 0.0 )  ++nmoins;
+    if ( v2 > 0.0 )  ++nplus;
+    if ( v2 == 0.0 ) ++nzeros;
+    if ( v2 < 0.0 )  ++nmoins;
+    if ( v3 > 0.0 )  ++nplus;
+    if ( v3 == 0.0 ) ++nzeros;
+    if ( v3 < 0.0 )  ++nmoins;
     circ = &circum[4*(i-1)+1];  
 	  
-    /* case lv 0 in tetra ntetra is given by 3 0 vertices */
-	  
-    if((v0==0.)&&(v1==0.)&&(v2==0.)){
+    /* Case where lv 0 in bndy[i] is given by 3 0 vertices */
+    if ( (v0 == 0.) && ( v1 == 0. ) && ( v2 == 0. ) ) {
       circumcoords(p0, p1, p2, circ);
-      continue;	
+      continue;
     }
 	  
-    if((v0==0.)&&(v1==0.)&&(v3==0.)){
-      circumcoords(p0, p1, p3, circ);	  
-      continue;	
+    if ( ( v0 == 0. ) && ( v1 == 0. ) && ( v3 == 0. ) ) {
+      circumcoords(p0, p1, p3, circ);
+      continue;
     }	
 	  
-    if((v0==0.)&&(v2==0.)&&(v3==0.)){
-      circumcoords(p0, p2, p3, circ);	  
-      continue;	
+    if ( (v0 == 0. ) && ( v2 == 0. ) && ( v3 == 0. ) ) {
+      circumcoords(p0, p2, p3, circ);
+      continue;
     }	
 	  
-    if((v1==0.)&&(v2==0.)&&(v3==0.)){
-      circumcoords(p1, p2, p3, circ);	  
-      continue;	
-    }	
+    if ( ( v1 == 0. ) && ( v2 == 0. ) && ( v3 == 0. ) ) {
+      circumcoords(p1, p2, p3, circ);
+      continue;
+    }
     
-    /* case 2 vertices of tetra are on level set 0 */
-    
-    if((v0==0.)&&(v1==0.)){
-      if(v2*v3>0.){
+    /* Case where 2 vertices of bndy[i] are on lv 0 */
+    if ( ( v0 == 0. ) && ( v1 == 0. ) ) {
+      if ( v2*v3 >0. ) {
         circ[0] = 0.0;	
         circ[1] = 0.0;	
         circ[2] = 0.0;	
@@ -1629,14 +1631,14 @@ int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum)
       }
     }
 	  
-    if((v0==0.)&&(v2==0.)){
-      if(v1*v3>0.){
+    if ( ( v0 == 0. ) && ( v2 == 0. ) ) {
+      if ( v1*v3 >0. ) {
         circ[0] = 0.0;	
         circ[1] = 0.0;	
         circ[2] = 0.0;	
         circ[3] = 0.0;	
       }
-      else{
+      else {
         lambda = v1/(v1-v3);
         p.c[0] = p1->c[0] + lambda*(p3->c[0] - p1->c[0]);	
         p.c[1] = p1->c[1] + lambda*(p3->c[1] - p1->c[1]);	
@@ -1646,8 +1648,8 @@ int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum)
       }
     }	
 	  
-    if((v0==0.)&&(v3==0.)){
-      if(v1*v2>0.){
+    if ( ( v0 == 0. ) && ( v3 == 0. ) ) {
+      if ( v1*v2 >0. ) {
         circ[0] = 0.0;	
         circ[1] = 0.0;	
         circ[2] = 0.0;	
@@ -1663,14 +1665,14 @@ int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum)
       }
     }	
 	  
-    if((v1==0.)&&(v2==0.)){
-      if(v0*v3>0.){
+    if ( ( v1 == 0. ) && ( v2 == 0. ) ) {
+      if ( v0*v3 > 0. ) {
         circ[0] = 0.0;	
         circ[1] = 0.0;	
         circ[2] = 0.0;	
         circ[3] = 0.0;	
       }
-      else{
+      else {
         lambda = v0/(v0-v3);
         p.c[0] = p0->c[0] + lambda*(p3->c[0] - p0->c[0]);	
         p.c[1] = p0->c[1] + lambda*(p3->c[1] - p0->c[1]);	
@@ -1680,14 +1682,14 @@ int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum)
       }
     }	
 	  
-    if((v1==0.)&&(v3==0.)){
-      if(v0*v2>0.){
+    if ( ( v1 == 0. ) && ( v3 == 0. ) ) {
+      if ( v0*v2 > 0. ) {
         circ[0] = 0.0;	
         circ[1] = 0.0;	
         circ[2] = 0.0;	
         circ[3] = 0.0;	
       }
-      else{
+      else {
         lambda = v0/(v0-v2);
         p.c[0] = p0->c[0] + lambda*(p2->c[0] - p0->c[0]);	
         p.c[1] = p0->c[1] + lambda*(p2->c[1] - p0->c[1]);	
@@ -1697,14 +1699,14 @@ int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum)
       }
     }
 	  
-    if((v2==0.)&&(v3==0.)){
-      if(v0*v1>0.){
+    if ( ( v2 == 0. ) && ( v3 == 0. ) ) {
+      if ( v0*v1 > 0. ) {
         circ[0] = 0.0;	
         circ[1] = 0.0;	
         circ[2] = 0.0;	
         circ[3] = 0.0;		
       }
-      else{
+      else {
         lambda = v0/(v0-v1);
         p.c[0] = p0->c[0] + lambda*(p1->c[0] - p0->c[0]);	
         p.c[1] = p0->c[1] + lambda*(p1->c[1] - p0->c[1]);	
@@ -1712,51 +1714,57 @@ int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum)
         circumcoords(p2,p3,&p,circ);
         continue;  
       }
-    }	  
-	  
-    if(nzeros ==1){
-      if(v0 ==0.0) p0p = p0;
-      if(v1 ==0.0) p0p = p1;
-      if(v2 ==0.0) p0p = p2;
-      if(v3 ==0.0) p0p = p3;
+    }
+            
+    /* Case where only one pt of the 0 lv set if vertex of bndy[i] */
+    if ( nzeros == 1 ) {
+      if ( v0 == 0.0 ) p0p = p0;
+      else if ( v1 == 0.0 ) p0p = p1;
+      else if ( v2 == 0.0 ) p0p = p2;
+      else p0p = p3;
       v0p = 0.0;
 		  
-      if(nplus ==1){
-        if(v0 >0.0) { p1p = p0; v1p = v0; }
-        if(v1 >0.0) { p1p = p1; v1p = v1; }
-        if(v2 >0.0) { p1p = p2; v1p = v2; }
-        if(v3 >0.0) { p1p = p3; v1p = v3; }
+      if ( nplus == 1 ) {
+        if ( v0 >0.0 ) { p1p = p0; v1p = v0; }
+        else if ( v1 >0.0 ) { p1p = p1; v1p = v1; }
+        else if ( v2 >0.0 ) { p1p = p2; v1p = v2; }
+        else { p1p = p3; v1p = v3; }
 			  
-        if((v0 <0.0)&&(v1 <0.0)) { p2p = p0; v2p = v0; p3p = p1; v3p = v1;}
-        if((v0 <0.0)&&(v2 <0.0)) { p2p = p0; v2p = v0; p3p = p2; v3p = v2;}
-        if((v0 <0.0)&&(v3 <0.0)) { p2p = p0; v2p = v0; p3p = p3; v3p = v3;}
-        if((v1 <0.0)&&(v2 <0.0)) { p2p = p1; v2p = v1; p3p = p2; v3p = v2;}
-        if((v1 <0.0)&&(v3 <0.0)) { p2p = p1; v2p = v1; p3p = p3; v3p = v3;}
-        if((v2 <0.0)&&(v3 <0.0)) { p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
+        if ( ( v0 < 0.0 ) && ( v1 < 0.0 ) ) { p2p = p0; v2p = v0; p3p = p1; v3p = v1;}
+        else if ( ( v0 < 0.0 ) && ( v2 < 0.0 ) ) { p2p = p0; v2p = v0; p3p = p2; v3p = v2;}
+        else if ( ( v0 < 0.0 ) && ( v3 < 0.0 ) ) { p2p = p0; v2p = v0; p3p = p3; v3p = v3;}
+        else if ( ( v1 < 0.0 ) && ( v2 < 0.0 ) ) { p2p = p1; v2p = v1; p3p = p2; v3p = v2;}
+        else if ( ( v1 < 0.0 ) && ( v3 < 0.0 ) ) { p2p = p1; v2p = v1; p3p = p3; v3p = v3;}
+        else { p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
       }
 		  
-      else{
-        if ( nmoins !=1 ){
+      else {
+        if ( nmoins != 1 ){
           circ[0] = p0p->c[0];
           circ[1] = p0p->c[1];
           circ[2] = p0p->c[2];
           circ[3] = 0.0;
         }
         
-        if(v0 <0.0) { p1p = p0; v1p = v0; }
-        if(v1 <0.0) { p1p = p1; v1p = v1; }
-        if(v2 <0.0) { p1p = p2; v1p = v2; }
-        if(v3 <0.0) { p1p = p3; v1p = v3; }
+        if ( v0 < 0.0 ) { p1p = p0; v1p = v0; }
+        else if ( v1 < 0.0 ) { p1p = p1; v1p = v1; }
+        else if ( v2 < 0.0 ) { p1p = p2; v1p = v2; }
+        else { p1p = p3; v1p = v3; }
         
-        if((v0 >0.0)&&(v1 >0.0)) { p2p = p0; v2p = v0; p3p = p1; v3p = v1;}
-        if((v0 >0.0)&&(v2 >0.0)) { p2p = p0; v2p = v0; p3p = p2; v3p = v2;}
-        if((v0 >0.0)&&(v3 >0.0)) { p2p = p0; v2p = v0; p3p = p3; v3p = v3;}
-        if((v1 >0.0)&&(v2 >0.0)) { p2p = p1; v2p = v1; p3p = p2; v3p = v2;}
-        if((v1 >0.0)&&(v3 >0.0)) { p2p = p1; v2p = v1; p3p = p3; v3p = v3;}
-        if((v2 >0.0)&&(v3 >0.0)) { p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
+        if ( ( v0 > 0.0 ) && ( v1 > 0.0 ) ) { p2p = p0; v2p = v0; p3p = p1; v3p = v1;}
+        else if ( ( v0 > 0.0 ) && ( v2 > 0.0 ) ) { p2p = p0; v2p = v0; p3p = p2; v3p = v2;}
+        else if ( ( v0 > 0.0 ) && ( v3 > 0.0 ) ) { p2p = p0; v2p = v0; p3p = p3; v3p = v3;}
+        else if ( ( v1 > 0.0 ) && ( v2 > 0.0 ) ) { p2p = p1; v2p = v1; p3p = p2; v3p = v2;}
+        else if ( ( v1 > 0.0 ) && ( v3 > 0.0 ) ) { p2p = p1; v2p = v1; p3p = p3; v3p = v3;}
+        else { p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
       }
 		  
-      /* now, p0p has value 0, p1p has different sign from p2p and p3p, which have same sign */
+      /* p0p has value 0, p1p has different sign from p2p and p3p, which have same sign */
+      if ( fabs(v1p-v2p) < EPS1 || fabs(v1p-v3p) < EPS1 ) {
+        memset(circ,0.0,4*sizeof(double));
+        continue;
+      }
+      
       lambda = v1p/(v1p-v2p);
       p.c[0] = p1p->c[0] + lambda*(p2p->c[0] - p1p->c[0]);	
       p.c[1] = p1p->c[1] + lambda*(p2p->c[1] - p1p->c[1]);	
@@ -1772,16 +1780,21 @@ int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum)
 		  
     }  
     
-    /* general case : 2 possible configurations	*/ 
-    assert(nzeros ==0);
+    /* General case : 2 possible configurations	*/
+    assert( nzeros == 0 );
 	  
-    if(nplus ==1){
-      assert(nmoins == 3);
-      if(v0 >0.0) { p0p = p0; v0p = v0; p1p = p1; v1p = v1; p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
-      if(v1 >0.0) { p0p = p1; v0p = v1; p1p = p0; v1p = v0; p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
-      if(v2 >0.0) { p0p = p2; v0p = v2; p1p = p0; v1p = v0; p2p = p1; v2p = v1; p3p = p3; v3p = v3;}
-      if(v3 >0.0) { p0p = p3; v0p = v3; p1p = p0; v1p = v0; p2p = p1; v2p = v1; p3p = p2; v3p = v2;}  
-		  
+    if ( nplus == 1 ) {
+      assert( nmoins == 3 );
+      if ( v0 > 0.0 ) { p0p = p0; v0p = v0; p1p = p1; v1p = v1; p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
+      else if ( v1 > 0.0 ) { p0p = p1; v0p = v1; p1p = p0; v1p = v0; p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
+      else if ( v2 > 0.0 ) { p0p = p2; v0p = v2; p1p = p0; v1p = v0; p2p = p1; v2p = v1; p3p = p3; v3p = v3;}
+      else { p0p = p3; v0p = v3; p1p = p0; v1p = v0; p2p = p1; v2p = v1; p3p = p2; v3p = v2;}
+      
+      if ( fabs(v0p-v1p) < EPS1 || fabs(v0p-v2p) < EPS1 || fabs(v0p-v3p) < EPS1 ) {
+        memset(circ,0.0,4*sizeof(double));
+        continue;
+      }
+      
       lambda = v0p/(v0p-v1p);
       p.c[0] = p0p->c[0] + lambda*(p1p->c[0] - p0p->c[0]);	
       p.c[1] = p0p->c[1] + lambda*(p1p->c[1] - p0p->c[1]);	
@@ -1797,18 +1810,23 @@ int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum)
       r.c[1] = p0p->c[1] + lambda*(p3p->c[1] - p0p->c[1]);	
       r.c[2] = p0p->c[2] + lambda*(p3p->c[2] - p0p->c[2]);
 		  
-      circumcoords(&p, &q, &r,circ);  
+      circumcoords(&p, &q, &r, circ);
       continue;	
 		  
 	  }
 	  
-    if(nmoins ==1){
-      assert(nplus == 3);
-      if(v0 <0.0) { p0p = p0; v0p = v0; p1p = p1; v1p = v1; p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
-      if(v1 <0.0) { p0p = p1; v0p = v1; p1p = p0; v1p = v0; p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
-      if(v2 <0.0) { p0p = p2; v0p = v2; p1p = p0; v1p = v0; p2p = p1; v2p = v1; p3p = p3; v3p = v3;}
-      if(v3 <0.0) { p0p = p3; v0p = v3; p1p = p0; v1p = v0; p2p = p1; v2p = v1; p3p = p2; v3p = v2;}  
+    if ( nmoins == 1 ) {
+      assert ( nplus == 3 );
+      if (v0 < 0.0 ) { p0p = p0; v0p = v0; p1p = p1; v1p = v1; p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
+      else if (v1 < 0.0 ) { p0p = p1; v0p = v1; p1p = p0; v1p = v0; p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
+      else if (v2 < 0.0 ) { p0p = p2; v0p = v2; p1p = p0; v1p = v0; p2p = p1; v2p = v1; p3p = p3; v3p = v3;}
+      else { p0p = p3; v0p = v3; p1p = p0; v1p = v0; p2p = p1; v2p = v1; p3p = p2; v3p = v2;}
 		  
+      if ( fabs(v0p-v1p) < EPS1 || fabs(v0p-v2p) < EPS1 || fabs(v0p-v3p) < EPS1 ) {
+        memset(circ,0.0,4*sizeof(double));
+        continue;
+      }
+      
       lambda = v0p/(v0p-v1p);
       p.c[0] = p0p->c[0] + lambda*(p1p->c[0] - p0p->c[0]);	
       p.c[1] = p0p->c[1] + lambda*(p1p->c[1] - p0p->c[1]);	
@@ -1828,16 +1846,21 @@ int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum)
       continue;
     }	
 	  
-    if(nplus ==2){
-      assert(nmoins ==2);
-      if((v0 >0.0)&&(v1>0.0)) { p0p = p0; v0p = v0; p1p = p1; v1p = v1; p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
-      if((v0 >0.0)&&(v2>0.0)) { p0p = p0; v0p = v0; p1p = p2; v1p = v2; p2p = p1; v2p = v1; p3p = p3; v3p = v3;}
-      if((v0 >0.0)&&(v3>0.0)) { p0p = p0; v0p = v0; p1p = p3; v1p = v3; p2p = p1; v2p = v1; p3p = p2; v3p = v2;}
-      if((v1 >0.0)&&(v2>0.0)) { p0p = p1; v0p = v1; p1p = p2; v1p = v2; p2p = p0; v2p = v0; p3p = p3; v3p = v3;}
-      if((v1 >0.0)&&(v3>0.0)) { p0p = p1; v0p = v1; p1p = p3; v1p = v3; p2p = p0; v2p = v0; p3p = p2; v3p = v2;}
-      if((v2 >0.0)&&(v3>0.0)) { p0p = p2; v0p = v2; p1p = p3; v1p = v3; p2p = p0; v2p = v0; p3p = p1; v3p = v1;}
+    if ( nplus == 2 ) {
+      assert ( nmoins == 2 );
+      if ( (v0 > 0.0 ) && ( v1 > 0.0 ) ) { p0p = p0; v0p = v0; p1p = p1; v1p = v1; p2p = p2; v2p = v2; p3p = p3; v3p = v3;}
+      else if ( (v0 > 0.0 ) && ( v2 > 0.0 ) ) { p0p = p0; v0p = v0; p1p = p2; v1p = v2; p2p = p1; v2p = v1; p3p = p3; v3p = v3;}
+      else if ( (v0 > 0.0 ) && ( v3 > 0.0 ) ) { p0p = p0; v0p = v0; p1p = p3; v1p = v3; p2p = p1; v2p = v1; p3p = p2; v3p = v2;}
+      else if ( (v1 > 0.0 ) && ( v2 > 0.0 ) ) { p0p = p1; v0p = v1; p1p = p2; v1p = v2; p2p = p0; v2p = v0; p3p = p3; v3p = v3;}
+      else if ( (v1 > 0.0 ) && ( v3 > 0.0 ) ) { p0p = p1; v0p = v1; p1p = p3; v1p = v3; p2p = p0; v2p = v0; p3p = p2; v3p = v2;}
+      else { p0p = p2; v0p = v2; p1p = p3; v1p = v3; p2p = p0; v2p = v0; p3p = p1; v3p = v1;}
 		  
       /* p, q and r,t go together (same face) */
+      if ( fabs(v0p-v2p) < EPS1 || fabs(v0p-v3p) < EPS1 || fabs(v1p-v2p) < EPS1 || fabs(v1p-v3p) < EPS1 ) {
+        memset(circ,0.0,4*sizeof(double));
+        continue;
+      }
+      
       lambda = v0p/(v0p-v2p);
       p.c[0] = p0p->c[0] + lambda*(p2p->c[0] - p0p->c[0]);	
       p.c[1] = p0p->c[1] + lambda*(p2p->c[1] - p0p->c[1]);	
@@ -1877,6 +1900,7 @@ int buildcircumredis_3d(pMesh mesh, pSol sol, int *bndy, int nb, double *circum)
       continue;
     }
   }
+  
   return(1);
 }
 

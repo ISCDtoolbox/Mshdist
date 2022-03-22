@@ -7,7 +7,7 @@ extern unsigned char idirt[4][3];
 extern hash  hTab;
 char ddb;
 
-/* find background tetras intersecting the boundary,
+/* Find background tetras intersecting the boundary,
  and initialize distance at their vertices */
 int iniredist_3d(Info info, pMesh mesh, pSol sol) {
   pTetra  pt;
@@ -19,96 +19,102 @@ int iniredist_3d(Info info, pMesh mesh, pSol sol) {
   nb   = 0;
   bndy = (int*)calloc(mesh->ne+1,sizeof(int));
   assert(bndy);
-
-  /* store intersecting background triangles in list bndy */
+  
+  /* Store intersecting background triangles in list bndy */
   for (i=1; i<=mesh->ne; i++) {
-	  pt = &mesh->tetra[i];
-	  i0 = pt->v[0];
-	  i1 = pt->v[1];
-	  i2 = pt->v[2];
-	  i3 = pt->v[3];
+    pt = &mesh->tetra[i];
+    i0 = pt->v[0];
+    i1 = pt->v[1];
+    i2 = pt->v[2];
+    i3 = pt->v[3];
 
-	  if ( (sol->val[i0] * sol->val[i1] <=0.)||(sol->val[i0] * sol->val[i2] <=0.)||
-		  (sol->val[i0] * sol->val[i3] <=0.)||(sol->val[i1] * sol->val[i2] <=0.)||
-		  (sol->val[i1] * sol->val[i3] <=0.)||(sol->val[i2] * sol->val[i3] <=0.)){
-			  nb++;
-			  bndy[nb] = i;
-	  }
+    if ( (sol->val[i0] * sol->val[i1] <= 0.) || (sol->val[i0] * sol->val[i2] <= 0.) ||
+         (sol->val[i0] * sol->val[i3] <= 0.) || (sol->val[i1] * sol->val[i2] <= 0.) ||
+         (sol->val[i1] * sol->val[i3] <= 0.) || (sol->val[i2] * sol->val[i3] <= 0.)){
+      nb++;
+      bndy[nb] = i;
+    }
   }
 
   bndy = (int*)realloc(bndy,(nb+1)*sizeof(int));
   printf("nb= %d\n",nb);
 
-  /* Temporary values are stored in solTmp, so as not to lose level 0	*/
+  /* Store temporary values */
   solTmp = (double*)calloc(mesh->np+1,sizeof(double));
   assert(solTmp);
 
-  /* Check list bndy and compute distance at vertices of its elements */
+  /* Check list bndy and compute distance at the vertices of its elements */
   for (i=1; i<=nb; i++) {
-	  fflush(stdout);
-	  pt = &mesh->tetra[bndy[i]];
-	  i0 = pt->v[0];
-	  i1 = pt->v[1];
-	  i2 = pt->v[2];
-	  i3 = pt->v[3];
-	  p0 = &mesh->point[i0];
-	  p1 = &mesh->point[i1];
-	  p2 = &mesh->point[i2];
-	  p3 = &mesh->point[i3];
+    fflush(stdout);
+    pt = &mesh->tetra[bndy[i]];
+    i0 = pt->v[0];
+    i1 = pt->v[1];
+    i2 = pt->v[2];
+    i3 = pt->v[3];
+    
+    p0 = &mesh->point[i0];
+    p1 = &mesh->point[i1];
+    p2 = &mesh->point[i2];
+    p3 = &mesh->point[i3];
 
+    /* Distance from p0 to level 0 */
     d = distnv0_3d(mesh, sol, bndy[i], p0, &proj);
 
-  	if (p0->tag == 0) {
-	    solTmp[i0] = d;
-	    p0->tag    = proj;
-	  }
-	  else if (d < fabs(solTmp[i0])) {
+  	if ( p0->tag == 0 ) {
       solTmp[i0] = d;
       p0->tag    = proj;
-	  }
+    }
+    else if ( d < fabs(solTmp[i0]) ) {
+      solTmp[i0] = d;
+      p0->tag    = proj;
+    }
 
-	  d = distnv0_3d(mesh, sol, bndy[i], p1, &proj);
+    /* Distance from p1 to level 0 */
+    d = distnv0_3d(mesh, sol, bndy[i], p1, &proj);
 
-	  if (p1->tag == 0) {
-	    solTmp[i1] = d;
-	    p1->tag    = proj;
+    if ( p1->tag == 0 ) {
+      solTmp[i1] = d;
+      p1->tag    = proj;
   	}
-	  else if (d < fabs(solTmp[i1])) {
-	    solTmp[i1] = d;
-	    p1->tag    = proj;
-	  }
+    else if ( d < fabs(solTmp[i1]) ) {
+      solTmp[i1] = d;
+      p1->tag    = proj;
+    }
 
-	  d = distnv0_3d(mesh, sol, bndy[i], p2, &proj);
+    /* Distance from p2 to level 0 */
+    d = distnv0_3d(mesh, sol, bndy[i], p2, &proj);
 
-  	if (p2->tag == 0) {
-	    solTmp[i2] = d;
-	    p2->tag    = proj;
-	  }
-	  else if (d < fabs(solTmp[i2])) {
-	    solTmp[i2] = d;
-	    p2->tag    = proj;
-	  }
-
+  	if ( p2->tag == 0 ) {
+      solTmp[i2] = d;
+      p2->tag    = proj;
+    }
+    else if ( d < fabs(solTmp[i2]) ) {
+      solTmp[i2] = d;
+      p2->tag    = proj;
+    }
+    
+    /* Distance from p3 to level 0 */
   	d = distnv0_3d(mesh, sol, bndy[i], p3, &proj);
 
-	  if (p3->tag == 0) {
-	    solTmp[i3] = d;
-	    p3->tag    = proj;
-	  }
+    if ( p3->tag == 0 ) {
+      solTmp[i3] = d;
+      p3->tag    = proj;
+    }
 
-    else if (d < fabs(solTmp[i3])) {
-	    solTmp[i3] = d;
-	    p3->tag    = proj;
-	  }
+    else if ( d < fabs(solTmp[i3]) ) {
+      solTmp[i3] = d;
+      p3->tag    = proj;
+    }
   }
-
-  /* correction procedure, for points whose tag is 2, i.e. min is not achieved through an orthogonal projection */
+  
+  /* Correction procedure for points whose tag is 2, i.e. min is not achieved through an orthogonal projection */
   if ( !info.fini ) {
     circum = (double*)calloc(4*nb+1,sizeof(double));
     fprintf(stdout,"     Building circumcircle table...");
     buildcircumredis_3d(mesh,sol,bndy,nb,circum);
+    printf("Done\n");
     nc = 0;
-
+    
     for (i=1; i<=mesh->np; i++) {
       pa = &mesh->point[i];
       if ( pa->tag < 1 )  continue;
@@ -121,7 +127,7 @@ int iniredist_3d(Info info, pMesh mesh, pSol sol) {
             + (pa->c[2]-xc[2])*(pa->c[2]-xc[2]);
 
         if ( r == 0.0 ) continue;
-        if ((r<norm)&&(2* sol->val[i] *(r + norm) < (norm -r)*(norm-r))) continue;
+        if ( (r<norm) && (2* sol->val[i] *(r + norm) < (norm -r)*(norm-r)) ) continue;
 
 	    pt = &mesh->tetra[bndy[j]];
 	    d  = distnv0_3d(mesh,sol,bndy[j],pa,&proj);
