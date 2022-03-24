@@ -359,3 +359,69 @@ void delHash(pMesh mesh) {
   hTab.ttab = 0;
   
 }
+
+/* Extract points of a 3d mesh which are part of the surface triangulation, renumber them so that they are contiguous, and pack the values of sol accordingly */
+int pack_s(pMesh mesh,pSol sol,int *perm) {
+  pTria        ptt;
+  pPoint       p0,p1;
+  int          k,npc;
+  char         i;
+  
+  /* Reset flag field */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+  
+  /* Identify points of the surface triangulation */
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    if ( !ptt->v[0] ) continue;
+    for (i=0; i<3; i++){
+      p0 = &mesh->point[ptt->v[i]];
+      p0->flag = 1;
+    }
+  }
+  
+  /* Compress points: p1->flag contains the original index */
+  npc = 0;
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    if ( p0->flag ) {
+      npc++;
+      p1 = &mesh->point[npc];
+      memcpy(p1,p0,sizeof(Point));
+      p1->flag = k;
+    }
+  }
+  
+  mesh->np = npc;
+  
+  /* Compress solution */
+  sol->npi = sol->np;
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    sol->val[k] = sol->val[p0->flag];
+  }
+  
+  sol->np = npc;
+  
+  /* Store permutation; perm[k] = original index of (new) point k */
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    perm[k] = p0->flag;
+  }
+  
+  return(1);
+}
+
+/* Restore values of sol at the position pointed by perm */
+int unpack_s(pMesh mesh,pSol sol,int *perm) {
+  int k,ki;
+
+  for (k=sol->np; k>=1; k--) {
+    ki = perm[k];
+    sol->val[ki] = sol->val[k];
+  }
+  
+  sol->np = sol->npi;
+  return(1);
+}

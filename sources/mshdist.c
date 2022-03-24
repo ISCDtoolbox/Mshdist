@@ -389,19 +389,6 @@ static int mshdis1(Info info,pMesh mesh1,pMesh mesh2,pSol sol1) {
   pBucket  bucket;
   int      ier;
 
-  /* alloc memory */
-  if (( info.option == 1 )||( info.option == 3 )) {  //add : 21/01/2011
-    sol1->bin = mesh1->bin;
-    sol1->ver = GmfDouble;
-    sol1->size    = 1;
-    sol1->type[0] = 1;
-    sol1->typtab[0][0] = GmfSca;
-    sol1->dim = mesh1->dim;
-    sol1->np  = mesh1->np;
-    sol1->val = (double*)malloc((sol1->np+1)*sizeof(double));
-    assert(sol1->val);
-  }
-
   if(info.specdist){
     printf("GENERATING HOLES \n");
     //genHolesPCB_2d(mesh1,sol1);
@@ -464,7 +451,6 @@ static int mshdis1(Info info,pMesh mesh1,pMesh mesh2,pSol sol1) {
     if( info.startref ) {
       if ( info.imprim )  fprintf(stdout,"  ** Generation of signed distance function from surface edg/tria with prescribed refs\n");
       ier = inireftrias(info,mesh1,sol1);
-
     }
   	else {
       if ( info.imprim )  fprintf(stdout,"  ** Generation of signed distance function from tria/tets with ref 3\n");
@@ -506,7 +492,7 @@ int main(int argc,char **argv) {
   Info     info;
   Mesh     mesh1,mesh2;
   Sol      sol1;
-  int      k,ier;
+  int      k,ier,*perm;
   char     stim[32];
 
   fprintf(stdout,"  -- MSHDIST, Release %s (%s) \n",D_VER,D_REL);
@@ -548,10 +534,24 @@ int main(int argc,char **argv) {
   if ( info.imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
   
-  if ( !loadMesh(info,&mesh1,&mesh2) )  return(1);
+  if ( !loadMesh(&info,&mesh1,&mesh2) )  return(1);
+  
+  /* Load solution or allocate memory */
   if ( info.option == 2 )
-	  if ( !loadSol(&sol1) )  return(1);
+    if ( !loadSol(&sol1) )  return(1);
+  else if ( ( info.option == 1 ) || ( info.option == 3 ) ) {
+    sol1.bin = mesh1.bin;
+    sol1.ver = GmfDouble;
+    sol1.size    = 1;
+    sol1.type[0] = 1;
+    sol1.typtab[0][0] = GmfSca;
+    sol1.dim = mesh1.dim;
+    sol1.np  = mesh1.np;
+    sol1.val = (double*)malloc((sol1.np+1)*sizeof(double));
+    assert(sol1.val);
+  }
 
+  /* Set pointers */
   if ( !setfunc(info,mesh1.dim) )  return(1);
 
   chrono(OFF,&info.ctim[1]);
@@ -581,6 +581,15 @@ int main(int argc,char **argv) {
     printf("    *** No starting ref for triangles found.\n ");
     exit(0);
   }
+  
+  /* Compress mesh in the surface case if tetrahedra are supplied */
+  if ( info.zip ) {
+    perm = (int*)calloc(mesh1.np+1,sizeof(int));
+    if ( !pack_s(&mesh1,&sol1,perm) ) {
+      printf("    *** Impossible to pack mesh; abort.\n ");
+      exit(0);
+    }
+  }
 
   printim(info.ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
@@ -590,9 +599,8 @@ int main(int argc,char **argv) {
   chrono(ON,&info.ctim[2]);
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   
-  if ( !info.noscale || !info.specdist ) {
+  if ( !info.noscale || !info.specdist )
     if ( !scaleMesh(&info,&mesh1,&mesh2,&sol1) )  return(1);
-  }
 
   info.nexp = info.nexp == -1 ? 1 : info.nexp;
   
@@ -631,6 +639,15 @@ int main(int argc,char **argv) {
   chrono(ON,&info.ctim[1]);
   if ( !info.noscale || !info.specdist )
     if ( !unscaleSol(info,&sol1) )  return(1);
+  
+  /* Unpacking */
+  if ( info.zip ) {
+    if ( !unpack_s(&mesh1,&sol1,perm) ) {
+      printf("    *** Impossible to pack mesh; abort.\n ");
+      exit(0);
+    }
+    free(perm);
+  }
 
   if ( !saveSol(&sol1) )     return(1);
   chrono(OFF,&info.ctim[1]);

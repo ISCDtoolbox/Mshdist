@@ -84,7 +84,7 @@ typedef struct {
   int      ncpu,libpid,typ[2];          /* for // purposes */
   int      maxit,ref,nsref,*sref;
   int      nexp,nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
-  char     imprim,ddebug,option,bbbc,dsurf,fmm,fini,hausdorff,pcloud,specdist,startref,noscale;
+  char     imprim,ddebug,option,bbbc,dsurf,fmm,fini,hausdorff,pcloud,specdist,startref,noscale,zip;
   mytime   ctim[TIMEMAX];
 } Info;
 
@@ -101,7 +101,7 @@ typedef struct {
 typedef Mesh * pMesh;
 
 typedef struct {
-  int         np,nt,ne,dim,ver,bin;
+  int         np,npi,nt,ne,dim,ver,bin;
   int         type[2],size,typtab[2][GmfMaxTyp];
   double     *val;
   float       time;
@@ -133,7 +133,7 @@ typedef struct {
 } hash;
 
 /* prototypes */
-int  loadMesh(Info info,pMesh mesh1,pMesh mesh2);
+int  loadMesh(Info *info,pMesh mesh1,pMesh mesh2);
 int  loadSol(pSol );
 int  saveSol(pSol sol);
 int  scaleMesh(Info *info,pMesh mesh1,pMesh mesh2,pSol sol1);
@@ -203,6 +203,8 @@ int     iniredist_s(Info ,pMesh ,pSol );
 int     iniredist_3d(Info ,pMesh ,pSol );
 int     sgndist_2d(Info info,pMesh ,pMesh ,pSol ,pBucket );
 int     sgndist_3d(Info info,pMesh ,pMesh ,pSol ,pBucket );
+int     pack_s(pMesh ,pSol ,int *);
+int     unpack_s(pMesh ,pSol ,int *);
 int     ppgdist_2d(Info info,pMesh mesh, pSol sol);
 int     ppgdist_3d(Info info,pMesh mesh, pSol sol);
 int     ppgdistfmm_2d(pMesh mesh, pSol sol);

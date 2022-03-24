@@ -1,18 +1,19 @@
 #include "mshdist.h"
 
-
 /* Read mesh data */
-int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
+int loadMesh(Info *info,pMesh mesh1,pMesh mesh2) {
   pPoint       ppt;
   pTetra       pt;
   pTria        pt1;
   pEdge        pe;
   float        fp1,fp2,fp3;
   int          inm,i,k,ref,nh,nq;
-  char        *ptr,*name,data[128];
+  char         *ptr,*name,data[128];
 
   name = mesh1->name;
   strcpy(data,name);
+  
+  /* Open mesh file (or .meshb) */
   ptr = strstr(data,".mesh");
   mesh1->bin = 0;
   if ( !ptr ) {
@@ -34,11 +35,11 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
-  if ( abs(info.imprim) > 3 )
+  if ( abs(info->imprim) > 3 )
     fprintf(stdout,"  -- READING DATA FILE %s\n",data);
 
-  /* Load tetrahedra and vertices in the case of a full (volumic) 3d mesh */
-  if ( mesh1->dim == 3 && !info.dsurf ) {
+  /* Read numbers of tetrahedra and vertices in the case of a full (volumic) 3d mesh */
+  if ( mesh1->dim == 3 && !info->dsurf ) {
     mesh1->np = GmfStatKwd(inm,GmfVertices);
     mesh1->ne = GmfStatKwd(inm,GmfTetrahedra);
     nh = GmfStatKwd(inm,GmfHexahedra);
@@ -46,12 +47,19 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
       fprintf(stdout,"  ## Non simplicial mesh\n");
       return(0);
     }
-    if( info.option == 3 && info.startref ) mesh1->nt = GmfStatKwd(inm,GmfTriangles);
+    if( info->option == 3 && info->startref ) mesh1->nt = GmfStatKwd(inm,GmfTriangles);
   }
   
+  /* Read numbers of Triangles and vertices in 2d mesh or 3d surface triangulation */
   else {
     mesh1->np = GmfStatKwd(inm,GmfVertices);
-    if((info.option == 3)||(info.bbbc)||(info.hausdorff)) mesh1->na = GmfStatKwd(inm,GmfEdges);   //add 21/01/2011
+    /* Need to compress the surface mesh if tetras are also supplied */
+    if ( mesh1->dim == 3 && info->dsurf )
+      if ( GmfStatKwd(inm,GmfTetrahedra) ) info->zip = 1;
+        
+    if ( (info->option == 3) || (info->bbbc) || (info->hausdorff))
+      mesh1->na = GmfStatKwd(inm,GmfEdges);
+    
     mesh1->nt = GmfStatKwd(inm,GmfTriangles);
     nq = GmfStatKwd(inm,GmfQuadrilaterals);
     if ( nq ) {
@@ -59,6 +67,8 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
       return(0);
     }
   }
+  
+  /* Invalid mesh */
   if ( !mesh1->np || (mesh1->ne+mesh1->nt == 0)  ) {
     fprintf(stdout,"  ** MISSING DATA (expecting elements)\n");
     //return(0);
@@ -68,11 +78,11 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   mesh1->point = (pPoint)calloc(mesh1->np+1,sizeof(Point));
   assert(mesh1->point);
   
-  if ( mesh1->dim == 3 && !info.dsurf ) {
+  if ( mesh1->dim == 3 && !info->dsurf ) {
     mesh1->tetra = (pTetra)calloc(mesh1->ne+1,sizeof(Tetra));
     assert(mesh1->tetra);
     
-    if( info.option == 3 && info.startref ) {
+    if( info->option == 3 && info->startref ) {
       mesh1->tria  = (pTria)calloc(mesh1->nt+1,sizeof(Tria));
       assert(mesh1->tria);
     }
@@ -80,16 +90,15 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   else {
     mesh1->tria  = (pTria)calloc(mesh1->nt+1,sizeof(Tria));
     assert(mesh1->tria);
-	
-	  //add 21/01/2011
-	  if ((( mesh1->na )&&(info.option == 3))||(( mesh1->na )&&(info.bbbc))||((info.hausdorff)&&(mesh1->na))) {
+    
+    if ((( mesh1->na )&&(info->option == 3))||(( mesh1->na )&&(info->bbbc))||((info->hausdorff)&&(mesh1->na))) {
 	    mesh1->edge  = (pEdge)calloc(mesh1->na+1,sizeof(Edge));
 	    assert(mesh1->edge);
   	}
   }
   
   /* Memory allocation for adjacencies */
-  if ( mesh1->dim == 2 || ( mesh1->dim ==3 && info.dsurf) ) {
+  if ( mesh1->dim == 2 || ( mesh1->dim ==3 && info->dsurf) ) {
     mesh1->adja = (int*)calloc(3*mesh1->nt+5,sizeof(int));
     assert(mesh1->adja);
   }
@@ -103,7 +112,7 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   if ( mesh1->dim == 3 ) {
     for (k=1; k<=mesh1->np; k++) {
       ppt = &mesh1->point[k];
-			ppt->flag = 0;
+      ppt->flag = 0;
       if ( mesh1->ver == GmfFloat ) {
         GmfGetLin(inm,GmfVertices,&fp1,&fp2,&fp3,&ref);
         ppt->c[0] = fp1;
@@ -117,7 +126,7 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   else {
     for (k=1; k<=mesh1->np; k++) {
       ppt = &mesh1->point[k];
-			ppt->flag = 0;
+      ppt->flag = 0;
       if ( mesh1->ver == GmfFloat ) {
         GmfGetLin(inm,GmfVertices,&fp1,&fp2,&ref);
         ppt->c[0] = fp1;
@@ -128,23 +137,24 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
     }
   }
   
-  /* Read mesh edges : add 21/01/2011 */
-  if(((mesh1->dim == 2)&&(info.option == 3)&&(mesh1->na))||(((mesh1->dim == 2)&&(info.bbbc)&&(mesh1->na)))||((info.hausdorff)&&(mesh1->na))){
+  /* Read mesh edges */
+  if ( ((mesh1->dim == 2)&&(info->option == 3)&&(mesh1->na)) || (((mesh1->dim == 2)&&(info->bbbc)&&(mesh1->na))) || ((info->hausdorff)&&(mesh1->na))){
 	GmfGotoKwd(inm,GmfEdges);
     for (k=1; k<=mesh1->na; k++) {
       pe = &mesh1->edge[k];
       GmfGetLin(inm,GmfEdges,&pe->v[0],&pe->v[1],&pe->ref);
     }
-
   }
   
-  /* Read mesh elements */
-  if ( mesh1->dim == 3 && !info.dsurf ) {
+  /* Read mesh elements in the case of a 3d mesh */
+  if ( mesh1->dim == 3 && !info->dsurf ) {
     GmfGotoKwd(inm,GmfTetrahedra);
     for (k=1; k<=mesh1->ne; k++) {
       pt = &mesh1->tetra[k];
-      if(info.option ==3) GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&pt->ref);
-      else GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&ref);
+      if (info->option ==3)
+        GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&pt->ref);
+      else
+        GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&ref);
       
       /* Attribute the number of one tetra containing p0 */
       for (i=0; i<4; i++) {
@@ -154,12 +164,14 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
     }
     
     /* In case of option sref, read also mesh triangles */
-    if( info.option == 3 && info.startref ) {
+    if( info->option == 3 && info->startref ) {
       GmfGotoKwd(inm,GmfTriangles);
       for (k=1; k<=mesh1->nt; k++) {
         pt1 = &mesh1->tria[k];
-        if(info.option ==3) GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);//add : 21/01/2011
-        else GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&ref);
+        if (info->option ==3)
+          GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
+        else
+          GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&ref);
         
         /* Attribute the number of one tria containing p0 */
         for (i=0; i<3; i++) {
@@ -169,11 +181,12 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
       }
     }    
   }
+  /* Read mesh elements in the case of a 2d mesh or a 3d surface triangulation */
   else {
     GmfGotoKwd(inm,GmfTriangles);
     for (k=1; k<=mesh1->nt; k++) {
       pt1 = &mesh1->tria[k];
-      if ( info.option == 3 )
+      if ( info->option == 3 )
         GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
       else
         GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&ref);
@@ -186,9 +199,9 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   }
   GmfCloseMesh(inm);
 
-  if ( ( info.option == 2 ) || ( info.option == 3 ) )  return(1);
+  if ( ( info->option == 2 ) || ( info->option == 3 ) )  return(1);
 	
-  /* load mesh 2 */
+  /* Load mesh 2 */
   name = mesh2->name;
   strcpy(data,name);
   ptr = strstr(data,".mesh");
@@ -212,7 +225,7 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
-  if ( abs(info.imprim) > 3 )
+  if ( abs(info->imprim) > 3 )
     fprintf(stdout,"  -- READING DATA FILE %s\n",data);
 
   if ( mesh2->dim != mesh1->dim ) {
@@ -229,13 +242,12 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
     mesh2->na = GmfStatKwd(inm,GmfEdges);
   }
   
-  if ( (!info.pcloud && ( !mesh2->np || (mesh2->nt+mesh2->na == 0) )) || 
-       ( info.pcloud && !mesh2->np ) ) {
+  if ( (!info->pcloud && ( !mesh2->np || (mesh2->nt+mesh2->na == 0) )) || ( info->pcloud && !mesh2->np ) ) {
     fprintf(stdout,"  ** MISSING DATA (expecting elements)\n");
     return(0);
   }
 
-  /* mem alloc */
+  /* Memory allocation */
   mesh2->point = (pPoint)calloc(mesh2->np+1,sizeof(Point));
   assert(mesh2->point);
   
@@ -269,7 +281,7 @@ int loadMesh(Info info,pMesh mesh1,pMesh mesh2) {
   }
 
   /* Allocate memory and read mesh elements */
-  if ( !info.pcloud ) {
+  if ( !info->pcloud ) {
     if ( mesh2->dim == 3 ) {
       mesh2->tria = (pTria)calloc(mesh2->nt+1,sizeof(Tria));
       assert(mesh2->tria);
@@ -443,41 +455,6 @@ int saveSol(pSol sol) {
       GmfSetLin(inm,GmfSolAtVertices,&sol->val[k]);
     }
   }
-  
-  //change here !
-  /*if(info.option != 3){
-    if ( sol->dim == 2 ) {
-      GmfSetKwd(inm,GmfSolAtTriangles,sol->nt,sol->type[0],sol->typtab[0]);
-	    if ( sol->ver == GmfFloat ) {
-	      for (k=1; k<=sol->nt; k++) {
-		      fbuf = (float)sol->ref[k];
-		      GmfSetLin(inm,GmfSolAtTriangles,&fbuf);
-	      }
-	    }
-	    else {
-	      for (k=1; k<=sol->nt; k++) {
-		      dbuf = (double)sol->ref[k];
-		      GmfSetLin(inm,GmfSolAtTriangles,&dbuf);
-		    }
-	    }
-    }
-  }
-    
-  else {
-    GmfSetKwd(inm,GmfSolAtTetrahedra,sol->ne,sol->type[0],sol->typtab[0]);
-	  if ( sol->ver == GmfFloat ) {
-	    for (k=1; k<=sol->ne; k++) {
-		    fbuf = (float)sol->ref[k];
-		    GmfSetLin(inm,GmfSolAtTetrahedra,&fbuf);
-	    }
-	  }
-	  else {
-	    for (k=1; k<=sol->ne; k++) {
-		    dbuf = (double)sol->ref[k];
-		    GmfSetLin(inm,GmfSolAtTetrahedra,&dbuf);
-	    }
-	  }
-  }*/
 
   GmfCloseMesh(inm);
   return(1);
