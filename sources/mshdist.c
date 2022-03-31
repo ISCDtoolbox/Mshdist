@@ -526,7 +526,7 @@ int main(int argc,char **argv) {
   info.maxit  = 1000;
   info.size   = SIZE;
   info.nintel = -1;
-
+  
   /* Parse command line arguments */
   if ( !parsar(argc,argv,&info,&mesh1,&sol1,&mesh2) )  return(1);
   
@@ -535,10 +535,11 @@ int main(int argc,char **argv) {
   chrono(ON,&info.ctim[1]);
   
   if ( !loadMesh(&info,&mesh1,&mesh2) )  return(1);
-  
+    
   /* Load solution or allocate memory */
-  if ( info.option == 2 )
+  if ( info.option == 2 ) {
     if ( !loadSol(&sol1) )  return(1);
+  }
   else if ( ( info.option == 1 ) || ( info.option == 3 ) ) {
     sol1.bin = mesh1.bin;
     sol1.ver = GmfDouble;

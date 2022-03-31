@@ -748,7 +748,7 @@ int iniencdomain_2d(Info info,pMesh mesh, pSol sol){
   printf("Number of active edges : %d \n", nb);
   
   /* Initialize distance */
-  for (k=1; k<=sol->np; k++) 
+  for (k=1; k<=sol->np; k++)
     sol->val[k] = INIVAL_2d;
   
   sol->nt = mesh->nt;
@@ -756,7 +756,7 @@ int iniencdomain_2d(Info info,pMesh mesh, pSol sol){
   /* Memory allocation */
   list = (int*)calloc(mesh->nt+1,sizeof(int));
   assert(list);
-    
+      
   /* Travel the list of boundary edges */
   for (k=1; k<=nb; k++) {
     ped  = &mesh->edge[actiedg[k]];
@@ -771,12 +771,13 @@ int iniencdomain_2d(Info info,pMesh mesh, pSol sol){
     pt   = &mesh->tria[iel];
     pt->flag = base;
     cur      = 1;
+
     do {
       iel  = list[cur];
       pt   = &mesh->tria[iel];
       iadr = 3*(iel-1) + 1;
       adja = &mesh->adja[iadr];
-      
+            
       for (i=0; i<3; i++) {
         i1 = inxt2[i];
         i2 = inxt2[i1];
@@ -796,7 +797,7 @@ int iniencdomain_2d(Info info,pMesh mesh, pSol sol){
       cur++;
     }
     while ( cur <= ilist );
-    
+        
     /* Travel elements in the list and calculate distance to the considered edge at points of elements;
        at the end, the tag of points is 1 if the distance is realized as a orthogonal projection, 2 otherwise */
     for (l=1; l<=ilist; l++) {
