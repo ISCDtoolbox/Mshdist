@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.12)
 project(Mshdist C)
 
 # ---- Configure compiler ----------------------------------------------------
-if (NOT ${CMAKE_BUILD_TYPE})
+if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  add_compile_options(-O3 -Wall)
+  add_compile_options(-w -O3)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   add_compile_options(-g -O0 -Wall -Wextra -Wpedantic)
 else()
