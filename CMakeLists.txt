@@ -1,11 +1,25 @@
 cmake_minimum_required(VERSION 3.12)
-project(Mshdist)
 
-file(GLOB_RECURSE sources sources/*.c)
-file(GLOB_RECURSE headers sources/*.h)
+project(Mshdist C)
 
-add_library(libMshdist ${sources})
+# ---- Configure compiler ----------------------------------------------------
+if (NOT ${CMAKE_BUILD_TYPE})
+  set(CMAKE_BUILD_TYPE Release)
+endif()
 
+if (${CMAKE_BUILD_TYPE} MATCHES Release)
+  add_compile_options(-O3 -Wall)
+elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
+  add_compile_options(-g -O0 -Wall -Wextra -Wpedantic)
+else()
+  message(WARNING "Unhandled build type: ${CMAKE_BUILD_TYPE}")
+endif()
+
+# ---- Variable documentation ------------------------------------------------
+set(ISCD_COMMONS_LIBRARY "" CACHE STRING "Path to ISCD::Commons library")
+set(ISCD_COMMONS_INCLUDE_DIR "" CACHE STRING "Path to ISCD::Commons include directory")
+
+# ---- ISCD::Commons ---------------------------------------------------------
 find_library(Commons
   NAMES
   Commons
@@ -13,23 +27,22 @@ find_library(Commons
   ${ISCD_COMMONS_LIBRARY}
   )
 
+# ---- Math ------------------------------------------------------------------
 find_library(M_LIB m)
 
-target_include_directories(libMshdist PUBLIC ${ISCD_COMMONS_INCLUDE_DIR})
-target_link_libraries(libMshdist
+# ---- Executable ------------------------------------------------------------
+file(GLOB_RECURSE Mshdist_SRCS sources/*.c)
+file(GLOB_RECURSE Mshdist_HEADERS sources/*.h)
+
+add_executable(mshdist ${Mshdist_SRCS} ${Mshdist_HEADERS})
+
+target_include_directories(mshdist
   PUBLIC
-  ${Commons}
+  ${ISCD_COMMONS_INCLUDE_DIR}
+  )
+target_link_libraries(mshdist
+  PUBLIC
   pthread
   ${M_LIB}
+  ${Commons}
   )
-
-#Executable
-add_executable(        mshdist sources/mshdist.c)
-target_link_libraries( mshdist libMshdist ${Commons})
-
-# This install is really borked, so I do not want to use it
-# install(               TARGETS mshdist RUNTIME  DESTINATION "bin")
-# install(               TARGETS libMshdist LIBRARY DESTINATION "lib")
-# install(               FILES   ${headers} DESTINATION "include")
-# set_target_properties( mshdist PROPERTIES INSTALL_RPATH "/usr/local/lib")
-
