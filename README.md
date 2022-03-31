@@ -33,7 +33,7 @@ Please refer to the instructions provided on the ISCD Commons Library page in or
 
 #### Authors & contributors
 * mshdist is developped and maintained by Charles Dapogny (Université Joseph Fourier) and Pascal Frey (Université Pierre et Marie Curie).
-* Contributors to this project are warmly welcomed.
+* Contributors to this project are warmly welcome.
 
 #### License
 * mshdist is given under the [terms of the GNU Lesser General Public License] (LICENSE.md).
