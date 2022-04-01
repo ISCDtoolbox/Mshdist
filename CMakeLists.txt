@@ -10,7 +10,17 @@ endif()
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
   add_compile_options(-w -O3)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
-  add_compile_options(-g -O0 -Wall -Wextra -Wpedantic)
+  add_compile_options(
+    -g
+    -O0
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wno-char-subscripts
+    -Wno-unused-parameter
+    -Wno-unused-variable
+    -Wno-sign-compare
+    -Wno-incompatible-pointer-types)
 else()
   message(WARNING "Unhandled build type: ${CMAKE_BUILD_TYPE}")
 endif()
