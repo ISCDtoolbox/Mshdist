@@ -1,43 +1,32 @@
-# mshdist [![continuous integration](https://github.com/ISCDtoolbox/Mshdist/actions/workflows/ci.yml/badge.svg)](https://github.com/ISCDtoolbox/Mshdist/actions/workflows/ci.yml)
-mshdist is a simple algorithm to generate the signed distance function to given objects in two and three space dimensions.
+# Mshdist
 
-#### Installation
+| Branch      |  Matrix  |
+|:-----------:|:--------:|
+| master      | [![Build](https://github.com/cbritopacheco/Mshdist/actions/workflows/Build.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/Mshdist/actions/workflows/Build.yml) |
+| develop     | [![Build](https://github.com/cbritopacheco/Mshdist/actions/workflows/Build.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/Mshdist/actions/workflows/Build.yml) |
 
-1. you will need to install the [ISCD Commons Library](https://github.com/ISCDtoolbox/Commons) on your system.
-Please refer to the instructions provided on the ISCD Commons Library page in order to install this library.
+## About
+Mshdist is a simple algorithm to generate the signed distance function to given
+objects in two and three space dimensions.
 
-2. download the zip archive of NavierStokes or clone this repository:
+This repo is a fork of the [original
+Mshdist](https://github.com/ISCDtoolbox/Mshdist) to be used as a dependency in
+[Rodin](https://github.com/cbritopacheco/rodin).
 
-   ` git clone https://github.com/ISCDtoolbox/Mshdist.git `
+## Building
 
-   navigate to the downloaded directory:
+```bash
+git clone --recursive https://github.com/cbritopacheco/Mshdist
+cd Mshdist
+mkdir build && cd build
+cmake ..
+make -j4
+```
 
-   ` cd Mshdist `
+## License
 
-   then create build directory and compile the project using cmake
-   ```
-   mkdir build
-   cd build
-   cmake ..
-   make
-   make install
-   ```
+mshdist is given under the [terms of the GNU Lesser General Public License](LICENSE.md).
 
-#### Usage
+## Credits
+Mshdist is originally based on the paper: [Dapogny, Charles, and Pascal Frey. "Computation of the signed distance function to a discrete contour on adapted triangulation." Calcolo 49.3 (2012): 193-219.](https://link.springer.com/article/10.1007/s10092-011-0051-z)
 
-* A short documentation is supplied (see the [documentation](documentation) folder).
-
-#### Quickstart
-
-*
-
-#### Authors & contributors
-* mshdist is developped and maintained by Charles Dapogny (Université Joseph Fourier) and Pascal Frey (Université Pierre et Marie Curie).
-* Contributors to this project are warmly welcome.
-
-#### License
-* mshdist is given under the [terms of the GNU Lesser General Public License] (LICENSE.md).
-
-* If you use mshdist in your work, please refer to the journal article:
-
-C. Dapogny, P. Frey, _Computation of the signed distance function to a discrete contour on adapted triangulation_, Calcolo, Volume 49, Issue 3, pp.193-219 (2012).
