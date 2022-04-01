@@ -25,20 +25,14 @@ else()
   message(WARNING "Unhandled build type: ${CMAKE_BUILD_TYPE}")
 endif()
 
-# ---- Variable documentation ------------------------------------------------
-set(ISCD_COMMONS_LIBRARY "" CACHE STRING "Path to ISCD::Commons library")
-set(ISCD_COMMONS_INCLUDE_DIR "" CACHE STRING "Path to ISCD::Commons include directory")
-
 # ---- ISCD::Commons ---------------------------------------------------------
-find_library(Commons
-  NAMES
-  Commons
-  HINTS
-  ${ISCD_COMMONS_LIBRARY}
-  )
-
-# ---- Math ------------------------------------------------------------------
-find_library(M_LIB m)
+add_subdirectory(
+  ${PROJECT_SOURCE_DIR}/third-party/ISCD/Commons
+  ${PROJECT_BINARY_DIR}/third-party/ISCD/Commons)
+target_include_directories(Commons
+  INTERFACE
+  ${PROJECT_SOURCE_DIR}/third-party/ISCD/Commons/sources)
+add_library(ISCD::Commons ALIAS Commons)
 
 # ---- Executable ------------------------------------------------------------
 file(GLOB_RECURSE Mshdist_SRCS sources/*.c)
@@ -46,13 +40,8 @@ file(GLOB_RECURSE Mshdist_HEADERS sources/*.h)
 
 add_executable(mshdist ${Mshdist_SRCS} ${Mshdist_HEADERS})
 
-target_include_directories(mshdist
-  PUBLIC
-  ${ISCD_COMMONS_INCLUDE_DIR}
-  )
 target_link_libraries(mshdist
-  PUBLIC
+  PRIVATE
+  m
   pthread
-  ${M_LIB}
-  ${Commons}
-  )
+  ISCD::Commons)

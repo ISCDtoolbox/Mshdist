@@ -1,43 +1,28 @@
-# mshdist [![](https://travis-ci.org/ISCDtoolbox/Mshdist.svg?branch=master)](https://travis-ci.org/ISCDtoolbox/Mshdist)
-mshdist is a simple algorithm to generate the signed distance function to given objects in two and three space dimensions.
+# Mshdist
 
-#### Installation
+Mshdist is a simple algorithm to generate the signed distance function to given
+objects in two and three space dimensions.
 
-1. you will need to install the [ISCD Commons Library](https://github.com/ISCDtoolbox/Commons) on your system.
-Please refer to the instructions provided on the ISCD Commons Library page in order to install this library.
+This repo is a fork of the [original
+Mshdist](https://github.com/ISCDtoolbox/Mshdist) to be used as a dependency in
+[Rodin](https://github.com/cbritopacheco/rodin).
 
-2. download the zip archive of NavierStokes or clone this repository:
+# Building
 
-   ` git clone https://github.com/ISCDtoolbox/Mshdist.git `
+```bash
+git clone --recursive https://github.com/cbritopacheco/Mshdist
+cd Mshdist
+mkdir build && cd build
+cmake ..
+make -j4
+```
 
-   navigate to the downloaded directory:
+# License
 
-   ` cd Mshdist `
+mshdist is given under the [terms of the GNU Lesser General Public License] (LICENSE.md).
 
-   then create build directory and compile the project using cmake
-   ```
-   mkdir build
-   cd build
-   cmake ..
-   make
-   make install
-   ```
+If you use mshdist in your work, please refer to the journal article:
 
-#### Usage
-
-* A short documentation is supplied (see the [documentation](documentation) folder).
-
-#### Quickstart
-
-*
-
-#### Authors & contributors
-* mshdist is developped and maintained by Charles Dapogny (Université Joseph Fourier) and Pascal Frey (Université Pierre et Marie Curie).
-* Contributors to this project are warmly welcome.
-
-#### License
-* mshdist is given under the [terms of the GNU Lesser General Public License] (LICENSE.md).
-
-* If you use mshdist in your work, please refer to the journal article:
-
-C. Dapogny, P. Frey, _Computation of the signed distance function to a discrete contour on adapted triangulation_, Calcolo, Volume 49, Issue 3, pp.193-219 (2012).
+C. Dapogny, P. Frey, _Computation of the signed distance function to a discrete
+contour on adapted triangulation_, Calcolo, Volume 49, Issue 3, pp.193-219
+(2012).
