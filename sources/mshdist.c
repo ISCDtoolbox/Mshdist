@@ -39,7 +39,6 @@ static void usage(char *prog) {
   exit(1);
 }
 
-
 /* Parse arguments on the command line */
 static int parsar(int argc,char *argv[],Info *info,pMesh mesh1,pSol sol1,pMesh mesh2) {
   int      i,ier;

@@ -724,28 +724,34 @@ int sgndist_3d(Info info,pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   int     *pile,*adja,*pilcc,i,j,k,cc,kk,iel,base,bfin,iadr,ipile,start,ip,nc;
   char     j1,j2,j3,sgn;
 
-  /* memory alloc */
+  /* Memory alloc */
   pile = (int*)calloc(mesh->ne+1,sizeof(int));
   assert(pile);
-
-  /* identify element close to outer bdry */
-  p[0] = 0.02;
-  p[1] = 0.02;
-  p[2] = 0.02;
-  iel = buckin_3d(mesh,bucket,p);
-  iel = locelt_3d(mesh,iel,p,cb);
-  assert(iel);
-
-  /* reset colors */
+  
+  /* Reset flags */
   for (k=1; k<=mesh->ne; k++)  mesh->tetra[k].flag = 0;
   for (k=1; k<=mesh->np; k++)  mesh->point[k].flag = 0;
-  mesh->flag  = 0;
-
-  ipile       = 1;
-  pile[ipile] = iel;
+  mesh->flag = 0;
   base = ++mesh->flag;
-  pt   = &mesh->tetra[iel];
-  pt->flag = base;
+  
+  ipile = 0;
+
+  /* Travel the exterior points (default or supplied) */
+  for (k=0; k<info.nexp; k++) {
+    p[0] = info.exp[3*k];
+    p[1] = info.exp[3*k+1];
+    p[2] = info.exp[3*k+2];
+    
+    iel = buckin_3d(mesh,bucket,p);
+    iel = locelt_3d(mesh,iel,p,cb);
+    assert(iel);
+    
+    ipile++;
+    pile[ipile] = iel;
+    pt = &mesh->tetra[iel];
+    pt->flag = base;
+  }
+  
   start    = 1;
   while ( ipile > 0 ) {
     /* search for all elements in the current connected component */

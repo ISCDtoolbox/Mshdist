@@ -314,8 +314,6 @@ int inidist_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   if ( npp )	
 	fprintf(stdout,"  ##  WARNING : conflict in setting reference in %d triangles\n",npp);
 	
-  printf("NB D ARETES %d\n", mesh1->na);
-
   /* if bbbc mode has been actived, take references from the boundary box */
   if(info.bbbc){
     for(k=1;k<=mesh1->nt;k++){
@@ -433,7 +431,7 @@ int sgndist_2d(Info info,pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
   mesh->flag = 0;
   base = ++mesh->flag;
   
-  /* Travel the supplied exterior points */
+  /* Travel the exterior points (default or supplied) */
   for (k=0; k<info.nexp; k++) {
     p[0] = info.exp[2*k];
     p[1] = info.exp[2*k+1];
