@@ -359,6 +359,7 @@ int setfunc(Info info,int dim) {
     if ( info.dsurf ) {
       iniencdomain = iniencdomain_s;
       iniredist = iniredist_s;
+      ppgdist    = ppgdistfmm_s;
       ppgdistfmm = ppgdistfmm_s;
     }
     
@@ -474,8 +475,6 @@ static int mshdis1(Info info,pMesh mesh1,pMesh mesh2,pSol sol1) {
     else
       ier = ppgdist(info,mesh1,sol1);
     chrono(OFF,&info.ctim[4]);
-    
-	//assert(errdist(mesh1,mesh2,sol1));
   }
   else if ( ier < 0 )
     fprintf(stdout,"  ## Problem in sign function\n");
