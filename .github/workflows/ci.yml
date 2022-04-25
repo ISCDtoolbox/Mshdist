@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Install gcc on OSX
         if: matrix.compiler == 'gcc' && matrix.os == 'macos-10.15'
-        run:|
+        run: |
           brew install gcc
 
       - name: Install LibCommons
