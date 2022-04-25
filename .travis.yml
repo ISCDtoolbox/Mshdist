@@ -16,7 +16,7 @@ before_script:
 script:
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DCMAKE_INSTALL_PREFIX=$HOME/install ..
   - make
   - make install
   - cd -
