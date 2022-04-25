@@ -738,9 +738,9 @@ int sgndist_3d(Info info,pMesh mesh,pMesh mesh2,pSol sol,pBucket bucket) {
 
   /* Travel the exterior points (default or supplied) */
   for (k=0; k<info.nexp; k++) {
-    p[0] = info.exp[3*k];
-    p[1] = info.exp[3*k+1];
-    p[2] = info.exp[3*k+2];
+    p[0] = info.exp[3*k];
+    p[1] = info.exp[3*k+1];
+    p[2] = info.exp[3*k+2];
     
     iel = buckin_3d(mesh,bucket,p);
     iel = locelt_3d(mesh,iel,p,cb);
