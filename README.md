@@ -1,5 +1,7 @@
-# mshdist [![](https://travis-ci.org/ISCDtoolbox/Mshdist.svg?branch=master)](https://travis-ci.org/ISCDtoolbox/Mshdist)
+# mshdist [![continuous integration](https://github.com/ISCDtoolbox/Mshdist/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/ISCDtoolbox/Mshdist/actions/workflows/ci.yml)
 mshdist is a simple algorithm to generate the signed distance function to given objects in two and three space dimensions.
+
+[![continuous integration](https://github.com/ISCDtoolbox/Mshdist/actions/workflows/ci.yml/badge.svg)](https://github.com/ISCDtoolbox/Mshdist/actions/workflows/ci.yml)
 
 #### Installation
 
