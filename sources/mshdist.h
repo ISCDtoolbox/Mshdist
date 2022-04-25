@@ -263,15 +263,4 @@ int     holeCl_Chair(pMesh,pSol);
 int     holeChairIni(pMesh,pSol);
 int     gen1Hole_2d(pMesh mesh,pSol sol);
 
-/* Function pointers */
-pBucket (*newBucket)(pMesh ,int );
-int     (*closept)(pMesh ,double *);
-int     (*inidist)(Info info,pMesh ,pMesh ,pSol ,pBucket );
-int     (*inidistpcloud)(pMesh ,pMesh ,pSol ,pBucket );
-int     (*iniredist)(Info ,pMesh ,pSol );
-int     (*iniencdomain)(Info ,pMesh ,pSol );
-int     (*inireftrias)(Info ,pMesh, pSol);
-int     (*ppgdist)(Info info,pMesh mesh, pSol sol);
-int     (*ppgdistfmm)(pMesh mesh, pSol sol);
-
 #endif

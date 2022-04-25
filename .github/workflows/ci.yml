@@ -15,14 +15,9 @@ jobs:
         fail-fast: false
         matrix:
           os: [ubuntu-20.04,macos-10.15]
-          compiler: [gcc,clang]
+          compiler: [gcc-11,clang]
 
     steps:
-      - name: Install gcc on OSX
-        if: matrix.compiler == 'gcc' && matrix.os == 'macos-10.15'
-        run:|
-          brew install gcc
-
       - name: Install LibCommons
         # LinearElasticity don't build with MSVC
         run: |

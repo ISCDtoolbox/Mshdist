@@ -1,4 +1,6 @@
 #include "mshdist.h"
+#include "mshdistexterns.h"
+
 #include "compil.date"
 
 #define BUCKSIZ       16
