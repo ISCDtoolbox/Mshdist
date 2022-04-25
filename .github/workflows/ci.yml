@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: GNU gcc symlink on OSX
         # by default, /usr/local/bin/gcc points toward clang on OSX
-        if: matrix.compiler == 'gcc' && matrix.os == 'macois-10.15'
+        if: matrix.compiler == 'gcc' && matrix.os == 'macos-10.15'
         run: |
           ln -sf /usr/local/bin/gcc-11 /usr/local/bin/gcc
 
