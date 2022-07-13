@@ -29,4 +29,3 @@ mshdist is given under the [terms of the GNU Lesser General Public License](LICE
 
 ## Credits
 Mshdist is originally based on the paper: [Dapogny, Charles, and Pascal Frey. "Computation of the signed distance function to a discrete contour on adapted triangulation." Calcolo 49.3 (2012): 193-219.](https://link.springer.com/article/10.1007/s10092-011-0051-z)
-
