@@ -1,0 +1,3 @@
+[submodule "third-party/ISCD/Commons"]
+	path = third-party/ISCD/Commons
+	url = https://github.com/ISCDtoolbox/Commons
