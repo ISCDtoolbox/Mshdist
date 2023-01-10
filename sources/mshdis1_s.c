@@ -338,7 +338,7 @@ double actival2pt_s(double o1[3], double o2[3], double a[3], double d1, double d
   int          nr;
   
   dist = INIVAL_3d;
-  
+    
   /* Calculation of the gradient of basis functions */
   m[0][0]            = (o1[0]-a[0])*(o1[0]-a[0]) + (o1[1]-a[1])*(o1[1]-a[1]) + (o1[2]-a[2])*(o1[2]-a[2]);
   m[0][1] = m[1][0]  = (o1[0]-a[0])*(o2[0]-a[0]) + (o1[1]-a[1])*(o2[1]-a[1]) + (o1[2]-a[2])*(o2[2]-a[2]);
@@ -362,7 +362,7 @@ double actival2pt_s(double o1[3], double o2[3], double a[3], double d1, double d
   
   /* Reduced gradients = coefficients in the basis (p1-p0,p2-p0) */
   gre[0][0] = ialpha*(-im[0][0] -im[0][1])  ;  gre[0][1] = ialpha*im[0][0] ; gre[0][2] = ialpha*im[0][1] ;
-  gre[1][0] = -ialpha*(-im[1][0] -im[1][1]) ;  gre[1][1] = ialpha*im[1][0] ; gre[1][2] = ialpha*im[1][1] ;
+  gre[1][0] = ialpha*(-im[1][0] -im[1][1]) ;  gre[1][1] = ialpha*im[1][0] ; gre[1][2] = ialpha*im[1][1] ;
   
   /* Gr[0,1,2][i] = coordinates 0,1,2 of ith basis function */
   Gr[0][0] = gre[0][0]*(o1[0]-a[0]) + gre[1][0]*(o2[0]-a[0]);
@@ -414,7 +414,7 @@ double actival2pt_s(double o1[3], double o2[3], double a[3], double d1, double d
       rmin = r[1];
       rmax = r[0];
     }
-    
+        
     /* Try first rmin */
     if ( rmin >= d1 && rmin >= d2 ) {
       g[0] = (d1-rmin)*Gr[0][1] + (d2-rmin)*Gr[0][2];
@@ -448,7 +448,7 @@ double actival2pt_s(double o1[3], double o2[3], double a[3], double d1, double d
   ll = sqrt(ll);
   defval2 = d2 + ll;
   dist = D_MIN(fabs(defval2),dist);
-  
+    
   return (dist);
   
 }
@@ -481,7 +481,7 @@ double actival_s(pMesh mesh,pSol sol,int start,int i) {
   /* If ip1 is not accepted, calculate a trial value based on ip2 */
   if ( p1->tag != 1 ) {
     ps = (p1->c[0]-p0->c[0])*(p2->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p2->c[1]-p0->c[1]) + (p1->c[2]-p0->c[2])*(p2->c[2]-p0->c[2]);
-
+    
     /* Acute angle */
     if ( ps > 0.0 ) {
       ll = (p2->c[0]-p0->c[0])*(p2->c[0]-p0->c[0]) + (p2->c[1]-p0->c[1])*(p2->c[1]-p0->c[1]) + (p2->c[2]-p0->c[2])*(p2->c[2]-p0->c[2]);
