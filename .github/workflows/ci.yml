@@ -57,3 +57,7 @@ jobs:
       - name: Install Mshdist
         run: |
           cmake --install build
+
+      - name: Test Mshdist
+        run: |
+          cd build && ctest
