@@ -1,27 +1,33 @@
-cmake_minimum_required(VERSION 2.8)
-set(CMAKE_BUILD_TYPE  "Release")
-SET(CMAKE_C_FLAGS   "-w -O3")
-set(CMAKE_MACOSX_RPATH 1)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+cmake_minimum_required(VERSION 3.12)
 
-project(libMshdist)
-file(                  GLOB_RECURSE sources sources/*)
-file(                  GLOB_RECURSE headers sources/*.h)
-add_library(           libMshdist SHARED ${sources})
-set_target_properties( libMshdist PROPERTIES PREFIX "")
+project(Mshdist C)
 
-find_library(          Commons NAMES Commons HINTS "$ENV{HOME}/lib" required)
-FIND_LIBRARY(          M_LIB m)
-SET(                   EXTRA_LIBS ${M_LIB} "-lpthread")
-include_directories(   "$ENV{HOME}/include")
-target_link_libraries( libMshdist ${EXTRA_LIBS} ${Commons})
+# ---- Configure compiler ----------------------------------------------------
+add_compile_options(
+  -Wno-char-subscripts
+  -Wno-unused-parameter
+  -Wno-unused-variable
+  -Wno-sign-compare
+  -Wno-incompatible-pointer-types
+  -Wno-incompatible-function-pointer-types)
 
-#Executable
-add_executable(        mshdist sources/mshdist.c)
-target_link_libraries( mshdist libMshdist ${Commons})
+# ---- ISCD::Commons ---------------------------------------------------------
+add_subdirectory(
+  ${PROJECT_SOURCE_DIR}/third-party/ISCD/Commons
+  ${PROJECT_BINARY_DIR}/third-party/ISCD/Commons)
+target_include_directories(Commons
+  INTERFACE
+  ${PROJECT_SOURCE_DIR}/third-party/ISCD/Commons/sources)
+add_library(ISCD::Commons ALIAS Commons)
 
-install(               TARGETS mshdist RUNTIME  DESTINATION "bin")
-install(               TARGETS libMshdist LIBRARY DESTINATION "lib")
-install(               FILES   ${headers} DESTINATION "include")
-set_target_properties( mshdist PROPERTIES INSTALL_RPATH "/usr/local/lib")
+# ---- Executable ------------------------------------------------------------
+file(GLOB_RECURSE Mshdist_SRCS sources/*.c)
+file(GLOB_RECURSE Mshdist_HEADERS sources/*.h)
 
+add_executable(mshdist ${Mshdist_SRCS} ${Mshdist_HEADERS})
+
+target_link_libraries(mshdist
+  PRIVATE
+  m
+  pthread
+  ISCD::Commons)
