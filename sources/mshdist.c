@@ -128,6 +128,12 @@ static int parsar(int argc,char *argv[],Info *info,pMesh mesh1,pSol sol1,pMesh m
           
         break;
           
+      /* Generation of two level set functions for an open curve (2d) or surface (3d) */
+      case 'o':
+          if ( !strcmp(argv[i],"-open") )
+            info->pcloud = 1;
+          break;
+          
       /* Generate unsigned distance with respect to a point cloud */
       case 'p':
         if ( !strcmp(argv[i],"-pcloud") )
