@@ -41,7 +41,7 @@ pBucket newBucket_2d(pMesh mesh,int nmax) {
   pBucket  bucket;
   double   dd;
   int      k,ic,ii,jj;
-
+    
   /* memory alloc */
   bucket = (Bucket*)malloc(sizeof(Bucket));
   assert(bucket);

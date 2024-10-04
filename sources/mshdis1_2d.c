@@ -49,7 +49,6 @@ int hashEdge_2d(pMesh mesh) {
   return(1);
 }
 
-
 int getEdge(pMesh mesh,int ia,int ib) {
   int   key,kb;
   

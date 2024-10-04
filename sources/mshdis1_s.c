@@ -506,8 +506,6 @@ double actival_s(pMesh mesh,pSol sol,int start,int i) {
         return(dist);
       }
     }
-    
-
   }
   /* Else if ip2 is not accepted, calculate a trial value based on ip1 if the angle at ip0 is acute, or search for another accepted value otherwise */
   else if ( p2->tag != 1 ) {

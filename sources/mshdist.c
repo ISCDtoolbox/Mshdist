@@ -131,7 +131,7 @@ static int parsar(int argc,char *argv[],Info *info,pMesh mesh1,pSol sol1,pMesh m
       /* Generation of two level set functions for an open curve (2d) or surface (3d) */
       case 'o':
           if ( !strcmp(argv[i],"-open") )
-            info->pcloud = 1;
+            info->option = 4;
           break;
           
       /* Generate unsigned distance with respect to a point cloud */
@@ -397,7 +397,7 @@ static int mshdis1(Info info,pMesh mesh1,pMesh mesh2,pSol sol1) {
   pBucket  bucket;
   int      ier;
 
-  if(info.specdist){
+  if ( info.specdist ) {
     printf("GENERATING HOLES \n");
     //genHolesPCB_2d(mesh1,sol1);
     //genHolesRadia_2d(mesh1,sol1);
@@ -497,9 +497,10 @@ static int mshdis1(Info info,pMesh mesh1,pMesh mesh2,pSol sol1) {
 int main(int argc,char **argv) {
   Info     info;
   Mesh     mesh1,mesh2;
-  Sol      sol1;
+  Sol      sol1,phi,psi;
   int      k,ier,*perm;
   char     stim[32];
+  char    *ptr;
 
   fprintf(stdout,"  -- MSHDIST, Release %s (%s) \n",D_VER,D_REL);
   fprintf(stdout,"     %s\n",D_CPY);
@@ -541,6 +542,86 @@ int main(int argc,char **argv) {
   chrono(ON,&info.ctim[1]);
   
   if ( !loadMesh(&info,&mesh1,&mesh2) )  return(1);
+  
+  /* Temporary fork for option 4 */
+  if ( info.option == 4 ) {
+    if ( !setfunc(info,mesh1.dim) )  return(1);
+    
+    sol1.bin = mesh1.bin;
+    sol1.ver = GmfDouble;
+    sol1.size    = 1;
+    sol1.type[0] = 1;
+    sol1.typtab[0][0] = GmfSca;
+    sol1.dim = mesh1.dim;
+    sol1.np  = mesh1.np;
+    sol1.val = (double*)malloc((sol1.np+1)*sizeof(double));
+    assert(sol1.val);
+    
+    phi.bin = mesh1.bin;
+    phi.ver = GmfDouble;
+    phi.size    = 1;
+    phi.type[0] = 1;
+    phi.typtab[0][0] = GmfSca;
+    phi.dim = mesh1.dim;
+    phi.np  = mesh1.np;
+    
+    phi.name = (char *)calloc(128,sizeof(char));
+    assert(phi.name);
+    strcpy(phi.name,mesh1.name);
+    ptr = strstr(phi.name,".mesh");
+    if ( ptr ) *ptr = '\0';
+    strcat(phi.name,".phi");
+
+    phi.val = (double*)malloc((phi.np+1)*sizeof(double));
+    assert(phi.val);
+    
+    psi.bin = mesh1.bin;
+    psi.ver = GmfDouble;
+    psi.size    = 1;
+    psi.type[0] = 1;
+    psi.typtab[0][0] = GmfSca;
+    psi.dim = mesh1.dim;
+    psi.np  = mesh1.np;
+    
+    psi.name = (char *)calloc(128,sizeof(char));
+    assert(psi.name);
+    strcpy(psi.name,mesh1.name);
+    ptr = strstr(psi.name,".mesh");
+    if ( ptr ) *ptr = '\0';
+    strcat(psi.name,".psi");
+    
+    psi.val = (double*)malloc((psi.np+1)*sizeof(double));
+    assert(psi.val);
+    
+    /* Default value for the starting point if none supplied (used in generating signed distance only) */
+    if ( !info.nexp ) {
+      info.nexp = -1;
+      info.exp  = (double*)calloc(mesh1.dim,sizeof(double));
+      for (k=0; k<mesh1.dim; k++)
+        info.exp[k] = 0.01;
+    }
+        
+    /* Scale mesh 2 */
+    if ( !scaleMesh(&info,&mesh1,&mesh2,&sol1) )  return(1);
+    
+    /* Create adjacencies */
+    ier = hashelt_2d(&mesh1);
+    if ( !ier )  return(1);
+    
+    if ( !mshdis1_2d_o(info,&mesh1,&mesh2,&sol1,&phi,&psi) )  return(1);
+
+    /* Unscale solution */
+    if ( !unscaleSol(info,&sol1) )  return(1);
+    if ( !unscaleSol(info,&phi) )  return(1);
+    if ( !unscaleSol(info,&psi) )  return(1);
+
+    /* Save outputs */
+    if ( !saveSol(&sol1) )    return(1);
+    if ( !saveSol(&phi) )     return(1);
+    if ( !saveSol(&psi) )     return(1);
+
+    exit(0);
+  }
     
   /* Load solution or allocate memory */
   if ( info.option == 2 ) {
@@ -626,7 +707,8 @@ int main(int argc,char **argv) {
   chrono(ON,&info.ctim[3]);
 
   if ( !mshdis1(info,&mesh1,&mesh2,&sol1) )  return(1);
-  /* free memory */
+  
+  /* Free memory */
   if ( info.nintel )  free(info.intel);
   if ( info.nst )  free(info.st);
   if ( info.nsa )  free(info.sa);

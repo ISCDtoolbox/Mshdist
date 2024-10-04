@@ -181,6 +181,7 @@ int    popAnod(pQueue pq,double *d);
 
 pBucket newBucket_2d(pMesh ,int );
 pBucket newBucket_3d(pMesh ,int );
+// pBucket (*newBucket)(pMesh ,int );
 int     buckin_2d(pMesh ,pBucket ,double *);
 int     buckin_3d(pMesh ,pBucket ,double *);
 int     inTetra(pMesh ,int ,double *,double *);
@@ -229,6 +230,22 @@ int     isStartTri(Info info,int );
 int     isStartEdg(Info info,int );
 int     isStartVer(Info info,int );
 int     invmatg(double m[9],double mi[9]);
+
+/* Open mode routines */
+int mshdis1_2d_o(Info ,pMesh ,pMesh ,pSol ,pSol ,pSol );
+int hashelt_1d(pMesh );
+int orimesh_1d(pMesh );
+int iniLS_open_2d(Info ,pMesh ,pMesh ,pSol ,pSol ,pSol ,double *,pBucket );
+int inidis_open_2d(Info ,pMesh ,pSol ,pSol );
+int ppgSolPhi_open_2d(Info ,pMesh ,pSol ,pSol ,pSol ,double *);
+double distptHS_2d(double *,double *,double *);
+int exitPt_2d(pMesh ,int ,double *,double *,double *);
+int isCrossed_2d(pMesh ,int ,double *,double *);
+int isCrossed_LS_2d(pMesh ,pSol ,int ,double *);
+double actival_tan_2d(pMesh ,pSol ,int ,char ,double *);
+double norval_2d(pMesh ,pSol ,pSol ,int ,char );
+int norLS_2d(pMesh ,pSol ,int ,double *);
+int norppg_2d(Info ,pMesh ,pSol ,pSol );
 
 /* Analytical distance functions */
 int     genHolesPCB_2d(pMesh mesh,pSol sol);

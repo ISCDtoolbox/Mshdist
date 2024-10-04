@@ -7,7 +7,7 @@ int scaleMesh(Info *info,pMesh mesh1,pMesh mesh2,pSol sol1) {
   double    dd,deltb,delta;
   int       i,k;
 
-  /* find bounding box */
+  /* Find bounding box */
 	for (i=0; i<mesh1->dim; i++) {
 		info->min1[i] = info->min2[i] =  1.e30;
 		info->max1[i] = info->max2[i] = -1.e30;
@@ -51,7 +51,7 @@ int scaleMesh(Info *info,pMesh mesh1,pMesh mesh2,pSol sol1) {
   	}
     return(1);
   }
-  
+    
   /* scale starting points */
   if ( info->nexp > 0 ) {
     for (k=0; k<info->nexp; k++) {
