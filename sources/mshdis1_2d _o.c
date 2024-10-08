@@ -13,7 +13,7 @@ double distptHS_2d(double c[2],double o[2],double n[2]) {
     return(0.0);
   
   ps = (c[0]-o[0])*n[0] + (c[1]-o[1])*n[1];
-  dd = ( ps > 0.0 ) ? ps*ps/nn : -ps*ps/nn;
+  dd = ( ps > 0.0 ) ? ps*ps*nn : -ps*ps/nn;
   
   return(dd);
 }
@@ -214,7 +214,7 @@ int isCrossed_LS_2d(pMesh mesh,pSol phi,int k,double n[2]) {
   v1  = phi->val[ip1];
   v2  = phi->val[ip2];
   
-  if ( ( v0*v1 >= 0.0 ) && ( v0*v2 >= 0.0 ) && ( v1*v2 >= 0.0 ) ) return(0);
+  if ( ( v0*v1 > EPS1 ) && ( v0*v2 > EPS1 ) && ( v1*v2 >= EPS1 ) ) return(0);
 
   /* Calculate tangent vector */
   m[0][0] = p1->c[0] - p0->c[0];     m[0][1] = p1->c[1] - p0->c[1];
@@ -486,10 +486,10 @@ double norval_2d(pMesh mesh,pSol phi,pSol psi,int k,char i) {
 int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,double *nor,pBucket bucket) {
   pTria      pt,pt1;
   pEdge      pe;
-  pPoint     p0,p1,pa,pb,ppt;
-  double     d,dd,det,cb[3],u[2],v[2],t[2],*n;
-  int        base,iadr,ilist,iball,k,l,kk,ip,iel,jel,ier,cur,nc,tag,*adja,*adja2,*list,*ball;
-  char       i,j,ia,ib,i1,voy;
+  pPoint     p0,p1,p2,pa,pb,ppt;
+  double     d,dd,det,c[2],cb[3],u[2],v[2],t[2],*n;
+  int        base,iadr,ilist,iball,k,l,kk,ip,ip1,ip2,iel,jel,ier,cur,nc,tag,*adja,*adja2,*list,*ball;
+  char       i,j,j0,j1,j2,ia,ib,i1,voy;
 
   for (k=1; k<=sol->np; k++) {
     sol->val[k] = INIVAL_2d;
@@ -638,7 +638,7 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
       iel = buckin_2d(mesh1,bucket,ppt->c);
       iel = locelt_2d(mesh1,iel,ppt->c,cb);
       if ( !iel ) continue;
-
+      
       pt = &mesh1->tria[iel];
       
       for (j=0; j<3; j++) {
@@ -658,48 +658,42 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
       }
       
       /* Find next points on extended surface for normal vectors + put a tag = 4: special trial value */
-      ier = exitPt_2d(mesh1,iel,ppt->c,t,cb);
-      
-      /* Exit through edge */
-      if ( ier == 1 ) {
-        for (j=0; j<3; j++)
-          if ( cb[j] < EPS ) break;
-
-        /* Pass to neighbour */
-        iadr = mesh1->adja[3*(iel-1)+1+j];
-        jel  = iadr / 3;
-        voy  = iadr % 3;
-        if ( !jel ) continue;
-                
-        pt  = &mesh1->tria[jel];
-        ip  = pt->v[voy];
-        pa  = &mesh1->point[ip];
-        
-        /* Update normal vector and distance */
-        n    = &nor[2*(ip-1)+1];
-        n[0] = v[0];
-        n[1] = v[1];
-        phi->val[ip] = distptHS_2d(pa->c,ppt->c,v);
-        pa->tag = 4;
-      }
-      /* Exit through vertex */
-      else {
-        for (j=0; j<3; j++)
-          if ( cb[j] > 1.0 - EPS ) break;
-        
+      for (j=0; j<3; j++) {
         ip = pt->v[j];
-        /* Take ball */
-        iball = boulep_2d(mesh1,ip,ball);
-
+        pa = &mesh1->point[ip];
+        
+        n  = &nor[2*(ip-1)+1];
+        dd = phi->val[ip];
+        dd = dd > 0.0 ? sqrt(dd) : -sqrt(fabs(dd));
+        c[0] = pa->c[0] - dd*n[0];
+        c[1] = pa->c[1] - dd*n[1];
+                        
+        iball = boulet_2d(mesh1,iel,j,ball);
+        
         for (l=0; l<iball; l++) {
-          ip = ball[l];
-          p0 = &mesh1->point[ip];
-          if ( !p0->tag ) {
-            n    = &nor[2*(ip-1)+1];
-            n[0] = v[0];
-            n[1] = v[1];
-            phi->val[ip] = distptHS_2d(p0->c,ppt->c,v);
-            p0->tag = 4;
+          jel = ball[l] / 3;
+          j0  = ball[l] % 3;
+          pt1 = &mesh1->tria[jel];
+          
+          j1  = inxt2[j0];
+          j2  = inxt2[j1];
+          ip1 = pt1->v[j1];
+          ip2 = pt1->v[j2];
+          p1  = &mesh1->point[ip1];
+          p2  = &mesh1->point[ip2];
+
+          if ( !isCrossed_2d(mesh1,jel,c,n) ) continue;
+          if ( !p1->tag ) {
+            phi->val[ip1] = distptHS_2d(p1->c,c,n);
+            nor[2*(ip1-1)+1] = n[0];
+            nor[2*(ip1-1)+2] = n[1];
+            p1->tag = 4;
+          }
+          if ( !p2->tag ) {
+            phi->val[ip2] = distptHS_2d(p2->c,c,n);
+            nor[2*(ip2-1)+1] = n[0];
+            nor[2*(ip2-1)+2] = n[1];
+            p2->tag = 4;
           }
         }
       }
@@ -740,10 +734,6 @@ int ppgSolPhi_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,pSol psi,double *no
     printf("Impossible to allocate memory for priority queue. Abort program.\n");
     exit(0);
   }
-  
-  printf("tags: %d\n",mesh->point[9749].tag);
-  printf("tags: %d\n",mesh->point[9748].tag);
-  printf("tags: %d\n",mesh->point[9858].tag);
   
   /* Definition of the initial set of active nodes: travel accepted nodes */
   for (k=1; k<=mesh->nt; k++) {
@@ -849,7 +839,7 @@ int ppgSolPhi_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,pSol psi,double *no
       n[1] = nor[2*(ip-1)+2];
       c[0] = p0->c[0] - phi->val[ip]*n[0];
       c[1] = p0->c[1] - phi->val[ip]*n[1];
-            
+                  
       k = p0->s;
       pt = &mesh->tria[k];
       for (i=0; i<3; i++)
@@ -1151,7 +1141,7 @@ int inidis_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
       printf("Problem in popping in Fast Marching Method. Abort\n");
       exit(0);
     }
-    
+        
     p0 = &mesh->point[ip];
     p0->tag = 1;
     psi->val[ip] = ( psi->val[ip] > 0.0 ) ? dist : -dist;
@@ -1169,7 +1159,7 @@ int inidis_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
       j   = list[l] % 3;
       pt  = &mesh->tria[iel];
       if ( !isCrossed_LS_2d(mesh,phi,iel,n) ) continue;
-
+      
       u[0] = -n[1];
       u[1] = n[0];
       
@@ -1407,10 +1397,10 @@ int mshdis1_2d_o(Info info,pMesh mesh,pMesh mesh2,pSol sol,pSol phi,pSol psi) {
   free(nor);
   
   /* Step 3: Calculate psi at triangles intersecting \tilde S */
-  // if ( !inidis_open_2d(info,mesh,phi,psi) ) return(0);
+  if ( !inidis_open_2d(info,mesh,phi,psi) ) return(0);
   
   /* Step 4: propagation of phi + normal extension of psi */
-  // if ( !norppg_2d(info,mesh,phi,psi) ) return(0);
+  if ( !norppg_2d(info,mesh,phi,psi) ) return(0);
   
   return(1);
 }
