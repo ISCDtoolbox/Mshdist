@@ -1079,7 +1079,7 @@ double actival_2d(pMesh mesh,pSol sol,int k,int i) {
 }
 
 /* Propagation of the signed distance field by the Fast Marching Method */
-int ppgdistfmm_2d(pMesh mesh,pSol sol){
+int ppgdistfmm_2d(Info info,pMesh mesh,pSol sol){
   Queue     q;
   pQueue    pq;
   pTria     pt,pt1;

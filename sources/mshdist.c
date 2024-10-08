@@ -473,7 +473,7 @@ static int mshdis1(Info info,pMesh mesh1,pMesh mesh2,pSol sol1) {
     if ( info.imprim )  fprintf(stdout,"  ** Propagation [%d cpu]\n",info.ncpu);
     
     if ( info.fmm )
-      ier = ppgdistfmm(mesh1,sol1);
+      ier = ppgdistfmm(info,mesh1,sol1);
     else
       ier = ppgdist(info,mesh1,sol1);
     chrono(OFF,&info.ctim[4]);

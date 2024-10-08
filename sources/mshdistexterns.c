@@ -8,4 +8,4 @@ extern int     (*iniredist)(Info ,pMesh ,pSol ) = NULL;
 extern int     (*iniencdomain)(Info ,pMesh ,pSol ) = NULL;
 extern int     (*inireftrias)(Info ,pMesh, pSol) = NULL;
 extern int     (*ppgdist)(Info info,pMesh mesh, pSol sol) = NULL;
-extern int     (*ppgdistfmm)(pMesh mesh, pSol sol) = NULL;
+extern int     (*ppgdistfmm)(Info info,pMesh mesh, pSol sol) = NULL;

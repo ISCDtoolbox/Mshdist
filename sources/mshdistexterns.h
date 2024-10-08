@@ -11,6 +11,6 @@ extern int     (*iniredist)(Info ,pMesh ,pSol );
 extern int     (*iniencdomain)(Info ,pMesh ,pSol );
 extern int     (*inireftrias)(Info ,pMesh, pSol);
 extern int     (*ppgdist)(Info info,pMesh mesh, pSol sol);
-extern int     (*ppgdistfmm)(pMesh mesh, pSol sol);
+extern int     (*ppgdistfmm)(Info info,pMesh mesh, pSol sol);
 
 #endif
