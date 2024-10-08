@@ -80,7 +80,7 @@ int intersec_2d(pPoint p1,pPoint p2,pPoint pa,pPoint pb) {
 /* Return (squared) distance from point pa to segment (p1,p2);
    proj = 2 if distance is realized by p1 or p2,
           1 if it is realized by the orthogonal projection of pa on (p1p2) */
-double distpt_2d(pPoint p1,pPoint p2,pPoint pa,int *proj) {
+double distpt_2d(pPoint p1,pPoint p2,pPoint pa,char *proj) {
   double   a,b,c,d,dd,ux,uy,vx,vy,wx,wy,xp,yp,lambda;
   
   *proj = 1;
@@ -138,7 +138,7 @@ double distpt_2d(pPoint p1,pPoint p2,pPoint pa,int *proj) {
 }
 
 /* compute (squared) distance from pa to the 0 level set in triangle ntria ; same use of proj as before */
-double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa, int *proj) {
+double distnv0_2d(pMesh mesh, pSol sol, int ntria, pPoint pa, char *proj) {
   pTria   pt; 
   pPoint  p0,p1,p2;
   Point   q,r;
@@ -251,7 +251,8 @@ double hausdorff(pMesh mesh1, pMesh mesh2){
   pPoint p0,p1,pmil,p2,p3;
   Point mil;
   double rho1,rho2,haus,d, d0,d1,dmil;
-  int k,j,proj,nac1,nac2;  
+  int k,j,nac1,nac2;
+  char proj;
   
   rho1 = 0.0;
   rho2 = 0.0;

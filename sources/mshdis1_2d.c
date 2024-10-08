@@ -77,7 +77,8 @@ int iniredist_2d(Info info, pMesh mesh, pSol sol){
   pTria    pt;
   pPoint   p0,p1,p2,pa;
   double  *solTmp,d;
-  int     *bndy,i,j,nb,nc,i0,i1,i2,proj;
+  int     *bndy,i,j,nb,nc,i0,i1,i2;
+  char     proj;
 	
   nb   = 0;	
   bndy = (int*)calloc(mesh->nt+1,sizeof(int));
@@ -191,7 +192,8 @@ int inidist_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol1,pBucket bucket) {
   pEdge      pe;
   pPoint     p1,p2,pa,pb;
   double     cb[3],d;
-  int        *adja,*list,base,iadr,ilist,i,j,k,ia,ib,iel,jel,ier,cur,nc,tag,npp,i0,i1;
+  int        *adja,*list,base,iadr,ilist,i,j,k,ia,ib,iel,jel,ier,cur,nc,npp,i0,i1;
+  char       tag;
 
   for (k=1; k<=sol1->np; k++)
     sol1->val[k] = INIVAL_2d;
@@ -679,8 +681,8 @@ int iniencdomain_2d(Info info,pMesh mesh, pSol sol){
   pPoint   pa,pb,p0,p1,p2;
   double   d;
   int      ied,ier,*actiedg,nb,k,l,ip0,ip1,ip2,ia,*adja,iel,jel;
-  int      ilist,*list,base,cur,nc,iadr,ib,tag;
-  char     i,i0,i1,i2;
+  int      ilist,*list,base,cur,nc,iadr,ib;
+  char     tag,i,i0,i1,i2;
   
   /* Hash edges of the mesh */
   ier = hashEdge_2d(mesh);
@@ -1077,7 +1079,7 @@ double actival_2d(pMesh mesh,pSol sol,int k,int i) {
 }
 
 /* Propagation of the signed distance field by the Fast Marching Method */
-int ppgdistfmm_2d(pMesh mesh,pSol sol){
+int ppgdistfmm_2d(Info info,pMesh mesh,pSol sol){
   Queue     q;
   pQueue    pq;
   pTria     pt,pt1;
@@ -1442,11 +1444,12 @@ int ppgdist_2d(Info info,pMesh mesh,pSol sol) {
 
 /* Compute L^1,L^2 and L^\infty errors when compared to interpolation of real sdf */
 int errdist(pMesh mesh, pMesh mesh2, pSol sol){
-  int k,l,proj,i0,i1,i2;
+  int k,l,i0,i1,i2;
   pTria pt;
   pEdge pe;
   pPoint p0,p1,p2;
   double errLInfty,errL1,errL2,*dist,area;
+  char proj;
   
   errLInfty = 0.0;
   errL1     = 0.0;

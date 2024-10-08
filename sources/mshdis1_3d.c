@@ -1446,7 +1446,7 @@ double actival_3d(pMesh mesh,pSol sol,int k,int i) {
 }
 
 /* Propagation of the signed distance function by the Fast Marching Method */
-int ppgdistfmm_3d(pMesh mesh,pSol sol) {
+int ppgdistfmm_3d(Info info,pMesh mesh,pSol sol) {
   Queue            q;
   pQueue           pq;
   pTetra           pt,pt1;

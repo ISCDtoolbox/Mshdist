@@ -8,7 +8,8 @@ int iniredist_s(Info info, pMesh mesh, pSol sol){
   pTria    pt;
   pPoint   p0,p1,p2;
   double  *solTmp,d;
-  int     *bndy,i,j,nb,nc,i0,i1,i2,proj;
+  int     *bndy,i,j,nb,nc,i0,i1,i2;
+  char     proj;
   
   nb   = 0;
   bndy = (int*)calloc(mesh->nt+1,sizeof(int));
@@ -546,7 +547,7 @@ double actival_s(pMesh mesh,pSol sol,int start,int i) {
 }
 
 /* Propagation of the signed distance function by the Fast Marching Method */
-int ppgdistfmm_s(pMesh mesh,pSol sol) {
+int ppgdistfmm_s(Info info,pMesh mesh,pSol sol) {
   Queue       q;
   pQueue      pq;
   pTria       pt,pt1;
