@@ -5,7 +5,7 @@ extern unsigned char inxt2[5];
 /* Return (squared) distance from point pa to segment (p1,p2);
    proj = 2 if distance is realized by p1 or p2,
           1 if it is realized by the orthogonal projection of pa on (p1p2) */
-double distpt_s(pPoint p0,pPoint p1,pPoint pa,int *proj) {
+double distpt_s(pPoint p0,pPoint p1,pPoint pa,char *proj) {
   double   ux,uy,uz,p1p0,pap0,ps,lambda;
   
   ux = p1->c[0] - p0->c[0];
@@ -39,7 +39,7 @@ double distpt_s(pPoint p0,pPoint p1,pPoint pa,int *proj) {
 }
 
 /* Compute (squared) distance from pa to the 0 level set in triangle k */
-double distnv0_s(pMesh mesh, pSol sol, int k, pPoint pa, int *proj) {
+double distnv0_s(pMesh mesh, pSol sol, int k, pPoint pa, char *proj) {
   pTria   pt;
   pPoint  p0,p1,p2;
   Point   q,r;
