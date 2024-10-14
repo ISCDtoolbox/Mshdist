@@ -25,3 +25,20 @@ install(               TARGETS libMshdist LIBRARY DESTINATION "lib")
 install(               FILES   ${headers} DESTINATION "include")
 set_target_properties( mshdist PROPERTIES INSTALL_RPATH "/usr/local/lib")
 
+enable_testing()
+include(CTest)
+
+set( MSHDIST_TEST_SOURCE_DIR "${CMAKE_SOURCE_DIR}/documentation/Examples" )
+
+ADD_TEST(NAME frmap
+  COMMAND $<TARGET_FILE:mshdist>
+  ${MSHDIST_TEST_SOURCE_DIR}/france/carre.mesh
+  ${MSHDIST_TEST_SOURCE_DIR}/france/frmap.mesh
+  )
+
+ADD_TEST(NAME handle
+  COMMAND $<TARGET_FILE:mshdist>
+  ${MSHDIST_TEST_SOURCE_DIR}/handle/cube.mesh
+  ${MSHDIST_TEST_SOURCE_DIR}/handle/2handle.mesh
+  -ncpu 2 -it 100
+  )

@@ -14,15 +14,15 @@ jobs:
     strategy:
         fail-fast: false
         matrix:
-          os: [ubuntu-20.04,macos-10.15]
+          os: [ubuntu-20.04,macos-12]
           compiler: [gcc,clang]
 
     steps:
       - name: GNU gcc symlink on OSX
         # by default, /usr/local/bin/gcc points toward clang on OSX
-        if: matrix.compiler == 'gcc' && matrix.os == 'macos-10.15'
+        if: matrix.compiler == 'gcc' && matrix.os == 'macos-12'
         run: |
-          ln -sf /usr/local/bin/gcc-11 /usr/local/bin/gcc
+          ln -sf /usr/local/bin/gcc-14 /usr/local/bin/gcc
 
       - name: Install LibCommons
         # LinearElasticity don't build with MSVC
@@ -38,7 +38,7 @@ jobs:
           CXX: ${{ matrix.compiler }}
 
       # checkout the event branch for automatic workflows
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           path: mshdist
 
@@ -57,3 +57,7 @@ jobs:
       - name: Install Mshdist
         run: |
           cmake --install build
+
+      - name: Test Mshdist
+        run: |
+          cd build && ctest
