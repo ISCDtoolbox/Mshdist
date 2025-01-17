@@ -691,12 +691,6 @@ int ppgSolPhi_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,double *nor) {
       for (l=0; l<ilist; l++) {
         iel = list[l] / 3;
         pt1 = &mesh->tria[iel];
-        
-        /* Normal vector and projection on the surface */
-        n[0] = nor[2*(ip-1)+1];
-        n[1] = nor[2*(ip-1)+2];
-        c[0] = p0->c[0] - phi->val[ip]*n[0];
-        c[1] = p0->c[1] - phi->val[ip]*n[1];
 
         j   = list[l] % 3;
         j1  = inxt2[j];
@@ -775,85 +769,52 @@ int ppgSolPhi_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,double *nor) {
     }
     
     /* Update list of active nodes */
-    if ( tag == 3 ) {
-      /* Normal vector and projection on the surface */
-      n[0] = nor[2*(ip-1)+1];
-      n[1] = nor[2*(ip-1)+2];
-      c[0] = p0->c[0] - phi->val[ip]*n[0];
-      c[1] = p0->c[1] - phi->val[ip]*n[1];
-                  
-      k = p0->s;
-      pt = &mesh->tria[k];
-      for (i=0; i<3; i++)
-        if ( pt->v[i] == ip ) break;
-      assert ( i < 3 );
+    /* Normal vector and projection of p0 on the surface */
+    n[0] = nor[2*(ip-1)+1];
+    n[1] = nor[2*(ip-1)+2];
+    c[0] = p0->c[0] - phi->val[ip]*n[0];
+    c[1] = p0->c[1] - phi->val[ip]*n[1];
+             
+    /* Travel ball of p0 */
+    k = p0->s;
+    pt = &mesh->tria[k];
+    for (i=0; i<3; i++)
+      if ( pt->v[i] == ip ) break;
+    assert ( i < 3 );
       
-      ilist = boulet_2d(mesh,k,i,list);
-      for (l=0; l<ilist; l++) {
-        iel = list[l] / 3;
-        j   = list[l] % 3;
-        pt  = &mesh->tria[iel];
+    ilist = boulet_2d(mesh,k,i,list);
+    for (l=0; l<ilist; l++) {
+      iel = list[l] / 3;
+      j   = list[l] % 3;
+      pt  = &mesh->tria[iel];
                 
-        /* If triangle is crossed by the front: - set tag = 3 to vertices,
-                                                - calculate new values for phi
+      /* If triangle is crossed by the front: - set tag = 3 to vertices,
+                                                - calculate values for phi at point not accepted
                                                 - transmit normal vector */
-        for (jj=0; jj<2; jj++) {
-          j   = inxt2[j];
-          ip1 = pt->v[j];
-          p1  = &mesh->point[ip1];
-          if ( p1->tag == 1 ) continue;
+      for (jj=0; jj<2; jj++) {
+        j   = inxt2[j];
+        ip1 = pt->v[j];
+        p1  = &mesh->point[ip1];
+        if ( p1->tag == 1 ) continue;
           
-          dist = actival_2d(mesh,sol,iel,j);
+        dist = actival_2d(mesh,sol,iel,j);
           
-          if ( p1->tag == 2 || p1->tag == 3 )
-            upAnod(pq,ip1,dist);
-          else {
-            insertAnod(pq,ip1,dist);
-            p1->tag = 2;
-          }
-          
-          if ( isCrossed_2d(mesh,iel,c,n) ) {
-            ps = (p1->c[0] - p0->c[0])*n[0] + (p1->c[1] - p0->c[1])*n[1];
-            phi->val[ip1] = phi->val[ip] + ps;
-            
-            nor[2*(ip1-1)+1] = n[0];
-            nor[2*(ip1-1)+2] = n[1];
-            
-            p1->tag = 3;
-          }
+        if ( p1->tag == 2 || p1->tag == 3 )
+          upAnod(pq,ip1,dist);
+        else {
+          insertAnod(pq,ip1,dist);
+          p1->tag = 2;
         }
-      }
-    }
-    
-    /* Travel the ball of p0 to update the set of active nodes */
-    else if ( tag == 2 ) {
-      k = p0->s;
-      pt = &mesh->tria[k];
-      for (i=0; i<3; i++)
-        if ( pt->v[i] == ip ) break;
-      assert ( i < 3 );
-      
-      ilist = boulet_2d(mesh,k,i,list);
-      for (l=0; l<ilist; l++) {
-        iel = list[l] / 3;
-        j   = list[l] % 3;
-        pt  = &mesh->tria[iel];
         
-        for (jj=0; jj<2; jj++) {
-          j   = inxt2[j];
-          ip1 = pt->v[j];
-          p1  = &mesh->point[ip1];
-          
-          /* Either insert or update active value if the point is not already accepted */
-          if ( p1->tag == 1 ) continue;
-                    
-          dist = actival_2d(mesh,sol,iel,j);
-          if ( p1->tag == 2 || p1->tag == 3 )
-            upAnod(pq,ip1,dist);
-          else {
-            insertAnod(pq,ip1,dist);
-            p1->tag = 2;
-          }
+        
+        if ( tag == 3 && isCrossed_2d(mesh,iel,c,n) ) {
+          ps = (p1->c[0] - p0->c[0])*n[0] + (p1->c[1] - p0->c[1])*n[1];
+          phi->val[ip1] = phi->val[ip] + ps;
+            
+          nor[2*(ip1-1)+1] = n[0];
+          nor[2*(ip1-1)+2] = n[1];
+            
+          p1->tag = 3;
         }
       }
     }
@@ -1355,6 +1316,7 @@ int mshdis1_2d_o(Info info,pMesh mesh,pMesh mesh2,pSol sol,pSol phi,pSol psi) {
   if ( !resetLS_open_2d(info,mesh,phi) ) return(0);
   if ( !ppgimpLS_open_2d(info,mesh,phi,psi) ) return(0);
 
+  return(1);
   /* Step 3: propagation of phi + normal extension of psi */
   if ( !norppg_2d(info,mesh,phi,psi) ) return(0);
   
