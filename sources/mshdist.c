@@ -3,9 +3,6 @@
 
 #include "compil.date"
 
-#define BUCKSIZ       16
-
-
 /* Exceptions */
 static void excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
@@ -492,7 +489,6 @@ static int mshdis1(Info info,pMesh mesh1,pMesh mesh2,pSol sol1) {
   return(ier);
 }
 
-
 /* Main program */
 int main(int argc,char **argv) {
   Info     info;
@@ -543,10 +539,25 @@ int main(int argc,char **argv) {
   
   if ( !loadMesh(&info,&mesh1,&mesh2) )  return(1);
   
-  /* Temporary fork for option 4 */
-  if ( info.option == 4 ) {
-    if ( !setfunc(info,mesh1.dim) )  return(1);
-    
+  /* Set pointers */
+  if ( !setfunc(info,mesh1.dim) )  return(1);
+      
+  /* Load solution or allocate memory */
+  if ( info.option == 2 ) {
+    if ( !loadSol(&sol1) )  return(1);
+  }
+  else if ( ( info.option == 1 ) || ( info.option == 3 ) ) {
+    sol1.bin = mesh1.bin;
+    sol1.ver = GmfDouble;
+    sol1.size    = 1;
+    sol1.type[0] = 1;
+    sol1.typtab[0][0] = GmfSca;
+    sol1.dim = mesh1.dim;
+    sol1.np  = mesh1.np;
+    sol1.val = (double*)malloc((sol1.np+1)*sizeof(double));
+    assert(sol1.val);
+  }
+  else if ( info.option == 4 ) {
     sol1.bin = mesh1.bin;
     sol1.ver = GmfDouble;
     sol1.size    = 1;
@@ -592,55 +603,7 @@ int main(int argc,char **argv) {
     
     psi.val = (double*)malloc((psi.np+1)*sizeof(double));
     assert(psi.val);
-    
-    /* Default value for the starting point if none supplied (used in generating signed distance only) */
-    if ( !info.nexp ) {
-      info.nexp = -1;
-      info.exp  = (double*)calloc(mesh1.dim,sizeof(double));
-      for (k=0; k<mesh1.dim; k++)
-        info.exp[k] = 0.01;
-    }
-        
-    /* Scale mesh 2 */
-    if ( !scaleMesh(&info,&mesh1,&mesh2,&sol1) )  return(1);
-    
-    /* Create adjacencies */
-    ier = hashelt_2d(&mesh1);
-    if ( !ier )  return(1);
-    
-    if ( !mshdis1_2d_o(info,&mesh1,&mesh2,&sol1,&phi,&psi) )  return(1);
-
-    /* Unscale solution */
-    if ( !unscaleSol(info,&sol1) )  return(1);
-    if ( !unscaleSol(info,&phi) )  return(1);
-    if ( !unscaleSol(info,&psi) )  return(1);
-
-    /* Save outputs */
-    if ( !saveSol(&sol1) )    return(1);
-    if ( !saveSol(&phi) )     return(1);
-    if ( !saveSol(&psi) )     return(1);
-
-    exit(0);
   }
-    
-  /* Load solution or allocate memory */
-  if ( info.option == 2 ) {
-    if ( !loadSol(&sol1) )  return(1);
-  }
-  else if ( ( info.option == 1 ) || ( info.option == 3 ) ) {
-    sol1.bin = mesh1.bin;
-    sol1.ver = GmfDouble;
-    sol1.size    = 1;
-    sol1.type[0] = 1;
-    sol1.typtab[0][0] = GmfSca;
-    sol1.dim = mesh1.dim;
-    sol1.np  = mesh1.np;
-    sol1.val = (double*)malloc((sol1.np+1)*sizeof(double));
-    assert(sol1.val);
-  }
-
-  /* Set pointers */
-  if ( !setfunc(info,mesh1.dim) )  return(1);
 
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )
@@ -706,7 +669,12 @@ int main(int argc,char **argv) {
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 2 : DISTANCING\n");
   chrono(ON,&info.ctim[3]);
 
-  if ( !mshdis1(info,&mesh1,&mesh2,&sol1) )  return(1);
+  if ( info.option == 4 ) {
+    if ( !mshdis1_2d_o(info,&mesh1,&mesh2,&sol1,&phi,&psi) )  return(1);
+  }
+  else {
+    if ( !mshdis1(info,&mesh1,&mesh2,&sol1) )  return(1);
+  }
   
   /* Free memory */
   if ( info.nintel )  free(info.intel);
@@ -723,12 +691,16 @@ int main(int argc,char **argv) {
   
   fprintf(stdout,"\n  %s\n   END OF MODULE MSHDIST \n  %s\n",D_STR,D_STR);
 
-  /* Save file */
+  /* Unscale solution */
   if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",sol1.name);
   chrono(ON,&info.ctim[1]);
-  if ( !info.noscale || !info.specdist )
+  if ( !info.noscale || !info.specdist ) {
     if ( !unscaleSol(info,&sol1) )  return(1);
-  
+    if ( info.option == 4 ) {
+      if ( !unscaleSol(info,&phi) )  return(1);
+      if ( !unscaleSol(info,&psi) )  return(1);
+    }
+  }
   /* Unpacking */
   if ( info.zip ) {
     if ( !unpack_s(&mesh1,&sol1,perm) ) {
@@ -738,10 +710,17 @@ int main(int argc,char **argv) {
     free(perm);
   }
 
+  /* Save file(s) */
   if ( !saveSol(&sol1) )     return(1);
+  if ( info.option == 4 ) {
+    if ( !saveSol(&phi) )     return(1);
+    if ( !saveSol(&psi) )     return(1);
+  }
+  
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
+  /* Free memory */
   free(mesh1.point);
   free(mesh1.adja);
   if ( mesh2.point )  free(mesh2.point);

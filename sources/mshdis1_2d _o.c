@@ -18,7 +18,7 @@ double distptHS_2d(double c[2],double o[2],double n[2]) {
   return(dd);
 }
 
-/* Return normalized unit normal vector to LS function sol in triangle iel */
+/* Store in n normalized unit normal vector to LS function sol in triangle iel */
 int norLS_2d(pMesh mesh,pSol sol,int iel,double n[2]) {
   pTria     pt;
   pPoint    p0,p1,p2;
@@ -59,77 +59,6 @@ int norLS_2d(pMesh mesh,pSol sol,int iel,double n[2]) {
   n[0] *= dd;
   n[1] *= dd;
   
-  return(1);
-}
-
-/* Calculate exit point of half-line starting from c, with (normalized) direction u;
-   barycentric coordinates are stored in cb;
-   return: - 0: failure,
-           - 1: exit through edge
-           - 2: exit through vertex */
-int exitPt_2d(pMesh mesh,int k,double c[2],double u[2],double cb[3]) {
-  pTria   pt;
-  pPoint  p0,p1,p2;
-  double  det,idet,alpha,dd,ps,cb0[3],m[2][2],im[2][2],Gr[2][3];
-  int     imin;
-  char    i,i1,i2;
-  
-  pt = &mesh->tria[k];
-  p0 = &mesh->point[pt->v[0]];
-  p1 = &mesh->point[pt->v[1]];
-  p2 = &mesh->point[pt->v[2]];
-
-  /* Gr[*][i] = (column vector) gradient of \lambda_i */
-  m[0][0] = p1->c[0] - p0->c[0];     m[0][1] = p1->c[1] - p0->c[1];
-  m[1][0] = p2->c[0] - p0->c[0];     m[1][1] = p2->c[1] - p0->c[1];
-  
-  det = m[0][0]*m[1][1] - m[1][0]*m[0][1];
-  if ( det < EPS1 ) return(0);
-
-  idet = 1.0 / det;
-  
-  im[0][0] = idet*m[1][1];     im[0][1] = -idet*m[0][1];
-  im[1][0] = -idet*m[1][0];    im[1][1] = idet*m[0][0];
-  
-  Gr[0][0] = -im[0][0] - im[0][1];    Gr[0][1] = im[0][0];    Gr[0][2] = im[0][1];
-  Gr[1][0] = -im[1][0] - im[1][1];    Gr[1][1] = im[1][0];    Gr[1][2] = im[1][1];
-  
-  /* Barycentric coordinates of c */
-  cb0[0] = 1.0 + Gr[0][0]*(c[0]-p0->c[0]) + Gr[1][0]*(c[1]-p0->c[1]);
-  cb0[1] =       Gr[0][1]*(c[0]-p0->c[0]) + Gr[1][1]*(c[1]-p0->c[1]);
-  cb0[2] =       Gr[0][2]*(c[0]-p0->c[0]) + Gr[1][2]*(c[1]-p0->c[1]);
-
-  /* Search for length of exit ray */
-  imin = -1;
-  for (i=0; i<3; i++) {
-    ps = u[0]*Gr[0][i] + u[1]*Gr[1][i];
-    if ( fabs(ps) < EPS1 ) continue;
-    
-    dd = - cb0[i] / ps;
-    if ( dd > 0.0 ) {
-      if ( imin < 0 ) {
-        alpha = dd;
-        imin = i;
-      }
-      else {
-        if ( dd < alpha ) {
-          alpha = dd;
-          imin = i;
-        }
-      }
-    }
-  }
-  
-  if ( imin < 0 ) return(0);
-  i1 = inxt2[imin];
-  i2 = inxt2[i1];
-  
-  /* Update barycentric coordinates */
-  cb[imin]  = 0.0;
-  cb[i1] = cb0[i1] + alpha*(u[0]*Gr[0][i1] + u[1]*Gr[1][i1]);
-  cb[i2] = cb0[i2] + alpha*(u[0]*Gr[0][i2] + u[1]*Gr[1][i2]);
-
-  if ( cb[i1] < EPS || cb[i2] < EPS ) return(2);
   return(1);
 }
 
@@ -193,7 +122,7 @@ int isCrossed_2d(pMesh mesh,int k,double c[2],double n[2]) {
 
 /* Return 1 if triangle k is crossed by 0 level set of phi,
           0 otherwise
-   Unit normal vector to 0 level set stored in n
+   Calculate the unit normal vector to 0 level set in n
 */
 int isCrossed_LS_2d(pMesh mesh,pSol phi,int k,double n[2]) {
   pTria    pt;
@@ -241,7 +170,7 @@ int isCrossed_LS_2d(pMesh mesh,pSol phi,int k,double n[2]) {
   return(1);
 }
 
-/* Calculate an active value at vertex i in triangle k based on the values in the other two vertices,
+/* Calculate attempt value at vertex i in triangle k based on the values in the other two vertices,
        when distance is calculated tangentially to u */
 double actival_tan_2d(pMesh mesh,pSol psi,int k,char i,double u[2]) {
   pTria         pt;
@@ -478,16 +407,17 @@ double norval_2d(pMesh mesh,pSol phi,pSol psi,int k,char i) {
   return(vnor);
 }
 
-/* Step 1 in the definition of two LS functions for open mesh2:
-   -
-   -
-   -
+/* Initialization of the two LS functions for open mesh2 of $S$ at the vertices of mesh1
+   - Initial unsigned distance function to mesh2 is in sol
+   - Initial signed distance function to extended surface $\tilde S$ is in phi
+   - Initial signed distance to $S$ on phi, to mesh2 is in psi
+   - table nor contains normal vector field to 0 LS of phi at close points
 */
 int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,double *nor,pBucket bucket) {
   pTria      pt,pt1;
   pEdge      pe;
   pPoint     p0,p1,p2,pa,pb,ppt;
-  double     d,dd,det,c[2],cb[3],u[2],v[2],t[2],*n;
+  double     d,dd,det,c[2],ct[2],cb[3],u[2],v[2],t[2],*n;
   int        base,iadr,ilist,iball,k,l,kk,ip,ip1,ip2,iel,jel,ier,cur,nc,tag,*adja,*adja2,*list,*ball;
   char       i,j,j0,j1,j2,ia,ib,i1,voy;
 
@@ -517,6 +447,8 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
       iel = buckin_2d(mesh1,bucket,p1->c);
       iel = locelt_2d(mesh1,iel,p1->c,cb);
     }
+    
+    if ( !iel ) continue;
     
     ilist       = 1;
     list[ilist] = iel;
@@ -599,8 +531,8 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
     nc++;
   }
   if ( nc )   fprintf(stdout,"     %d correction(s)\n",nc);
-  /* At this point, all points initialized have tag 1 */
   
+  /* At this stage, all initialized points have tag 1 */
   /* Travel boundary points of mesh2 */
   for (k=1; k<=mesh2->na; k++){
     pe    = &mesh2->edge[k];
@@ -667,6 +599,11 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
         dd = dd > 0.0 ? sqrt(dd) : -sqrt(fabs(dd));
         c[0] = pa->c[0] - dd*n[0];
         c[1] = pa->c[1] - dd*n[1];
+
+        dd = psi->val[ip];
+        dd = dd > 0.0 ? sqrt(dd) : -sqrt(fabs(dd));
+        ct[0] = pa->c[0] - dd*t[0];
+        ct[1] = pa->c[1] - dd*t[1];
                         
         iball = boulet_2d(mesh1,iel,j,ball);
         
@@ -685,12 +622,14 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
           if ( !isCrossed_2d(mesh1,jel,c,n) ) continue;
           if ( !p1->tag ) {
             phi->val[ip1] = distptHS_2d(p1->c,c,n);
+            psi->val[ip1] = distptHS_2d(p1->c,ct,t);
             nor[2*(ip1-1)+1] = n[0];
             nor[2*(ip1-1)+2] = n[1];
             p1->tag = 4;
           }
           if ( !p2->tag ) {
             phi->val[ip2] = distptHS_2d(p2->c,c,n);
+            psi->val[ip2] = distptHS_2d(p2->c,ct,t);
             nor[2*(ip2-1)+1] = n[0];
             nor[2*(ip2-1)+2] = n[1];
             p2->tag = 4;
@@ -712,8 +651,11 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
   return(1);
 }
 
-/* Step 2 in the definition of two LS functions for open mesh2 */
-int ppgSolPhi_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,pSol psi,double *nor) {
+/* Step 1 in the definition of two LS functions for open mesh2: propagation by Fast Marching
+     - Calculate unsigned distance function to S in sol
+     - Propagate signed distance to \tilde S in phi
+*/
+int ppgSolPhi_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,double *nor) {
   Queue     q;
   pQueue    pq;
   pTria     pt,pt1;
@@ -926,20 +868,17 @@ int ppgSolPhi_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,pSol psi,double *no
   return(1);
 }
 
-/* Initialize signed distance function to extended surface, and secondary LS function psi */
-int inidis_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
-  Queue     q;
-  pQueue    pq;
-  pTria     pt,pt1;
+/* Step 2 (a):  Reset values of the signed distance function to extended surface at close nodes in phi */
+int resetLS_open_2d(Info info,pMesh mesh,pSol phi) {
+  pTria     pt;
   pPoint    p0,p1,p2;
-  double    d,dist,n[2],u[2],*solTmp;
-  int       k,iel,l,ip,ip0,ip1,ip2,nc,nb,ilist,*list,*bndy,*proj;
-  char      i,j,jj,j1,j2;
+  double    d,*solTmp;
+  int       k,iel,l,ip,ip0,ip1,ip2,nc,nb,*bndy,*proj;
   
   nb   = 0;
   bndy = (int*)calloc(mesh->nt+1,sizeof(int));
   assert(bndy);
-  
+    
   /* Reset point tags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].tag = 0;
@@ -1013,7 +952,7 @@ int inidis_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
     }
   }
   
-  /* Correction procedure, for points with tag = 2 */
+  /* Correction procedure for points with tag = 2 */
   nc = 0;
   for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
@@ -1043,6 +982,19 @@ int inidis_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
   free(solTmp);
   free(bndy);
   
+  return(1);
+}
+
+/* Step 2 (b):  Propagate values of psi at close nodes by a variant of the Fast Marching Method on an implicit line. */
+int ppgimpLS_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
+  Queue     q;
+  pQueue    pq;
+  pTria     pt,pt1;
+  pPoint    p0,p1,p2;
+  double    d,dist,n[2],u[2];
+  int       k,iel,l,ip,ip0,ip1,ip2,nc,nb,ilist,*list,*proj;
+  char      i,j,jj,j1,j2;
+  
   /* Change point tags: - tag = 1: accepted node for psi
                         - tag = 2: active node for psi
                         - tag = 3: "far away" node for psi, but concerned by the calculation of psi
@@ -1070,7 +1022,7 @@ int inidis_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     
-    /* Catch accepted points by triangle with only accepted vertices: optimization possible */
+    /* Catch accepted points by triangle with only accepted vertices */
     for(i=0; i<3; i++) {
       ip = pt->v[i];
       p0 = &mesh->point[ip];
@@ -1103,7 +1055,6 @@ int inidis_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
         /* Calculate value at ip1 and put it in the queue */
         if ( p1->tag == 2 || p1->tag == 3 ) {
           dist = psi->val[ip] + (p1->c[0]-p0->c[0])*n[0] + (p1->c[1]-p0->c[1])*n[1];
-          // psi->val[ip1] = ( dist > 0.0 ) ? INIVAL_2d : -INIVAL_2d;
           psi->val[ip1] = dist;
 
           dist = fabs(dist);
@@ -1119,7 +1070,6 @@ int inidis_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
         /* Calculate value at ip2 and put it in the queue */
         if ( p2->tag == 2 || p2->tag == 3 ) {
           dist = psi->val[ip] + (p2->c[0]-p0->c[0])*n[0] + (p2->c[1]-p0->c[1])*n[1];
-          // psi->val[ip2] = ( dist > 0.0 ) ? INIVAL_2d : -INIVAL_2d;
           psi->val[ip2] = dist;
           dist = fabs(dist);
           
@@ -1183,6 +1133,12 @@ int inidis_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
     }
   }
   
+  /* Take care of components of extended surface not containing initial one */
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    if ( p0->tag == 3 ) p0->tag = 1;
+  }
+  
   /* Release memory of the queue */
   if ( !freeQueue(pq) ) {
     printf("Impossible to free priority queue. Abort program.\n");
@@ -1193,7 +1149,7 @@ int inidis_open_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
   return(1);
 }
 
-/* Propagation of the signed distance phi and normal extension of psi
+/* Step 3: Propagate signed distance phi and normal extension of psi
    info:  information file;
    mesh:  mesh of computational domain;
    phi:   signed distance function, initialized at the points near the 0 LS;
@@ -1213,11 +1169,12 @@ int norppg_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
     printf("Impossible to allocate memory for priority queue. Abort program.\n");
     exit(0);
   }
-  
+
   /* Memory allocation */
   list = (int*)calloc(LONMAX,sizeof(int));
   assert(list);
   
+
   /* Definition of the initial set of active nodes: travel accepted nodes */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -1251,7 +1208,7 @@ int norppg_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
             p1->tag = 2;
             p1->s   = iel;
           }
-          /* To do: optimization here */
+          /* p1->s = number of triangle where distance comes from */
           else {
             ll = pq->perm[ip1];
             dold = pq->hp[ll].d;
@@ -1270,7 +1227,7 @@ int norppg_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
             p2->tag = 2;
             p2->s   = iel;
           }
-          /* To do: optimization here */
+          /* p2->s = number of triangle where distance comes from */
           else {
             ll = pq->perm[ip2];
             dold = pq->hp[ll].d;
@@ -1358,7 +1315,6 @@ int norppg_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
   return(1);
 }
 
-/* Todo: bucksiz is #define in mshdist.c -> harmonize */
 /* Generation of two level set functions for a mesh of an open (collection of) curve(s):
    info:  information file;
    mesh:  mesh of computational domain;
@@ -1369,7 +1325,7 @@ int norppg_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
 int mshdis1_2d_o(Info info,pMesh mesh,pMesh mesh2,pSol sol,pSol phi,pSol psi) {
   pBucket  bucket;
   double   *nor;
-  int      ier,bucksiz;
+  int      ier;
   
   /* Check that mesh2 is open + give consistent orientation */
   ier = hashelt_1d(mesh2);
@@ -1379,27 +1335,27 @@ int mshdis1_2d_o(Info info,pMesh mesh,pMesh mesh2,pSol sol,pSol phi,pSol psi) {
   if ( !ier )  return(0);
   
   /* Initialize bucket */
-  bucksiz = 16;
-  bucket  = newBucket_2d(mesh,bucksiz);
+  bucket  = newBucket_2d(mesh,BUCKSIZ);
   if ( !bucket )  return(0);
   
   /* (Normalized) Normal vector field to the extended surface */
   nor = (double*)calloc(2*mesh->np+1,sizeof(double));
 
-  /* Step 1: - Initialize sol in triangles intersecting mesh2
-             - Initialize phi + its sign (using orientation) in triangle intersecting mesh 2
+  /* Initialization:
+             - Initialize sol in triangles intersecting mesh2
+             - Initialize phi + its sign (using orientation) in triangles intersecting mesh 2
              - Initialize psi + its sign in triangles intersecting boundary of mesh 2 */
   if ( !iniLS_open_2d(info,mesh,mesh2,sol,phi,psi,nor,bucket) ) return(0);
   
-  /* Step 2: Calculate unsigned distance to mesh2 and unravel phi near \tilde S */
-  if ( !ppgSolPhi_open_2d(info,mesh,sol,phi,psi,nor) ) return(0);
-
+  /* Step 1: Calculate unsigned distance to mesh2 and unravel phi near \tilde S */
+  if ( !ppgSolPhi_open_2d(info,mesh,sol,phi,nor) ) return(0);
   free(nor);
   
-  /* Step 3: Calculate psi at triangles intersecting \tilde S */
-  if ( !inidis_open_2d(info,mesh,phi,psi) ) return(0);
-  
-  /* Step 4: propagation of phi + normal extension of psi */
+  /* Step 2: Calculate psi at triangles intersecting \tilde S */
+  if ( !resetLS_open_2d(info,mesh,phi) ) return(0);
+  if ( !ppgimpLS_open_2d(info,mesh,phi,psi) ) return(0);
+
+  /* Step 3: propagation of phi + normal extension of psi */
   if ( !norppg_2d(info,mesh,phi,psi) ) return(0);
   
   return(1);

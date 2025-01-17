@@ -28,6 +28,7 @@
 #define EPS2     1.e-10
 #define PRECI    1.0    // size for scaling
 #define SIZE     0.75   // size of mesh2 in mesh1
+#define BUCKSIZ  16
 
 #define REFINT        3
 #define REFDIR        1
@@ -236,10 +237,10 @@ int mshdis1_2d_o(Info ,pMesh ,pMesh ,pSol ,pSol ,pSol );
 int hashelt_1d(pMesh );
 int orimesh_1d(pMesh );
 int iniLS_open_2d(Info ,pMesh ,pMesh ,pSol ,pSol ,pSol ,double *,pBucket );
+int resetLS_open_2d(Info ,pMesh ,pSol );
 int inidis_open_2d(Info ,pMesh ,pSol ,pSol );
-int ppgSolPhi_open_2d(Info ,pMesh ,pSol ,pSol ,pSol ,double *);
+int ppgSolPhi_open_2d(Info ,pMesh ,pSol ,pSol ,double *);
 double distptHS_2d(double *,double *,double *);
-int exitPt_2d(pMesh ,int ,double *,double *,double *);
 int isCrossed_2d(pMesh ,int ,double *,double *);
 int isCrossed_LS_2d(pMesh ,pSol ,int ,double *);
 double actival_tan_2d(pMesh ,pSol ,int ,char ,double *);

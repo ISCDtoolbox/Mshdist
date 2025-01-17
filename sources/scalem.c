@@ -51,8 +51,8 @@ int scaleMesh(Info *info,pMesh mesh1,pMesh mesh2,pSol sol1) {
   	}
     return(1);
   }
-    
-  /* scale starting points */
+  
+  /* Scale starting points */
   if ( info->nexp > 0 ) {
     for (k=0; k<info->nexp; k++) {
       for (i=0; i<mesh1->dim; i++) {
@@ -63,6 +63,7 @@ int scaleMesh(Info *info,pMesh mesh1,pMesh mesh2,pSol sol1) {
   /* Assign a default value */
   else {
     info->nexp = 1;
+    info->exp  = (double*)calloc(mesh1->dim,sizeof(double));
     for (i=0; i<mesh1->dim; i++)
       info->exp[i] = 0.01;
   }
