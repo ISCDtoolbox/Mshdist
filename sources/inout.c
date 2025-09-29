@@ -199,7 +199,7 @@ int loadMesh(Info *info,pMesh mesh1,pMesh mesh2) {
   }
   GmfCloseMesh(inm);
 
-  if ( ( info->option == 2 ) || ( info->option == 3 ) )  return(1);
+  if ( ( info->option == 2 ) || ( info->option == 3 ) || ( info->option == 4 && info->dom ) )  return(1);
 	
   /* Load mesh 2 */
   name = mesh2->name;

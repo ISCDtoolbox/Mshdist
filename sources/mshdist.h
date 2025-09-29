@@ -85,7 +85,7 @@ typedef struct {
   int      ncpu,libpid,typ[2];          /* for // purposes */
   int      maxit,ref,nsref,*sref;
   int      nexp,nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
-  char     imprim,ddebug,option,bbbc,dsurf,fmm,fini,hausdorff,pcloud,specdist,startref,noscale,zip;
+  char     imprim,ddebug,option,bbbc,dom,dsurf,fmm,fini,hausdorff,pcloud,specdist,startref,noscale,zip;
   mytime   ctim[TIMEMAX];
 } Info;
 
@@ -237,6 +237,7 @@ int mshdis1_2d_o(Info ,pMesh ,pMesh ,pSol ,pSol ,pSol );
 int hashelt_1d(pMesh );
 int orimesh_1d(pMesh );
 int iniLS_open_2d(Info ,pMesh ,pMesh ,pSol ,pSol ,pSol ,double *,pBucket );
+int iniLSdom_open_2d(Info ,pMesh ,pSol ,pSol ,pSol ,double *);
 int resetLS_open_2d(Info ,pMesh ,pSol );
 int inidis_open_2d(Info ,pMesh ,pSol ,pSol );
 int ppgSolPhi_open_2d(Info ,pMesh ,pSol ,pSol ,double *);

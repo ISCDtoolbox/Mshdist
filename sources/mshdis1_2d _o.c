@@ -651,6 +651,19 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
   return(1);
 }
 
+/* Initialization of the two LS functions associated to a collection of edges present in mesh
+   - Initial unsigned distance function to these edges is in sol
+   - Initial signed distance function to extended surface $\tilde S$ is in phi
+   - Initial signed distance to $S$ on phi, to mesh2 is in psi
+   - table nor contains normal vector field to 0 LS of phi at close points
+*/
+int iniLSdom_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,pSol psi,double *nor) {
+  
+  printf("Coucou !! \n");
+  
+  return(1);
+}
+
 /* Step 1 in the definition of two LS functions for open mesh2: propagation by Fast Marching
      - Calculate unsigned distance function to S in sol
      - Propagate signed distance to \tilde S in phi
@@ -834,7 +847,7 @@ int resetLS_open_2d(Info info,pMesh mesh,pSol phi) {
   pTria     pt;
   pPoint    p0,p1,p2;
   double    d,*solTmp;
-  int       k,iel,l,ip,ip0,ip1,ip2,nc,nb,*bndy,*proj;
+  int       k,iel,l,ip,ip0,ip1,ip2,nc,nb,*bndy,proj;
   
   nb   = 0;
   bndy = (int*)calloc(mesh->nt+1,sizeof(int));
@@ -1287,26 +1300,32 @@ int mshdis1_2d_o(Info info,pMesh mesh,pMesh mesh2,pSol sol,pSol phi,pSol psi) {
   pBucket  bucket;
   double   *nor;
   int      ier;
-  
-  /* Check that mesh2 is open + give consistent orientation */
-  ier = hashelt_1d(mesh2);
-  if ( !ier )  return(0);
-  
-  ier = orimesh_1d(mesh2);
-  if ( !ier )  return(0);
-  
-  /* Initialize bucket */
-  bucket  = newBucket_2d(mesh,BUCKSIZ);
-  if ( !bucket )  return(0);
-  
+    
   /* (Normalized) Normal vector field to the extended surface */
   nor = (double*)calloc(2*mesh->np+1,sizeof(double));
 
   /* Initialization:
              - Initialize sol in triangles intersecting mesh2
-             - Initialize phi + its sign (using orientation) in triangles intersecting mesh 2
-             - Initialize psi + its sign in triangles intersecting boundary of mesh 2 */
-  if ( !iniLS_open_2d(info,mesh,mesh2,sol,phi,psi,nor,bucket) ) return(0);
+             - Initialize phi + its sign (using orientation) in triangles intersecting mesh2
+             - Initialize psi + its sign in triangles intersecting boundary of mesh2 */
+  if ( !info.dom ) {
+    /* Check that mesh2 is open + give consistent orientation */
+    ier = hashelt_1d(mesh2);
+    if ( !ier )  return(0);
+  
+    ier = orimesh_1d(mesh2);
+    if ( !ier )  return(0);
+  
+    /* Initialize bucket */
+    bucket  = newBucket_2d(mesh,BUCKSIZ);
+    if ( !bucket )  return(0);
+  
+    if ( !iniLS_open_2d(info,mesh,mesh2,sol,phi,psi,nor,bucket) ) return(0);
+  }
+  else {
+    if ( !iniLSdom_open_2d(info,mesh,sol,phi,psi,nor) ) return(0);
+    exit(0);
+  }
   
   /* Step 1: Calculate unsigned distance to mesh2 and unravel phi near \tilde S */
   if ( !ppgSolPhi_open_2d(info,mesh,sol,phi,nor) ) return(0);
@@ -1316,7 +1335,6 @@ int mshdis1_2d_o(Info info,pMesh mesh,pMesh mesh2,pSol sol,pSol phi,pSol psi) {
   if ( !resetLS_open_2d(info,mesh,phi) ) return(0);
   if ( !ppgimpLS_open_2d(info,mesh,phi,psi) ) return(0);
 
-  return(1);
   /* Step 3: propagation of phi + normal extension of psi */
   if ( !norppg_2d(info,mesh,phi,psi) ) return(0);
   

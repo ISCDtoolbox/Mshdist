@@ -68,7 +68,8 @@ static int parsar(int argc,char *argv[],Info *info,pMesh mesh1,pSol sol1,pMesh m
             --i;
         }
 		else if ( !strcmp(argv[i],"-dom") ) {
-		  info->option = 3;
+		  info->option = D_MAX(info->option,3);
+          info->dom    = 1;
 		  ++i;
 		  if ( i < argc && isdigit(argv[i][0]) )
 			info->ref = atoi(argv[i]);
@@ -230,7 +231,7 @@ static int parsar(int argc,char *argv[],Info *info,pMesh mesh1,pSol sol1,pMesh m
   if ( ptr ) *ptr = '\0';
 
   /* Option 3 prevails */
-  if ( ( mesh2->name == NULL ) && (info->option != 3) )
+  if ( ( mesh2->name == NULL ) && (info->option != 3) && (info->option != 4) )
 	  info->option = 2;
   
   return(1);
@@ -364,7 +365,7 @@ int setfunc(Info info,int dim) {
     if ( info.dsurf ) {
       iniencdomain = iniencdomain_s;
       iniredist = iniredist_s;
-      ppgdist    = ppgdistfmm_s;
+      // ppgdist    = ppgdistfmm_s;
       ppgdistfmm = ppgdistfmm_s;
     }
     
@@ -532,13 +533,13 @@ int main(int argc,char **argv) {
   
   /* Parse command line arguments */
   if ( !parsar(argc,argv,&info,&mesh1,&sol1,&mesh2) )  return(1);
-  
+    
   /* Load data */
   if ( info.imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
-  
+    
   if ( !loadMesh(&info,&mesh1,&mesh2) )  return(1);
-  
+    
   /* Set pointers */
   if ( !setfunc(info,mesh1.dim) )  return(1);
       

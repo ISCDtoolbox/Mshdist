@@ -13,7 +13,7 @@ typedef struct {
 Hedge *tab;
 int    hnext;
 
-/* Hash mesh edges for creating P2 nodes */
+/* Hash mesh edges */
 int hashEdge_2d(pMesh mesh) {
   pEdge    pa;
   int      k,ia,ib,kb,key;
@@ -49,6 +49,8 @@ int hashEdge_2d(pMesh mesh) {
   return(1);
 }
 
+/* Find the number of edge with endpoints ia, ib
+   Return 0 if edge does not exits */
 int getEdge(pMesh mesh,int ia,int ib) {
   int   key,kb;
   

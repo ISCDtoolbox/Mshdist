@@ -68,7 +68,7 @@ int scaleMesh(Info *info,pMesh mesh1,pMesh mesh2,pSol sol1) {
       info->exp[i] = 0.01;
   }
 
-  if ( info->option == 3 )
+  if ( info->option == 3 || (info->option == 4 && info->dom) )
     return(1);
   
   /* 2nd mesh is put to scale SIZE with respect to mesh 1 */
