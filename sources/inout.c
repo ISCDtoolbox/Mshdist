@@ -57,7 +57,7 @@ int loadMesh(Info *info,pMesh mesh1,pMesh mesh2) {
     if ( mesh1->dim == 3 && info->dsurf )
       if ( GmfStatKwd(inm,GmfTetrahedra) ) info->zip = 1;
         
-    if ( (info->option == 3) || (info->bbbc) || (info->hausdorff))
+    if ( (info->option == 3) || (info->bbbc) || (info->hausdorff) || (info->option==4 && info->dom) )
       mesh1->na = GmfStatKwd(inm,GmfEdges);
     
     mesh1->nt = GmfStatKwd(inm,GmfTriangles);
@@ -91,7 +91,7 @@ int loadMesh(Info *info,pMesh mesh1,pMesh mesh2) {
     mesh1->tria  = (pTria)calloc(mesh1->nt+1,sizeof(Tria));
     assert(mesh1->tria);
     
-    if ((( mesh1->na )&&(info->option == 3))||(( mesh1->na )&&(info->bbbc))||((info->hausdorff)&&(mesh1->na))) {
+    if ((( mesh1->na )&&(info->option == 3))||(( mesh1->na )&&(info->bbbc))||((info->hausdorff)&&(mesh1->na))||(info->option==4&&info->dom)) {
 	    mesh1->edge  = (pEdge)calloc(mesh1->na+1,sizeof(Edge));
 	    assert(mesh1->edge);
   	}
@@ -138,14 +138,14 @@ int loadMesh(Info *info,pMesh mesh1,pMesh mesh2) {
   }
   
   /* Read mesh edges */
-  if ( ((mesh1->dim == 2)&&(info->option == 3)&&(mesh1->na)) || (((mesh1->dim == 2)&&(info->bbbc)&&(mesh1->na))) || ((info->hausdorff)&&(mesh1->na))){
+  if ( ((mesh1->dim == 2)&&(info->option == 3)&&(mesh1->na)) || (((mesh1->dim == 2)&&(info->bbbc)&&(mesh1->na))) || ((info->hausdorff)&&(mesh1->na)) || (info->option==4 && info->dom && mesh1->na) ){
 	GmfGotoKwd(inm,GmfEdges);
     for (k=1; k<=mesh1->na; k++) {
       pe = &mesh1->edge[k];
       GmfGetLin(inm,GmfEdges,&pe->v[0],&pe->v[1],&pe->ref);
     }
   }
-  
+    
   /* Read mesh elements in the case of a 3d mesh */
   if ( mesh1->dim == 3 && !info->dsurf ) {
     GmfGotoKwd(inm,GmfTetrahedra);

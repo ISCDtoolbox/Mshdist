@@ -25,6 +25,16 @@ inline int isIntDom(Info info,int ref) {
   return(0);
 }
 
+/* Identify whether ref corresponds to a reference of an interior boundary */
+inline int isIntBdy(Info info,int ref) {
+  int k;
+  
+  for (k=0; k<info.nintbdy; k++)
+    if ( info.intbdy[k] == ref ) return(1);
+  
+  return(0);
+}
+
 /* Identify whether ref corresponds to a starting triangle */
 inline int isStartTri(Info info,int ref) {
   int k;

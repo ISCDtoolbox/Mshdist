@@ -256,6 +256,50 @@ int hashelt_1d(pMesh mesh) {
   return(1);
 }
 
+/* Create adjacency relations within the edges of an internal line, enclosed in the mesh:
+   for each edge k in mesh, adjae[2*(k-1)+i+1], i=0,1 is of the form 2*l+j, where
+   - l is the neighbor to k opposite to endpoint i
+   - j is the index of the vertex in l opposite to k
+   By convention, adjae[2*(k-1)+i+1] = -1 if vertex (i+1)%2 of edge k belongs to a non internal edge (i.e. lies on the BB) */
+int hashelt_enc_1d(Info info, pMesh mesh,int *adjae) {
+  pEdge   pe,pe1;
+  int     k,kk,l,ip,*hcode;
+  char    i,ii;
+  
+  /* Allocate memory */
+  hcode = (int*)calloc(mesh->np+1,sizeof(int));
+  assert(hcode);
+  
+  /* Fill adja table */
+  for (k=1; k<=mesh->na; k++) {
+    pe  = &mesh->edge[k];
+    
+    for (i=0; i<2; i++) {
+      ip = pe->v[inxt1[i]];
+      
+      if ( !hcode[ip] )
+        hcode[ip] = 2*k+i;
+      else {
+        l  = hcode[ip];
+        kk = l / 2;
+        ii = l % 2;
+        
+        pe1 = &mesh->edge[kk];
+        
+        if ( isIntBdy(info,pe->ref) )  {
+          adjae[2*(k-1)+i+1]    = isIntBdy(info,pe1->ref) ? 2*kk + ii : -1;
+        }
+        if ( isIntBdy(info,pe1->ref) ) {
+          adjae[2*(kk-1)+ii+1]  = isIntBdy(info,pe->ref) ? 2*k + i : -1;
+        }
+      }
+    }
+  }
+  
+  free(hcode);
+  return(1);
+}
+
 /* Gives a consistent orientation to a 1d mesh and check that mesh is open */
 int orimesh_1d(pMesh mesh) {
   pEdge pe,pe1;
@@ -322,6 +366,98 @@ int orimesh_1d(pMesh mesh) {
     for (kk=1; kk<=mesh->na; kk++) {
       pe = &mesh->edge[kk];
       if ( pe->flag == 0 ) {
+        pile[++ipil] = kk;
+        break;
+      }
+    }
+  }
+  
+  /* Record */
+  if ( !isopen ) {
+    printf("    *** Error in mode selection: mesh is not open.\n");
+    return(0);
+  }
+  
+  printf("%d connected components, %d reoriented edges.\n",ncc,nor);
+  
+  free(pile);
+  return(1);
+}
+
+/* Gives a consistent orientation to the enclosed edge mesh with ref REFISO and check that mesh is open */
+int orimesh_enc_1d(Info info,pMesh mesh,int *adjae) {
+  pEdge pe,pe1;
+  int   k,kk,ncc,nor,ipil,ip,iadr,*pile,*adja,*adjb;
+  char  i,ii,ii1,isopen;
+  
+  pile = (int*)calloc(mesh->na+1,sizeof(int));
+  
+  /* First element */
+  for (k=1; k<=mesh->na; k++) {
+    if ( isIntBdy(info,mesh->edge[k].ref) ) break;
+  }
+  
+  pile[1] = k;
+  ipil    = 1;
+  
+  isopen = 0;
+  ncc = 0;
+  nor = 0;
+  
+  while ( ipil > 0 ) {
+    ncc++;
+    
+    do {
+      k = pile[ipil--];
+      pe = &mesh->edge[k]; 
+      pe->flag = ncc;
+      
+      adja = &adjae[2*(k-1)+1];
+      
+      for (i=0; i<2; i++) {
+        if ( adja[i] == -1 ) continue;
+        kk = adja[i] / 2;
+        ii = adja[i] % 2;
+        if ( !kk ) {
+          isopen = 1;
+          continue;
+        }
+        
+        /* Store adjacent */
+        pe1 = &mesh->edge[kk];
+        if ( pe1->flag == ncc ) continue;
+        if ( !isIntBdy(info,pe1->ref) ) continue;
+        
+        pe1->flag = ncc;
+        pile[++ipil] = kk;
+
+        /* Change orientation of kk */
+        if ( ii == i ) {
+          ii1 = inxt1[ii];
+          nor++;
+          ip = pe1->v[0];
+          pe1->v[0] = pe1->v[1];
+          pe1->v[1] = ip;
+          
+          /* Change voyeur in adjacency relation of k */
+          adja[i] = 2*kk + ii1;
+          
+          /* Change adjacencies of kk */
+          adjb = &adjae[2*(kk-1)+1];
+          iadr = adjb[0];
+          adjb[0] = adjb[1];
+          adjb[1] = iadr;
+        }
+      }
+      
+    }
+    while ( ipil > 0 );
+      
+    /* Find next unmarked edge */
+    ipil = 0;
+    for (kk=1; kk<=mesh->na; kk++) {
+      pe = &mesh->edge[kk];
+      if ( isIntBdy(info,pe->ref) && pe->flag == 0 ) {
         pile[++ipil] = kk;
         break;
       }
@@ -433,7 +569,7 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
   assert(list);
   assert(ball);
   
-  /* Set tag = 2 to elts intersected, 1 if connected to elt intersected, 0 else */
+  /* Calculate unsigned distance to mesh2 at vertices of intersecting bg triangles */
   nc  = 0;
   
   for (k=1; k<=mesh2->na; k++){
@@ -658,9 +794,33 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
    - table nor contains normal vector field to 0 LS of phi at close points
 */
 int iniLSdom_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,pSol psi,double *nor) {
+  int k,*list,*ball;
   
-  printf("Coucou !! \n");
+  for (k=1; k<=sol->np; k++) {
+    sol->val[k] = INIVAL_2d;
+    phi->val[k] = INIVAL_2d;
+    psi->val[k] = INIVAL_2d;
+  }
   
+  /* Memory allocation */
+  list = (int*)calloc(mesh->nt+1,sizeof(int));
+  ball = (int*)calloc(LONMAX,sizeof(int));
+  assert(list);
+  assert(ball);
+  
+  /* Calculate unsigned distance to mesh2 at vertices of intersecting bg triangles */
+  
+  /* At this stage, all initialized points have tag 1 */
+
+  /* Take square roots */
+  for (k=1; k<=mesh->np; k++) {
+    sol->val[k] = sqrt(sol->val[k]);
+    phi->val[k] = ( phi->val[k] > 0.0 ) ? sqrt(phi->val[k]) : -sqrt(fabs(phi->val[k]));
+    psi->val[k] = ( psi->val[k] > 0.0 ) ? sqrt(psi->val[k]) : -sqrt(fabs(psi->val[k]));
+  }
+  
+  free(list);
+  free(ball);
   return(1);
 }
 
@@ -1299,7 +1459,7 @@ int norppg_2d(Info info,pMesh mesh,pSol phi,pSol psi) {
 int mshdis1_2d_o(Info info,pMesh mesh,pMesh mesh2,pSol sol,pSol phi,pSol psi) {
   pBucket  bucket;
   double   *nor;
-  int      ier;
+  int      ier,*adjae;
     
   /* (Normalized) Normal vector field to the extended surface */
   nor = (double*)calloc(2*mesh->np+1,sizeof(double));
@@ -1323,7 +1483,21 @@ int mshdis1_2d_o(Info info,pMesh mesh,pMesh mesh2,pSol sol,pSol phi,pSol psi) {
     if ( !iniLS_open_2d(info,mesh,mesh2,sol,phi,psi,nor,bucket) ) return(0);
   }
   else {
+    /* Allocate memory */
+    adjae = (int*)calloc(2*mesh->na+1,sizeof(int));
+    assert(adjae);
+  
+    ier = hashelt_enc_1d(info,mesh,adjae);
+    if ( !ier )  return(0);
+    
+    ier = orimesh_enc_1d(info,mesh,adjae);
+    if ( !ier )  return(0);
+    
+    free(adjae);
+    exit(0);
+    
     if ( !iniLSdom_open_2d(info,mesh,sol,phi,psi,nor) ) return(0);
+    
     exit(0);
   }
   

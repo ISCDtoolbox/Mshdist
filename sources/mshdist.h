@@ -32,6 +32,7 @@
 
 #define REFINT        3
 #define REFDIR        1
+#define REFISO       10
 #define REFDIRSWP     3
 #define REFSYM        4
 #define MAXGRD        5.0
@@ -84,7 +85,7 @@ typedef struct {
   double   delta1[3],delta2[3],min1[3],max1[3],min2[3],max2[3],cen1[3],cen2[3];
   int      ncpu,libpid,typ[2];          /* for // purposes */
   int      maxit,ref,nsref,*sref;
-  int      nexp,nintel,*intel,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
+  int      nexp,nintel,*intel,nintbdy,*intbdy,nst,*st,nsa,*sa,nsp,*sp; /* for -dom option */
   char     imprim,ddebug,option,bbbc,dom,dsurf,fmm,fini,hausdorff,pcloud,specdist,startref,noscale,zip;
   mytime   ctim[TIMEMAX];
 } Info;
@@ -227,6 +228,7 @@ double  volume(double *,double *,double *,double *);
 void    delhash(pMesh);
 int     corrGrad_3d(pMesh,pSol);
 int     isIntDom(Info info, int );
+int     isIntBdy(Info info, int );
 int     isStartTri(Info info,int );
 int     isStartEdg(Info info,int );
 int     isStartVer(Info info,int );
@@ -235,7 +237,9 @@ int     invmatg(double m[9],double mi[9]);
 /* Open mode routines */
 int mshdis1_2d_o(Info ,pMesh ,pMesh ,pSol ,pSol ,pSol );
 int hashelt_1d(pMesh );
+int hashelt_enc_1d(Info ,pMesh ,int *);
 int orimesh_1d(pMesh );
+int orimesh_enc_1d(Info ,pMesh ,int *);
 int iniLS_open_2d(Info ,pMesh ,pMesh ,pSol ,pSol ,pSol ,double *,pBucket );
 int iniLSdom_open_2d(Info ,pMesh ,pSol ,pSol ,pSol ,double *);
 int resetLS_open_2d(Info ,pMesh ,pSol );

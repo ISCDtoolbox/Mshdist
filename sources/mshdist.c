@@ -271,6 +271,15 @@ static int parsop(Info *info,pMesh mesh) {
       for (k=0; k<info->nintel; k++)
         fscanf(in,"%d",&info->intel[k]);
     }
+    
+    /* In mode -dom: read interior boudary refs; if none, default reference is REFISO */
+    if ( !strcmp(data,"interiorboundaries") ) {
+      fscanf(in,"%d",&info->nintbdy);
+      info->intbdy = (int*)calloc(info->nintbdy,sizeof(int));
+      assert ( info->nintbdy );
+      for (k=0; k<info->nintbdy; k++)
+        fscanf(in,"%d",&info->intbdy[k]);
+    }
 
     /* in mode -dom: read starting triangles (useful in 3d only) */
     if ( !strcmp(data,"starttrias") ) {
@@ -520,16 +529,17 @@ int main(int argc,char **argv) {
   memset(&sol1,0,sizeof(Sol));
   memset(&info,0,sizeof(Info));
 
-  info.imprim = -99;
-  info.option = 1;
-  info.ddebug = 0;
-  info.ncpu   = 1;
-  info.res    = EPS;
-  info.nexp   = 0;
-  info.dt     = 0.001;
-  info.maxit  = 1000;
-  info.size   = SIZE;
-  info.nintel = -1;
+  info.imprim  = -99;
+  info.option  = 1;
+  info.ddebug  = 0;
+  info.ncpu    = 1;
+  info.res     = EPS;
+  info.nexp    = 0;
+  info.dt      = 0.001;
+  info.maxit   = 1000;
+  info.size    = SIZE;
+  info.nintel  = -1;
+  info.nintbdy = -1;
   
   /* Parse command line arguments */
   if ( !parsar(argc,argv,&info,&mesh1,&sol1,&mesh2) )  return(1);
@@ -613,11 +623,17 @@ int main(int argc,char **argv) {
   /* Read file DEFAULT.mshdist, if any */
   parsop(&info,&mesh1);
   
-  /* Default value for the interior domain, if none supplied (used in -dom option only) */
+  /* Default value for the interior domain and boundaries, if none supplied (used in -dom option only) */
   if ( info.nintel < 0 ) {
     info.nintel = 1;
     info.intel = (int*)calloc(1,sizeof(int));
     info.intel[0] = REFINT;
+  }
+  
+  if ( info.nintbdy < 0 ) {
+    info.nintbdy = 1;
+    info.intbdy = (int*)calloc(1,sizeof(int));
+    info.intbdy[0] = REFISO;
   }
   
   /* Default value for the starting point if none supplied (used in generating signed distance only) */
