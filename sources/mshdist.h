@@ -241,7 +241,7 @@ int hashelt_enc_1d(Info ,pMesh ,int *);
 int orimesh_1d(pMesh );
 int orimesh_enc_1d(Info ,pMesh ,int *);
 int iniLS_open_2d(Info ,pMesh ,pMesh ,pSol ,pSol ,pSol ,double *,pBucket );
-int iniLSdom_open_2d(Info ,pMesh ,pSol ,pSol ,pSol ,double *);
+int iniLSdom_open_2d(Info ,pMesh ,int *,pSol ,pSol ,pSol ,double *);
 int resetLS_open_2d(Info ,pMesh ,pSol );
 int inidis_open_2d(Info ,pMesh ,pSol ,pSol );
 int ppgSolPhi_open_2d(Info ,pMesh ,pSol ,pSol ,double *);

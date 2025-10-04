@@ -793,9 +793,15 @@ int iniLS_open_2d(Info info,pMesh mesh1,pMesh mesh2,pSol sol,pSol phi,pSol psi,d
    - Initial signed distance to $S$ on phi, to mesh2 is in psi
    - table nor contains normal vector field to 0 LS of phi at close points
 */
-int iniLSdom_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,pSol psi,double *nor) {
-  int k,*list,*ball;
+int iniLSdom_open_2d(Info info,pMesh mesh,int *adjae,pSol sol,pSol phi,pSol psi,double *nor) {
+  pTria    pt,pt1;
+  pEdge    pe;
+  pPoint   p0,p1,p2,pa,ppt;
+  double   d,dd,det,c[2],ct[2],u[2],v[2],t[2],*n;
+  int      k,kk,l,iel,jel,ip,ip0,ip1,ip2,ipo,nc,tag,base,ilist,iball,*list,*ball,*adja2;
+  char     i,j,i1,j0,j1,j2;
   
+  /* Initialization */
   for (k=1; k<=sol->np; k++) {
     sol->val[k] = INIVAL_2d;
     phi->val[k] = INIVAL_2d;
@@ -808,9 +814,221 @@ int iniLSdom_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,pSol psi,double *nor
   assert(list);
   assert(ball);
   
+  /* Reset point flags */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+
+  /* Assign a starting triangle to each point */
+  /* DEJA FAIT JE CROIS... A checker!!!! */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    for (i=0; i<3; i++) {
+      ip0 = pt->v[i];
+      p0  = &mesh->point[ip0];
+      if ( !p0->s ) p0->s = k;
+    }
+  }
+    
   /* Calculate unsigned distance to mesh2 at vertices of intersecting bg triangles */
+  nc  = 0;
   
+  for (k=1; k<=mesh->na; k++){
+    pe  = &mesh->edge[k];
+    if ( !isIntBdy(info,pe->ref) ) continue;
+    
+    base = ++mesh->flag;
+    
+    ip0 = pe->v[0];
+    ip1 = pe->v[1];
+    p0  = &mesh->point[ip0];
+    p1  = &mesh->point[ip1];
+
+    ilist = boulep_2d(mesh,ip0,list);
+
+    /* List analysis */
+    for (kk=0; kk<ilist; kk++) {
+      ip = list[kk];
+      pa = &mesh->point[ip];
+      
+      if ( pa->flag == base ) continue;
+      pa->flag = base;
+        
+      /* Orientation of pa w.r.t pe */
+      u[0]  = p1->c[0] - p0->c[0];
+      u[1]  = p1->c[1] - p0->c[1];
+      v[0]  = pa->c[0] - p0->c[0];
+      v[1]  = pa->c[1] - p0->c[1];
+      det   = u[0]*v[1] - u[1]*v[0];
+        
+      d  = distpt_2d(p0,p1,pa,&tag);
+        
+      if ( d < sol->val[ip] ) {
+        sol->val[ip] = d;
+        phi->val[ip] = ( det > 0.0 ) ? d : -d;
+        pa->tag = tag;
+      }
+    }
+    
+    ilist = boulep_2d(mesh,ip1,list);
+
+    /* List analysis */
+    for (kk=0; kk<ilist; kk++) {
+      ip = list[kk];
+      pa = &mesh->point[ip];
+      
+      if ( pa->flag == base ) continue;
+      pa->flag = base;
+        
+      /* Orientation of pa w.r.t pe */
+      u[0]  = p1->c[0] - p0->c[0];
+      u[1]  = p1->c[1] - p0->c[1];
+      v[0]  = pa->c[0] - p0->c[0];
+      v[1]  = pa->c[1] - p0->c[1];
+      det   = u[0]*v[1] - u[1]*v[0];
+        
+      d  = distpt_2d(p0,p1,pa,&tag);
+        
+      if ( d < sol->val[ip] ) {
+        sol->val[ip] = d;
+        phi->val[ip] = ( det > 0.0 ) ? d : -d;
+        pa->tag = tag;
+      }
+    }
+  }
+  
+  /* Correction */
+  nc = 0;
+  for (k=1; k<=mesh->np; k++){
+    pa = &mesh->point[k];
+    if ( pa->tag < 2 )  continue;
+
+    for (kk=1; kk<=mesh->na; kk++) {
+      pe = &mesh->edge[kk];
+      if ( !isIntBdy(info,pe->ref) ) continue;
+      p0 = &mesh->point[pe->v[0]];
+      p1 = &mesh->point[pe->v[1]];
+      d  = distpt_2d(p0,p1,pa,&tag);
+      if ( tag == 1 && d < sol->val[k] ) {
+        sol->val[k] = d;
+        break;
+      }
+    }
+    pa->tag = 1;
+    nc++;
+  }
+  if ( nc )   fprintf(stdout,"     %d correction(s)\n",nc);
+
   /* At this stage, all initialized points have tag 1 */
+  /* Travel boundary points of line mesh */
+  for (k=1; k<=mesh->na; k++){
+    pe    = &mesh->edge[k];
+    if ( !isIntBdy(info,pe->ref) ) continue;
+    
+    adja2 = &adjae[2*(k-1)+1];
+    p0 = &mesh->point[pe->v[0]];
+    p1 = &mesh->point[pe->v[1]];
+    
+    /* Tangent and normal with correct orientation */
+    u[0] = p1->c[0] - p0->c[0];
+    u[1] = p1->c[1] - p0->c[1];
+    dd   = u[0]*u[0] + u[1]*u[1];
+    dd   = sqrt(dd);
+    if ( dd < EPS ) continue;
+    
+    u[0] /= dd;
+    u[1] /= dd;
+    v[0] = -u[1];
+    v[1] = u[0];
+
+    for (i=0; i<2; i++) {
+      if ( adja2[i] || adja2[i] == -1 ) continue;
+      i1 = inxt1[i];
+      ipo  = pe->v[i1];
+      ppt  = &mesh->point[ipo];
+            
+      /* Direction for extension */
+      if ( i == 0 ) {
+        t[0] = u[0];
+        t[1] = u[1];
+      }
+      else {
+        t[0] = -u[0];
+        t[1] = -u[1];
+      }
+      
+      ilist = boulep_2d(mesh,ipo,list);
+      
+      for (kk=0; kk<ilist; kk++) {
+        ip = list[kk];
+        pa = &mesh->point[ip];
+                
+        /* Update phi */
+        phi->val[ip] = distptHS_2d(pa->c,ppt->c,v);
+        
+        /* Update normal vector */
+        n    = &nor[2*(ip-1)+1];
+        n[0] = v[0];
+        n[1] = v[1];
+                
+        /* Update psi */
+        psi->val[ip] = distptHS_2d(pa->c,ppt->c,t);
+      }
+      
+      psi->val[ipo] = 0.0;
+      
+      /* Find next points on extended surface for normal vectors + put a tag = 4: special trial value */
+      for (kk=0; kk<ilist; kk++) {
+        ip = list[kk];
+        pa = &mesh->point[ip];
+                
+        n  = &nor[2*(ip-1)+1];
+        dd = phi->val[ip];
+        dd = dd > 0.0 ? sqrt(dd) : -sqrt(fabs(dd));
+        c[0] = pa->c[0] - dd*n[0];
+        c[1] = pa->c[1] - dd*n[1];
+
+        dd = psi->val[ip];
+        dd = dd > 0.0 ? sqrt(dd) : -sqrt(fabs(dd));
+        ct[0] = pa->c[0] - dd*t[0];
+        ct[1] = pa->c[1] - dd*t[1];
+                        
+        iel = pa->s;
+        pt = &mesh->tria[iel];
+        for (j=0; j<3; j++) {
+          if ( pt->v[j] == ip ) break;
+        }
+        iball = boulet_2d(mesh,iel,j,ball);
+                
+        for (l=0; l<iball; l++) {
+          jel = ball[l] / 3;
+          j0  = ball[l] % 3;
+          pt1 = &mesh->tria[jel];
+          j1  = inxt2[j0];
+          j2  = inxt2[j1];
+          ip1 = pt1->v[j1];
+          ip2 = pt1->v[j2];
+          p1  = &mesh->point[ip1];
+          p2  = &mesh->point[ip2];
+
+          if ( !isCrossed_2d(mesh,jel,c,n) ) continue;
+          if ( !p1->tag ) {
+            phi->val[ip1] = distptHS_2d(p1->c,c,n);
+            psi->val[ip1] = distptHS_2d(p1->c,ct,t);
+            nor[2*(ip1-1)+1] = n[0];
+            nor[2*(ip1-1)+2] = n[1];
+            p1->tag = 4;
+          }
+          if ( !p2->tag ) {
+            phi->val[ip2] = distptHS_2d(p2->c,c,n);
+            psi->val[ip2] = distptHS_2d(p2->c,ct,t);
+            nor[2*(ip2-1)+1] = n[0];
+            nor[2*(ip2-1)+2] = n[1];
+            p2->tag = 4;
+          }
+        }
+      }
+    }
+  }
 
   /* Take square roots */
   for (k=1; k<=mesh->np; k++) {
@@ -818,7 +1036,7 @@ int iniLSdom_open_2d(Info info,pMesh mesh,pSol sol,pSol phi,pSol psi,double *nor
     phi->val[k] = ( phi->val[k] > 0.0 ) ? sqrt(phi->val[k]) : -sqrt(fabs(phi->val[k]));
     psi->val[k] = ( psi->val[k] > 0.0 ) ? sqrt(psi->val[k]) : -sqrt(fabs(psi->val[k]));
   }
-  
+
   free(list);
   free(ball);
   return(1);
@@ -1493,12 +1711,9 @@ int mshdis1_2d_o(Info info,pMesh mesh,pMesh mesh2,pSol sol,pSol phi,pSol psi) {
     ier = orimesh_enc_1d(info,mesh,adjae);
     if ( !ier )  return(0);
     
+    if ( !iniLSdom_open_2d(info,mesh,adjae,sol,phi,psi,nor) ) return(0);
+        
     free(adjae);
-    exit(0);
-    
-    if ( !iniLSdom_open_2d(info,mesh,sol,phi,psi,nor) ) return(0);
-    
-    exit(0);
   }
   
   /* Step 1: Calculate unsigned distance to mesh2 and unravel phi near \tilde S */
