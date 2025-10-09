@@ -483,7 +483,7 @@ double norval_2d(pMesh mesh,pSol phi,pSol psi,int k,char i) {
   double   d0,d1,d2,v1,v2,vnor,ps,det,idet,g[2],m[2][2],im[2][2],Gr[2][3];
   int      ip,ip1,ip2;
   char     i1,i2;
-  
+    
   i1 = inxt2[i];
   i2 = inxt2[i1];
   
@@ -503,7 +503,7 @@ double norval_2d(pMesh mesh,pSol phi,pSol psi,int k,char i) {
   v2  = psi->val[ip2];
   
   if ( p1->tag != 1 && p2->tag != 1 ) printf("IMPOSSIBLE %d\n",ip);
-  
+    
   if ( p1->tag != 1 ) {
     // printf("Update from one accepted value only %d\n",ip);
     return(v2);
@@ -512,6 +512,7 @@ double norval_2d(pMesh mesh,pSol phi,pSol psi,int k,char i) {
     // printf("Update from one accepted value only %d\n",ip);
     return(v1);
   }
+  
   /* Gr[*][i] = (column vector) gradient of \lambda_i */
   m[0][0] = p1->c[0] - p0->c[0];     m[0][1] = p1->c[1] - p0->c[1];
   m[1][0] = p2->c[0] - p0->c[0];     m[1][1] = p2->c[1] - p0->c[1];
@@ -537,8 +538,11 @@ double norval_2d(pMesh mesh,pSol phi,pSol psi,int k,char i) {
     printf("Orthogonal update %d\n",ip);
     return(v1);
   }
+  
   vnor = -(v1*Gr[0][1]+v2*Gr[0][2])*g[0] - (v1*Gr[1][1]+v2*Gr[1][2])*g[1];
   vnor /= ps;
+  
+  if ( ddb ) printf("Return : %f\n",vnor);
   
   return(vnor);
 }
@@ -1242,8 +1246,8 @@ int resetLS_open_2d(Info info,pMesh mesh,pSol phi) {
     ip0 = pt->v[0];
     ip1 = pt->v[1];
     ip2 = pt->v[2];
-
-    if ( (phi->val[ip0] * phi->val[ip1] <=0.0) || (phi->val[ip0] * phi->val[ip2] <=0.0) || (phi->val[ip1] * phi->val[ip2] <=0.0)){
+    
+    if ( (phi->val[ip0] * phi->val[ip1] <= EPS2) || (phi->val[ip0] * phi->val[ip2] <= EPS2) || (phi->val[ip1] * phi->val[ip2] <= EPS2)){
       nb++;
       bndy[nb] = k;
     }
@@ -1715,15 +1719,15 @@ int mshdis1_2d_o(Info info,pMesh mesh,pMesh mesh2,pSol sol,pSol phi,pSol psi) {
         
     free(adjae);
   }
-  
+      
   /* Step 1: Calculate unsigned distance to mesh2 and unravel phi near \tilde S */
   if ( !ppgSolPhi_open_2d(info,mesh,sol,phi,nor) ) return(0);
   free(nor);
-  
+    
   /* Step 2: Calculate psi at triangles intersecting \tilde S */
   if ( !resetLS_open_2d(info,mesh,phi) ) return(0);
   if ( !ppgimpLS_open_2d(info,mesh,phi,psi) ) return(0);
-
+    
   /* Step 3: propagation of phi + normal extension of psi */
   if ( !norppg_2d(info,mesh,phi,psi) ) return(0);
   
